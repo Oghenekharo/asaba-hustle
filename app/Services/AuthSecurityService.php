@@ -8,10 +8,15 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
+use Throwable;
 use RuntimeException;
 
 class AuthSecurityService
 {
+    public function __construct(
+        protected NigeriaBulkSmsService $nigeriaBulkSmsService,
+    ) {}
+
     public function issuePasswordResetToken(User $user, string $channel): string
     {
         $token = $this->generateNumericToken();
@@ -170,12 +175,36 @@ class AuthSecurityService
             return;
         }
 
+        try {
+            $this->nigeriaBulkSmsService->send(
+                (string) $user->phone,
+                $this->buildPhoneTokenMessage($token, $purpose)
+            );
+        } catch (Throwable $exception) {
+            Log::error('auth_phone_token_dispatch_failed', [
+                'user_id' => $user->id,
+                'channel' => $channel,
+                'purpose' => $purpose,
+                'message' => $exception->getMessage(),
+            ]);
+
+            throw new RuntimeException('Unable to send the phone verification code right now. Please try again.');
+        }
+
         Log::info('auth_token_dispatched', [
             'user_id' => $user->id,
             'channel' => $channel,
             'purpose' => $purpose,
-            'token' => $token,
         ]);
+    }
+
+    protected function buildPhoneTokenMessage(string $token, string $purpose): string
+    {
+        return match ($purpose) {
+            'verification' => "Your Asaba Hustle verification code is {$token}. It expires soon. Do not share this code.",
+            'password_reset' => "Your Asaba Hustle password reset code is {$token}. It expires soon. Do not share this code.",
+            default => "Your Asaba Hustle code is {$token}.",
+        };
     }
 
     protected function generateNumericToken(): string

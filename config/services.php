@@ -47,4 +47,11 @@ return [
         'webhook_secret_hash' => env('FLUTTERWAVE_WEBHOOK_SECRET_HASH'),
     ],
 
+    'nigeriabulksms' => [
+        'username' => env('NIGERIABULKSMS_USERNAME'),
+        'password' => env('NIGERIABULKSMS_PASSWORD'),
+        'sender' => env('NIGERIABULKSMS_SENDER'),
+        'base_url' => env('NIGERIABULKSMS_BASE_URL', 'https://portal.nigeriabulksms.com/api/'),
+    ],
+
 ];
