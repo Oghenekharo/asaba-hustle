@@ -1,24 +1,4 @@
 services:
-  caddy:
-    image: caddy:2.10-alpine
-    container_name: asaba-hustle-caddy
-    restart: unless-stopped
-    depends_on:
-      app:
-        condition: service_started
-      reverb:
-        condition: service_started
-    environment:
-      APP_DOMAIN: ${APP_DOMAIN}
-      REVERB_DOMAIN: ${REVERB_DOMAIN}
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-
   app:
     build:
       context: .
@@ -43,6 +23,8 @@ services:
         condition: service_started
     volumes:
       - app_storage:/var/www/html/storage
+    ports:
+      - "127.0.0.1:8000:8000"
 
   queue:
     image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
@@ -60,6 +42,8 @@ services:
         condition: service_started
     volumes:
       - app_storage:/var/www/html/storage
+    ports:
+      - "127.0.0.1:8080:8080"
 
   reverb:
     image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
@@ -116,5 +100,3 @@ volumes:
   app_storage:
   mysql_data:
   redis_data:
-  caddy_data:
-  caddy_config:
