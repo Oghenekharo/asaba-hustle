@@ -16,12 +16,14 @@ if [ "${DB_CONNECTION:-mysql}" = "mysql" ]; then
   done
 fi
 
-php artisan optimize:clear
-php artisan package:discover --ansi
-php artisan storage:link || true
+BOOTSTRAP_CACHE_STORE="${BOOTSTRAP_CACHE_STORE:-file}"
+
+CACHE_STORE="${BOOTSTRAP_CACHE_STORE}" php artisan optimize:clear
+CACHE_STORE="${BOOTSTRAP_CACHE_STORE}" php artisan package:discover --ansi
+CACHE_STORE="${BOOTSTRAP_CACHE_STORE}" php artisan storage:link || true
 
 if [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
-  php artisan migrate --force --no-interaction
+  CACHE_STORE="${BOOTSTRAP_CACHE_STORE}" php artisan migrate --force --no-interaction
 fi
 
 php artisan config:cache
