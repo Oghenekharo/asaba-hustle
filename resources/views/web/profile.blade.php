@@ -200,21 +200,12 @@
                 </section>
 
 
-                <!-- Verification Badges -->
-                <section class="p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm grid grid-cols-2 gap-4">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="mail"
-                            class="w-5 h-5 text-{{ $user->email_verified_at ? 'green' : 'slate' }}-500"></i>
-                        <div>
-                            <p class="text-[10px] font-black uppercase text-slate-400">Email</p>
-                            <p class="text-xs font-bold">{{ $user->email_verified_at ? 'Verified' : 'Pending' }}</p>
-                        </div>
-                    </div>
+                <section class="p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm">
                     <div class="flex items-center gap-3">
                         <i data-lucide="phone"
                             class="w-5 h-5 text-{{ $user->phone_verified_at ? 'green' : 'slate' }}-500"></i>
                         <div>
-                            <p class="text-[10px] font-black uppercase text-slate-400">Phone</p>
+                            <p class="text-[10px] font-black uppercase text-slate-400">SMS Verification</p>
                             <p class="text-xs font-bold">{{ $user->phone_verified_at ? 'Verified' : 'Pending' }}</p>
                         </div>
                     </div>
@@ -331,19 +322,12 @@
                             </div>
                         </div>
 
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div class="rounded-2xl bg-slate-50 px-4 py-4">
-                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Email</p>
-                                <p class="mt-2 text-sm font-black text-slate-900">
-                                    {{ $user->email_verified_at ? 'Verified' : 'Pending' }}
-                                </p>
-                            </div>
-                            <div class="rounded-2xl bg-slate-50 px-4 py-4">
-                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Phone</p>
-                                <p class="mt-2 text-sm font-black text-slate-900">
-                                    {{ $user->phone_verified_at ? 'Verified' : 'Pending' }}
-                                </p>
-                            </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-4">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">SMS
+                                Verification</p>
+                            <p class="mt-2 text-sm font-black text-slate-900">
+                                {{ $user->phone_verified_at ? 'Verified' : 'Pending' }}
+                            </p>
                         </div>
                     </div>
                 </section>

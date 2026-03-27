@@ -50,9 +50,9 @@
                 <x-button id="resend-btn" data-url="{{ route('web.app.verification.send') }}" class="w-full mt-2"
                     color="black">
                     <x-slot:icon>
-                        <i data-lucide="mail" class="h-4 w-4"></i>
+                        <i data-lucide="message-square-more" class="h-4 w-4"></i>
                     </x-slot:icon>
-                    Resend
+                    Resend SMS Token
                 </x-button>
             </div>
         </div>

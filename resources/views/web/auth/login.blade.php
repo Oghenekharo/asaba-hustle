@@ -21,14 +21,13 @@
             @php
                 $vState = request()->query('verified');
                 $vMsg = match ($vState) {
-                    'email-success', 'phone-success' => [
+                    'phone-success' => [
                         'bg-emerald-50 text-emerald-700 border-emerald-100',
                         '✓ Verified! Log in below.',
                     ],
-                    'email-pending' => ['bg-blue-50 text-blue-700 border-blue-100', 'Check your inbox for a link.'],
-                    'email-invalid', 'email-failed' => [
+                    'phone-invalid', 'phone-failed' => [
                         'bg-rose-50 text-rose-700 border-rose-100',
-                        'Link expired or invalid.',
+                        'Token expired or invalid.',
                     ],
                     default => null,
                 };

@@ -21,47 +21,28 @@
             <form id="reset-password-form" method="POST" action="{{ route('web.password.update') }}"
                 class="mt-8 space-y-5">
                 @csrf
+                <input type="hidden" name="channel" value="phone">
 
-                <!-- Recovery Method Segmented Toggle (Replaces Select) -->
                 <div class="space-y-2">
                     <label class="ml-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Recovery
-                        Method</label>
-                    <div class="grid grid-cols-2 gap-2 p-1 bg-slate-50 rounded-xl border border-slate-100">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="channel" value="phone" class="peer hidden"
-                                @checked($phone !== '') onchange="toggleChannel(this.value)">
-                            <div
-                                class="text-center py-2 text-[10px] font-black uppercase tracking-widest rounded-lg peer-checked:bg-white peer-checked:text-orange-600 peer-checked:shadow-sm transition-all text-slate-400">
-                                Phone SMS</div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="channel" value="email" class="peer hidden"
-                                @checked($email !== '') onchange="toggleChannel(this.value)">
-                            <div
-                                class="text-center py-2 text-[10px] font-black uppercase tracking-widest rounded-lg peer-checked:bg-white peer-checked:text-orange-600 peer-checked:shadow-sm transition-all text-slate-400">
-                                Email</div>
-                        </label>
+                        method</label>
+                    <div class="rounded-2xl border border-orange-100 bg-orange-50 px-4 py-3">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-orange-600">SMS token</p>
+                        <p class="mt-1 text-xs font-bold text-orange-900/80">
+                            Reset this password with the token sent to your phone number.
+                        </p>
                     </div>
                 </div>
 
-                <!-- Identifiers (Toggled by JS) -->
-                <div id="phone-field" class="space-y-1.5 {{ $phone === '' && $email !== '' ? 'hidden' : '' }}">
+                <div class="space-y-1.5">
                     <x-input name="phone" type="tel" value="{{ $phone }}" label="Phone Number" icon="phone"
                         placeholder="0810..." />
                 </div>
-
-                <div id="email-field" class="space-y-1.5 {{ $email === '' && $phone !== '' ? 'hidden' : '' }}">
-                    <x-input name="email" type="email" value="{{ $email }}" label="Email Address" icon="mail"
-                        placeholder="aoe@email.com" />
-                </div>
-
-                <!-- Token Entry -->
                 <div class="space-y-1.5">
                     <x-input name="token" type="number" label="Verification Token" numeric icon="key"
                         placeholder="000000" minlength="1" maxlength="6" />
                 </div>
 
-                <!-- New Passwords -->
                 <div class="space-y-3">
                     <div class="space-y-1.5">
                         <x-input name="password" type="password" label="Password" placeholder="••••••••" icon="lock"

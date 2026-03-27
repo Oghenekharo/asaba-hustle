@@ -22,44 +22,26 @@
             <form id="forgot-password-form" method="POST" action="{{ route('web.password.email') }}"
                 class="mt-6 space-y-5">
                 @csrf
+                <input type="hidden" name="channel" value="phone">
 
-                <!-- Channel Switcher (Sleeker than a standard select) -->
                 <div class="space-y-2">
-                    <label class="ml-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Reset via</label>
-                    <div class="grid grid-cols-2 gap-2 p-1 bg-slate-50 rounded-xl border border-slate-100">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="channel" value="phone" class="peer hidden"
-                                {{ old('channel', 'phone') === 'phone' ? 'checked' : '' }}
-                                onchange="toggleChannel(this.value)">
-                            <div
-                                class="text-center py-2 text-[10px] font-black uppercase tracking-widest rounded-lg peer-checked:bg-white peer-checked:text-orange-600 peer-checked:shadow-sm transition-all text-slate-400">
-                                Phone</div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="channel" value="email" class="peer hidden"
-                                {{ old('channel', 'email') === 'email' ? 'checked' : '' }}
-                                onchange="toggleChannel(this.value)">
-                            <div
-                                class="text-center py-2 text-[10px] font-black uppercase tracking-widest rounded-lg peer-checked:bg-white peer-checked:text-orange-600 peer-checked:shadow-sm transition-all text-slate-400">
-                                Email</div>
-                        </label>
+                    <label class="ml-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Reset
+                        channel</label>
+                    <div class="rounded-2xl border border-orange-100 bg-orange-50 px-4 py-3">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-orange-600">SMS token</p>
+                        <p class="mt-1 text-xs font-bold text-orange-900/80">
+                            Enter the phone number on your account to receive a reset code by text.
+                        </p>
                     </div>
                 </div>
 
-                <!-- Dynamic Input Fields -->
-                <div id="phone-field" class="space-y-1.5 transition-all">
+                <div class="space-y-1.5">
                     <x-input name="phone" type="tel" label="Phone Number" icon="phone" placeholder="0810..." />
                 </div>
-                <div id="email-field" class="hidden space-y-1.5 transition-all">
-                    <x-input name="email" type="email" label="Email Address" icon="mail"
-                        placeholder="aoe@email.com" />
-                </div>
-                <!-- Alert Container (Reused from your showAlert component) -->
                 <x-error />
-                <!-- Submit Button -->
                 <x-button class="w-full mt-2" id="forgot-password-submit" type="submit">
                     <x-slot:icon>
-                        <i data-lucide="mail" class="h-4 w-4"></i>
+                        <i data-lucide="message-square-more" class="h-4 w-4"></i>
                     </x-slot:icon>
                     Send Reset Token
                 </x-button>

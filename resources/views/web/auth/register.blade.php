@@ -20,10 +20,12 @@
 
             <form id="register-form" action="{{ route('web.register.submit') }}" class="grid gap-x-5 gap-y-4 md:grid-cols-2">
                 @csrf
+                <input type="hidden" name="verification_method" value="phone">
 
                 <x-input label="Full Name" name="name" type="text" icon="user" placeholder="Olajide Eze Adamu" />
                 <x-input label="Phone Number" name="phone" type="tel" icon="phone" placeholder="0801..." />
-                <x-input label="Email address" name="email" type="email" icon="mail" placeholder="oea@email.com" />
+                <x-input label="Email address (optional)" name="email" type="email" icon="mail"
+                    placeholder="oea@email.com" />
                 <x-select :options="[
                     'client' => 'Hire a service',
                     'worker' => 'Provide a service',
@@ -33,23 +35,14 @@
                 <x-input name="password_confirmation" type="password" label="Confirm Password" placeholder="••••••••"
                     icon="lock" required />
 
-                <!-- Verification Method (Conditional styling) -->
                 <div class="md:col-span-2 space-y-1.5">
-                    <label class="ml-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Verify Account
-                        via</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="verification_method" value="phone" class="peer hidden" checked>
-                            <div
-                                class="text-center py-2 text-[10px] font-bold uppercase tracking-widest border border-slate-100 bg-slate-50 rounded-lg peer-checked:border-orange-500 peer-checked:text-orange-600 peer-checked:bg-orange-50 transition-all">
-                                SMS Token</div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="verification_method" value="email" class="peer hidden">
-                            <div
-                                class="text-center py-2 text-[10px] font-bold uppercase tracking-widest border border-slate-100 bg-slate-50 rounded-lg peer-checked:border-orange-500 peer-checked:text-orange-600 peer-checked:bg-orange-50 transition-all">
-                                Email Link</div>
-                        </label>
+                    <label class="ml-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Account
+                        verification</label>
+                    <div class="rounded-2xl border border-orange-100 bg-orange-50 px-4 py-3">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-orange-600">SMS only</p>
+                        <p class="mt-1 text-xs font-bold text-orange-900/80">
+                            Your verification code will be sent to the phone number above.
+                        </p>
                     </div>
                 </div>
 
