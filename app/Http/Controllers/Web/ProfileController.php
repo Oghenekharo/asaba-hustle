@@ -222,24 +222,17 @@ class ProfileController extends Controller
     {
         try {
             $channel = $request->validated('channel');
-            $meta = [];
 
             if ($channel === 'email') {
-                $link = $this->authSecurityService->sendEmailVerificationLink($request->user());
-                if (app()->isLocal() || config('app.debug')) {
-                    $meta['debug_link'] = $link;
-                }
+                $this->authSecurityService->sendEmailVerificationLink($request->user());
             } else {
-                $token = $this->authSecurityService->issueVerificationToken($request->user(), 'phone');
-                if (app()->isLocal() || config('app.debug')) {
-                    $meta['debug_token'] = $token;
-                }
+                $this->authSecurityService->issueVerificationToken($request->user(), 'phone');
             }
         } catch (RuntimeException $exception) {
             return $this->errorResponse($exception->getMessage(), 400);
         }
 
-        return $this->successResponse(null, 'Verification token sent successfully.', 200, $meta);
+        return $this->successResponse(null, 'Verification token sent successfully.', 200);
     }
 
     public function verifyContact(VerifyContactRequest $request)

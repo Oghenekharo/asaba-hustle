@@ -5,9 +5,13 @@ namespace Tests\Feature\Api;
 use App\Http\Middleware\EnsureTokenIsActive;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request as ClientRequest;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\URL;
 use Laravel\Sanctum\Sanctum;
 use Laravel\Sanctum\PersonalAccessToken;
 use Spatie\Permission\Models\Role;
@@ -17,8 +21,27 @@ class AuthApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config()->set('services.nigeriabulksms.username', 'bulk-user');
+        config()->set('services.nigeriabulksms.password', 'bulk-pass');
+        config()->set('services.nigeriabulksms.sender', 'AsabaHustle');
+        config()->set('services.nigeriabulksms.base_url', 'https://portal.nigeriabulksms.com/api/');
+        config()->set('auth_security.fixed_testing_token', '123456');
+    }
+
     public function test_user_can_register_with_phone_verification_and_verify_with_token(): void
     {
+        Http::fake([
+            'https://portal.nigeriabulksms.com/api/' => Http::response([
+                'status' => 'OK',
+                'count' => 1,
+                'price' => 7,
+            ], 200),
+        ]);
+
         Role::create(['name' => 'client', 'guard_name' => 'web']);
 
         $response = $this->postJson('/api/auth/register', [
@@ -40,21 +63,38 @@ class AuthApiTest extends TestCase
                     'user' => ['id', 'name', 'phone'],
                     'verification_method',
                 ],
-                'meta' => ['debug_token'],
             ]);
 
         $this->assertDatabaseHas('users', [
             'phone' => '08012345678',
         ]);
 
+        Http::assertSent(function (ClientRequest $request) {
+            parse_str((string) $request->body(), $payload);
+
+            return $request->url() === 'https://portal.nigeriabulksms.com/api/'
+                && $payload['username'] === 'bulk-user'
+                && $payload['sender'] === 'AsabaHustle'
+                && $payload['mobiles'] === '2348012345678'
+                && str_contains($payload['message'], 'verification code');
+        });
+
         $this->postJson('/api/auth/verify-phone', [
             'phone' => '08012345678',
-            'token' => $response->json('meta.debug_token'),
+            'token' => '123456',
         ])->assertOk()->assertJsonPath('success', true);
     }
 
     public function test_user_can_request_and_reset_password_by_phone(): void
     {
+        Http::fake([
+            'https://portal.nigeriabulksms.com/api/' => Http::response([
+                'status' => 'OK',
+                'count' => 1,
+                'price' => 7,
+            ], 200),
+        ]);
+
         $user = User::factory()->create([
             'phone' => '08099999999',
             'password' => Hash::make('oldpassword'),
@@ -69,12 +109,18 @@ class AuthApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('success', true);
 
-        $token = $forgot->json('meta.debug_token');
+        Http::assertSent(function (ClientRequest $request) {
+            parse_str((string) $request->body(), $payload);
+
+            return $request->url() === 'https://portal.nigeriabulksms.com/api/'
+                && $payload['mobiles'] === '2348099999999'
+                && str_contains($payload['message'], 'password reset code');
+        });
 
         $this->postJson('/api/auth/reset-password', [
             'channel' => 'phone',
             'phone' => $user->phone,
-            'token' => $token,
+            'token' => '123456',
             'password' => 'newpassword123',
             'password_confirmation' => 'newpassword123',
         ])->assertOk()->assertJsonPath('success', true);
@@ -84,6 +130,8 @@ class AuthApiTest extends TestCase
 
     public function test_authenticated_user_can_change_password_and_request_email_verification_link(): void
     {
+        Mail::fake();
+
         $user = User::factory()->create([
             'email' => 'tester@example.com',
             'password' => Hash::make('oldpassword'),
@@ -104,7 +152,18 @@ class AuthApiTest extends TestCase
 
         $tokenResponse->assertOk()->assertJsonPath('success', true);
 
-        $link = $tokenResponse->json('meta.debug_link');
+        Mail::assertSent(function ($mail) use ($user) {
+            return $mail->hasTo($user->email);
+        });
+
+        $link = URL::temporarySignedRoute(
+            'api.auth.verify-email',
+            now()->addMinutes((int) config('auth_security.contact_verification_token_ttl_minutes', 10)),
+            [
+                'user' => $user->id,
+                'hash' => sha1((string) $user->email),
+            ]
+        );
 
         $this->getJson($link)
             ->assertOk()

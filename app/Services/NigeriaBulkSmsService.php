@@ -18,9 +18,10 @@ class NigeriaBulkSmsService
             throw new RuntimeException('Nigeria Bulk SMS credentials are not configured.');
         }
 
-        $response = Http::timeout(15)
+        $response = Http::asForm()
+            ->timeout(15)
             ->acceptJson()
-            ->get($baseUrl, [
+            ->post($baseUrl, [
                 'username' => $username,
                 'password' => $password,
                 'message' => $message,
@@ -45,7 +46,15 @@ class NigeriaBulkSmsService
             if ($status !== '' && !in_array($status, ['ok', 'success'], true)) {
                 throw new RuntimeException('Nigeria Bulk SMS rejected the message request.');
             }
+
+            if ($status === '') {
+                throw new RuntimeException('Nigeria Bulk SMS returned an unexpected response.');
+            }
+
+            return;
         }
+
+        throw new RuntimeException('Nigeria Bulk SMS returned an invalid response.');
     }
 
     protected function normalizePhone(string $phone): string

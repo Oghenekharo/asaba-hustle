@@ -25,7 +25,7 @@ class AuthSecurityService
             'password_reset_channel' => $channel,
             'password_reset_token' => Hash::make($token),
             'password_reset_token_expires_at' => now()->addMinutes(
-                (int) env('PASSWORD_RESET_TOKEN_TTL_MINUTES', 30)
+                (int) config('auth_security.password_reset_token_ttl_minutes', 30)
             ),
         ])->save();
 
@@ -70,7 +70,7 @@ class AuthSecurityService
             'verification_channel' => $channel,
             'verification_token' => Hash::make($token),
             'verification_token_expires_at' => now()->addMinutes(
-                (int) env('CONTACT_VERIFICATION_TOKEN_TTL_MINUTES', 10)
+                (int) config('auth_security.contact_verification_token_ttl_minutes', 10)
             ),
         ])->save();
 
@@ -89,25 +89,31 @@ class AuthSecurityService
             'verification_channel' => 'email',
             'verification_token' => null,
             'verification_token_expires_at' => now()->addMinutes(
-                (int) env('CONTACT_VERIFICATION_TOKEN_TTL_MINUTES', 10)
+                (int) config('auth_security.contact_verification_token_ttl_minutes', 10)
             ),
         ])->save();
 
         $link = URL::temporarySignedRoute(
             'api.auth.verify-email',
-            now()->addMinutes((int) env('CONTACT_VERIFICATION_TOKEN_TTL_MINUTES', 10)),
+            now()->addMinutes((int) config('auth_security.contact_verification_token_ttl_minutes', 10)),
             [
                 'user' => $user->id,
                 'hash' => sha1((string) $user->email),
             ]
         );
 
-        Mail::raw(
-            "Verify your email by visiting this link: {$link}",
-            function ($message) use ($user) {
-                $message->to($user->email)->subject('Asaba Hustle Email Verification');
-            }
-        );
+        Mail::send('emails.simple', [
+            'subject' => 'Asaba Hustle Email Verification',
+            'heading' => 'Verify your email address',
+            'lines' => [
+                'Use the button below to verify your email address and continue your registration.',
+                'This link expires soon for your security.',
+            ],
+            'actionUrl' => $link,
+            'actionText' => 'Verify Email',
+        ], function ($message) use ($user) {
+            $message->to($user->email)->subject('Asaba Hustle Email Verification');
+        });
 
         return $link;
     }
@@ -165,12 +171,21 @@ class AuthSecurityService
     protected function dispatchToken(User $user, string $channel, string $token, string $purpose): void
     {
         if ($channel === 'email') {
-            Mail::raw(
-                "Your {$purpose} token is {$token}.",
-                function ($message) use ($user, $purpose) {
-                    $message->to($user->email)->subject('Asaba Hustle ' . ucfirst(str_replace('_', ' ', $purpose)));
-                }
-            );
+            $subject = 'Asaba Hustle ' . ucfirst(str_replace('_', ' ', $purpose));
+
+            Mail::send('emails.simple', [
+                'subject' => $subject,
+                'heading' => ucfirst(str_replace('_', ' ', $purpose)),
+                'lines' => [
+                    "Your code is {$token}.",
+                    'Enter this code in the app to continue.',
+                    'Do not share this code with anyone.',
+                ],
+                'actionUrl' => null,
+                'actionText' => null,
+            ], function ($message) use ($user, $subject) {
+                $message->to($user->email)->subject($subject);
+            });
 
             return;
         }
@@ -191,11 +206,6 @@ class AuthSecurityService
             throw new RuntimeException('Unable to send the phone verification code right now. Please try again.');
         }
 
-        Log::info('auth_token_dispatched', [
-            'user_id' => $user->id,
-            'channel' => $channel,
-            'purpose' => $purpose,
-        ]);
     }
 
     protected function buildPhoneTokenMessage(string $token, string $purpose): string
@@ -209,6 +219,12 @@ class AuthSecurityService
 
     protected function generateNumericToken(): string
     {
+        $fixedTestingToken = config('auth_security.fixed_testing_token');
+
+        if (app()->environment('testing') && is_string($fixedTestingToken) && preg_match('/^\d{6}$/', $fixedTestingToken)) {
+            return $fixedTestingToken;
+        }
+
         return str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
     }
 }

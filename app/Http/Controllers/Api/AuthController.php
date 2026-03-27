@@ -48,18 +48,10 @@ class AuthController extends Controller
 
         $user->assignRole($data['role']);
 
-        $meta = [];
-
         if ($data['verification_method'] === 'email') {
-            $debugLink = $this->authSecurityService->sendEmailVerificationLink($user);
-            if (app()->isLocal() || config('app.debug')) {
-                $meta['debug_link'] = $debugLink;
-            }
+            $this->authSecurityService->sendEmailVerificationLink($user);
         } else {
-            $debugToken = $this->authSecurityService->issueVerificationToken($user, 'phone');
-            if (app()->isLocal() || config('app.debug')) {
-                $meta['debug_token'] = $debugToken;
-            }
+            $this->authSecurityService->issueVerificationToken($user, 'phone');
         }
 
         return $this->successResponse(
@@ -68,8 +60,7 @@ class AuthController extends Controller
                 'verification_method' => $data['verification_method'],
             ],
             'Registration successful. Complete verification to continue.',
-            201,
-            $meta
+            201
         );
     }
 
@@ -199,16 +190,12 @@ class AuthController extends Controller
         $user = $this->resolveUserForChannel($data['channel'], $data);
 
         if ($user) {
-            $token = $this->authSecurityService->issuePasswordResetToken($user, $data['channel']);
-            $meta = app()->isLocal() || config('app.debug')
-                ? ['debug_token' => $token]
-                : [];
+            $this->authSecurityService->issuePasswordResetToken($user, $data['channel']);
 
             return $this->successResponse(
                 null,
                 'Password reset token sent successfully.',
-                200,
-                $meta
+                200
             );
         }
 
@@ -262,22 +249,14 @@ class AuthController extends Controller
     {
         try {
             $channel = $request->validated('channel');
-            $meta = [];
 
             if ($channel === 'email') {
-                $link = $this->authSecurityService->sendEmailVerificationLink($request->user());
-                if (app()->isLocal() || config('app.debug')) {
-                    $meta['debug_link'] = $link;
-                }
+                $this->authSecurityService->sendEmailVerificationLink($request->user());
             } else {
-                $token = $this->authSecurityService->issueVerificationToken(
+                $this->authSecurityService->issueVerificationToken(
                     $request->user(),
                     $channel
                 );
-
-                if (app()->isLocal() || config('app.debug')) {
-                    $meta['debug_token'] = $token;
-                }
             }
         } catch (RuntimeException $exception) {
             return $this->errorResponse($exception->getMessage(), 400);
@@ -286,8 +265,7 @@ class AuthController extends Controller
         return $this->successResponse(
             null,
             'Verification token sent successfully.',
-            200,
-            $meta
+            200
         );
     }
 
