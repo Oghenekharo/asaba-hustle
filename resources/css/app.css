@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans:
+        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
+}
+
+@layer base {
+    :root {
+        --brand: #ff7a00;
+        --brand-strong: #e56700;
+        --ink: #333333;
+        --surface: #ffffff;
+        --surface-soft: #fff6ed;
+    }
+
+    body {
+        background: var(--surface);
+        color: var(--ink);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e5e7eb;
+        border-radius: 10px;
+    }
+
+    .msg-bubble {
+        max-width: 75%;
+        padding: 1rem 1.25rem;
+        border-radius: 1.5rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        font-weight: 500;
+    }
+
+    .msg-sent {
+        background: var(--brand);
+        color: white;
+        border-bottom-right-radius: 0.25rem;
+        align-self: flex-end;
+        box-shadow: 0 10px 20px -5px rgba(255, 122, 0, 0.2);
+    }
+
+    .msg-received {
+        background: white;
+        color: var(--ink);
+        border-bottom-left-radius: 0.25rem;
+        align-self: flex-start;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+}

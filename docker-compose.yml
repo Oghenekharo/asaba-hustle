@@ -1,0 +1,251 @@
+services:
+  composer_deps:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: asaba-hustle-composer-deps
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - vendor:/var/www/html/vendor
+    command: >
+      sh -lc "
+      LOCK_HASH=$$(sha256sum composer.lock | awk '{print $$1}') &&
+      STORED_HASH=$$(cat vendor/.composer.lock.hash 2>/dev/null || true) &&
+      if [ ! -f vendor/autoload.php ] || [ \"$$LOCK_HASH\" != \"$$STORED_HASH\" ]; then
+        composer install --no-interaction --prefer-dist &&
+        echo \"$$LOCK_HASH\" > vendor/.composer.lock.hash;
+      fi
+      "
+
+  npm_deps:
+    image: node:22-bookworm
+    container_name: asaba-hustle-npm-deps
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - node_modules:/var/www/html/node_modules
+    command: >
+      sh -lc "
+      LOCK_SOURCE=package-lock.json;
+      if [ ! -f package-lock.json ]; then LOCK_SOURCE=package.json; fi;
+      LOCK_HASH=$$(sha256sum $$LOCK_SOURCE | awk '{print $$1}') &&
+      STORED_HASH=$$(cat node_modules/.package-lock.hash 2>/dev/null || true) &&
+      if [ ! -d node_modules/vite ] || [ \"$$LOCK_HASH\" != \"$$STORED_HASH\" ]; then
+        npm install &&
+        echo \"$$LOCK_HASH\" > node_modules/.package-lock.hash;
+      fi
+      "
+
+  mysql:
+    image: mysql:8.4
+    container_name: asaba-hustle-mysql
+    profiles:
+      - local
+    env_file:
+      - .env.docker
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-asaba_hustle}
+      MYSQL_USER: ${MYSQL_USER:-asaba}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "127.0.0.1",
+          "-uroot",
+          "-p${MYSQL_ROOT_PASSWORD:-root}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:latest
+    container_name: asaba-hustle-redis
+    profiles:
+      - local
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: asaba-hustle-mailhog
+    profiles:
+      - local
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: asaba-hustle-app
+    working_dir: /var/www/html
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    depends_on:
+      composer_deps:
+        condition: service_completed_successfully
+    volumes:
+      - ./:/var/www/html
+      - vendor:/var/www/html/vendor
+      - app_state:/var/www/state
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      APP_URL: ${CONTAINER_APP_URL:-http://127.0.0.1:8000}
+      APP_KEY: ${APP_KEY}
+      BROADCAST_CONNECTION: ${CONTAINER_BROADCAST_CONNECTION:-reverb}
+      DB_CONNECTION: ${DB_CONNECTION:-mysql}
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_DATABASE: ${DB_DATABASE:-asaba_hustle}
+      DB_USERNAME: ${DB_USERNAME:-asaba}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      REDIS_HOST: ${CONTAINER_REDIS_HOST:-redis}
+      REDIS_PORT: ${CONTAINER_REDIS_PORT:-6379}
+      REVERB_HOST: ${CONTAINER_REVERB_HOST:-reverb}
+      REVERB_PORT: ${CONTAINER_REVERB_PORT:-8080}
+      REVERB_SCHEME: ${CONTAINER_REVERB_SCHEME:-http}
+      REVERB_SERVER_HOST: ${CONTAINER_REVERB_SERVER_HOST:-0.0.0.0}
+      REVERB_SERVER_PORT: ${CONTAINER_REVERB_SERVER_PORT:-8080}
+    command: >
+      sh -lc "
+      if [ \"${DB_CONNECTION:-mysql}\" = \"sqlite\" ]; then php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"; fi &&
+      if [ \"${DB_CONNECTION:-mysql}\" = \"mysql\" ]; then until mysqladmin ping -h\"${DB_HOST}\" -P\"${DB_PORT}\" -u\"${DB_USERNAME}\" -p\"${DB_PASSWORD}\" --silent; do sleep 2; done; fi &&
+      php artisan optimize:clear &&
+      if [ ! -f /var/www/state/.db_initialized ]; then
+        php artisan migrate:fresh --seed --force --no-interaction &&
+        touch /var/www/state/.db_initialized;
+      fi &&
+      php artisan storage:link || true &&
+      php artisan serve --host=0.0.0.0 --port=8000
+      "
+
+  queue:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: asaba-hustle-queue
+    working_dir: /var/www/html
+    restart: unless-stopped
+    depends_on:
+      composer_deps:
+        condition: service_completed_successfully
+      app:
+        condition: service_started
+    env_file:
+      - .env.docker
+    volumes:
+      - ./:/var/www/html
+      - vendor:/var/www/html/vendor
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      APP_URL: ${CONTAINER_APP_URL:-http://127.0.0.1:8000}
+      APP_KEY: ${APP_KEY}
+      BROADCAST_CONNECTION: ${CONTAINER_BROADCAST_CONNECTION:-reverb}
+      DB_CONNECTION: ${DB_CONNECTION:-mysql}
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_DATABASE: ${DB_DATABASE:-asaba_hustle}
+      DB_USERNAME: ${DB_USERNAME:-asaba}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      REDIS_HOST: ${CONTAINER_REDIS_HOST:-redis}
+      REDIS_PORT: ${CONTAINER_REDIS_PORT:-6379}
+      REVERB_HOST: ${CONTAINER_REVERB_HOST:-reverb}
+      REVERB_PORT: ${CONTAINER_REVERB_PORT:-8080}
+      REVERB_SCHEME: ${CONTAINER_REVERB_SCHEME:-http}
+    command: >
+      sh -lc "
+      if [ \"${DB_CONNECTION:-mysql}\" = \"mysql\" ]; then until mysqladmin ping -h\"${DB_HOST}\" -P\"${DB_PORT}\" -u\"${DB_USERNAME}\" -p\"${DB_PASSWORD}\" --silent; do sleep 2; done; fi &&
+      php artisan optimize:clear &&
+      php artisan queue:work --sleep=3 --tries=1 --timeout=0 --verbose
+      "
+
+  vite:
+    image: node:22-bookworm
+    container_name: asaba-hustle-vite
+    working_dir: /var/www/html
+    restart: unless-stopped
+    depends_on:
+      npm_deps:
+        condition: service_completed_successfully
+    volumes:
+      - ./:/var/www/html
+      - node_modules:/var/www/html/node_modules
+    ports:
+      - "5173:5173"
+    command: >
+      sh -lc "
+      npm run dev -- --host 0.0.0.0 --port 5173
+      "
+
+  reverb:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: asaba-hustle-reverb
+    working_dir: /var/www/html
+    profiles:
+      - realtime
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    depends_on:
+      composer_deps:
+        condition: service_completed_successfully
+      app:
+        condition: service_started
+    volumes:
+      - ./:/var/www/html
+      - vendor:/var/www/html/vendor
+    ports:
+      - "8080:8080"
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      APP_URL: ${CONTAINER_APP_URL:-http://127.0.0.1:8000}
+      APP_KEY: ${APP_KEY}
+      BROADCAST_CONNECTION: ${CONTAINER_BROADCAST_CONNECTION:-reverb}
+      DB_CONNECTION: ${DB_CONNECTION:-mysql}
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_DATABASE: ${DB_DATABASE:-asaba_hustle}
+      DB_USERNAME: ${DB_USERNAME:-asaba}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      REDIS_HOST: ${CONTAINER_REDIS_HOST:-redis}
+      REDIS_PORT: ${CONTAINER_REDIS_PORT:-6379}
+      REVERB_HOST: ${CONTAINER_REVERB_HOST:-reverb}
+      REVERB_PORT: ${CONTAINER_REVERB_PORT:-8080}
+      REVERB_SCHEME: ${CONTAINER_REVERB_SCHEME:-http}
+      REVERB_SERVER_HOST: ${CONTAINER_REVERB_SERVER_HOST:-0.0.0.0}
+      REVERB_SERVER_PORT: ${CONTAINER_REVERB_SERVER_PORT:-8080}
+    command: >
+      sh -lc "
+      if [ \"${DB_CONNECTION:-mysql}\" = \"mysql\" ]; then until mysqladmin ping -h\"${DB_HOST}\" -P\"${DB_PORT}\" -u\"${DB_USERNAME}\" -p\"${DB_PASSWORD}\" --silent; do sleep 2; done; fi &&
+      php artisan optimize:clear &&
+      php artisan reverb:start --host=0.0.0.0 --port=8080
+      "
+
+volumes:
+  mysql_data:
+  redis_data:
+  node_modules:
+  vendor:
+  app_state:

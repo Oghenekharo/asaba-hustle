@@ -1,0 +1,285 @@
+import "./bootstrap";
+import $ from "jquery";
+import jQuery from "jquery";
+import { createIcons, icons } from "lucide";
+import AOS from "aos";
+import "aos/dist/aos.css";
+
+import {
+    handleAjaxForm,
+    togglePasswordView,
+    showAlert,
+    handleModalsForms,
+    toggleChannel,
+    toggleFilter,
+    initUserDropdown,
+    initJobCreationModal,
+    initMessagesPage,
+    initLocationFields,
+    initJobDetailPage,
+    initNavbarNotifications,
+    initNotificationsPage,
+} from "./main";
+
+window.$ = window.jQuery = jQuery;
+window.lucide = { createIcons, icons };
+
+createIcons({ icons });
+AOS.init();
+
+window.handleAjaxForm = handleAjaxForm;
+window.togglePasswordView = togglePasswordView;
+window.showAlert = showAlert;
+window.handleModalsForms = handleModalsForms;
+window.toggleChannel = toggleChannel;
+window.toggleFilter = toggleFilter;
+
+$(document).on("click", ".alert-close", function () {
+    $(this).closest("#js-error-container").addClass("hidden");
+});
+
+$(document).on("submit", 'form[action$="/logout"]', function () {
+    if (window.Echo) {
+        try {
+            window.Echo.disconnect();
+        } catch (_) {
+            // Ignore disconnect issues during logout.
+        }
+    }
+});
+
+// Ajax set up
+$.ajaxSetup({
+    headers: {
+        "X-CSRF-TOKEN":
+            document.querySelector('meta[name="csrf-token"]')?.content ?? "",
+        Accept: "application/json",
+    },
+});
+
+// Opening Modals
+window.openModal = function (id, data = null) {
+    const $modal = $(`#${id}`);
+    const $backdrop = $modal.find(".js-modal-backdrop");
+    const $content = $modal.find(".js-modal-content");
+
+    // If data is passed, you can dynamically fill the modal
+    if (data) {
+        if (data.title) $modal.find(".js-modal-title").text(data.title);
+        if (data.body) $modal.find(".js-modal-body").html(data.body);
+    }
+
+    $modal.removeClass("hidden");
+
+    // Animate In
+    setTimeout(() => {
+        $backdrop.removeClass("opacity-0").addClass("opacity-100");
+        $content
+            .removeClass("scale-95 opacity-0")
+            .addClass("scale-100 opacity-100");
+    }, 10);
+};
+
+// Close Modals
+window.closeModal = function (id) {
+    const $modal = $(`#${id}`);
+    const $backdrop = $modal.find(".js-modal-backdrop");
+    const $content = $modal.find(".js-modal-content");
+
+    // Animate Out
+    $backdrop.removeClass("opacity-100").addClass("opacity-0");
+    $content
+        .removeClass("scale-100 opacity-100")
+        .addClass("scale-95 opacity-0");
+
+    setTimeout(() => {
+        $modal.addClass("hidden");
+    }, 300);
+};
+
+// Password toggle
+if ($(".js-password-toggle")) {
+    togglePasswordView();
+}
+
+// Login users
+if ($("#login-form").length) {
+    handleAjaxForm("#login-form", "#login-submit");
+}
+// Register Users
+if ($("#register-form").length) {
+    handleAjaxForm("#register-form", "#register-submit");
+}
+
+if ($("#forgot-password-form").length) {
+    handleAjaxForm("#forgot-password-form", "#forgot-password-submit");
+}
+
+$(function () {
+    (function () {
+        if ($('input[name="channel"]').length > 0) {
+            const checked = document.querySelector(
+                'input[name="channel"]:checked',
+            );
+
+            if (checked) {
+                console.log("Initial channel:", checked.value);
+                toggleChannel(checked.value);
+            }
+        }
+    })();
+
+    $("#budget-slider").on("input", function () {
+        $("#budget-val").text("MAX: ₦" + parseInt($(this).val()) / 1000 + "K");
+    });
+});
+
+if ($("#reset-password-form").length) {
+    handleAjaxForm("#reset-password-form", "#reset-password-submit");
+}
+if ($("#verify-phone-form").length) {
+    handleAjaxForm("#verify-phone-form", "#verify-phone-submit");
+}
+
+if ($("#resend-btn").length) {
+    $("#resend-btn").on("click", function () {
+        const $btn = $(this);
+        const url = $btn.data("url");
+
+        $btn.prop("disabled", true);
+
+        $.ajax({
+            url: url,
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+
+            success: function (response) {
+                console.log(response);
+                if (response.success === true) {
+                    alert("yes");
+                    showAlert(
+                        response.message || "Verification email sent.",
+                        "success",
+                        "#verify-phone-form",
+                    );
+                } else {
+                    alert("no");
+                    showAlert(
+                        response.message || "An error occured.",
+                        "error",
+                        "#verify-phone-form",
+                    );
+                }
+
+                $btn.prop("disabled", false);
+            },
+
+            error: function (xhr) {
+                let message = "Something went wrong.";
+
+                if (xhr.responseJSON?.message) {
+                    message = xhr.responseJSON.message;
+                }
+                showAlert(message, "error", "#verify-phone-form");
+
+                $btn.prop("disabled", false);
+            },
+        });
+    });
+}
+
+if ($("#profile-update-form").length) {
+    handleAjaxForm(
+        "#profile-update-form",
+        "#profile-update-submit",
+        function (response) {
+            if (response.success === true) {
+                setTimeout(() => {
+                    closeModal("editProfileModal");
+                    location.reload();
+                }, 3000);
+            }
+        },
+    );
+}
+if ($("#profile-image-form").length) {
+    handleAjaxForm(
+        "#profile-image-form",
+        "#profile-image-submit",
+        function (response) {
+            if (response.success === true) {
+                setTimeout(() => {
+                    location.reload();
+                    closeModal("uploadPhotoModal");
+                }, 3000);
+            }
+        },
+    );
+}
+
+if ($("#job-create-form").length) {
+    handleAjaxForm(
+        "#job-create-form",
+        "#job-create-submit",
+        function (response) {
+            if (response.success === true) {
+                setTimeout(() => {
+                    closeModal("createJobModal");
+                    if (response?.data?.id) {
+                        window.location.href = `/app/jobs/${response.data.id}`;
+                        return;
+                    }
+
+                    window.location.reload();
+                }, 1200);
+            }
+        },
+    );
+}
+
+if ($("#password-change-form").length) {
+    handleAjaxForm("#password-change-form", "#password-change-submit");
+}
+
+if ($("#loggedOutBox").length) {
+    const msg = $("#loggedOutBox").data("message");
+    window.showAlert(msg, "warning", "#login-form");
+    $("#loggedOutBox").remove();
+}
+
+window.initUserDropdown = initUserDropdown;
+
+// Auto-initialize on load
+$(document).ready(function () {
+    window.initUserDropdown();
+    initJobCreationModal();
+    initMessagesPage();
+    initLocationFields();
+    initJobDetailPage();
+    initNavbarNotifications();
+    initNotificationsPage();
+});
+
+// NEGOTIATION
+if ($("#negotiation-form").length) {
+    handleAjaxForm(
+        "#negotiation-form",
+        "#negotiation-submit",
+        function (response) {
+            if (response.status === true) {
+                location.reload();
+            }
+        },
+    );
+}
+
+// if ($("#resend-form").length) {
+//     handleAjaxForm("#resend-form", "#submit-btn", function (response) {
+//         // Since we want to stay on page but show success
+//         showAlert(response.message, response.status ?? "error");
+//         // alert("Success! Please check your email.");
+//         setTimeout(() => window.location.reload(), 1500);
+//     });
+// }

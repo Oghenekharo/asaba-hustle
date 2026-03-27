@@ -1,0 +1,120 @@
+services:
+  caddy:
+    image: caddy:2.10-alpine
+    container_name: asaba-hustle-caddy
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_started
+      reverb:
+        condition: service_started
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN}
+      REVERB_DOMAIN: ${REVERB_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.prod
+      args:
+        VITE_REVERB_APP_KEY: ${REVERB_APP_KEY}
+        VITE_REVERB_HOST: ${VITE_REVERB_HOST}
+        VITE_REVERB_PORT: ${VITE_REVERB_PORT:-443}
+        VITE_REVERB_SCHEME: ${VITE_REVERB_SCHEME:-https}
+    image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
+    container_name: asaba-hustle-app
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      APP_ROLE: app
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - app_storage:/var/www/html/storage
+
+  queue:
+    image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
+    container_name: asaba-hustle-queue
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      APP_ROLE: queue
+      RUN_MIGRATIONS: "false"
+    depends_on:
+      app:
+        condition: service_started
+      redis:
+        condition: service_started
+    volumes:
+      - app_storage:/var/www/html/storage
+
+  reverb:
+    image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
+    container_name: asaba-hustle-reverb
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      APP_ROLE: reverb
+      RUN_MIGRATIONS: "false"
+    depends_on:
+      app:
+        condition: service_started
+      redis:
+        condition: service_started
+    volumes:
+      - app_storage:/var/www/html/storage
+
+  mysql:
+    image: mysql:8.4
+    container_name: asaba-hustle-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "127.0.0.1",
+          "-uroot",
+          "-p${MYSQL_ROOT_PASSWORD}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    container_name: asaba-hustle-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+
+volumes:
+  app_storage:
+  mysql_data:
+  redis_data:
+  caddy_data:
+  caddy_config:
