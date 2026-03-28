@@ -158,14 +158,12 @@ if ($("#resend-btn").length) {
             success: function (response) {
                 console.log(response);
                 if (response.success === true) {
-                    alert("yes");
                     showAlert(
                         response.message || "Verification email sent.",
                         "success",
                         "#verify-phone-form",
                     );
                 } else {
-                    alert("no");
                     showAlert(
                         response.message || "An error occured.",
                         "error",
