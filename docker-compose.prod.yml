@@ -87,6 +87,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
+    ports:
+      - "127.0.0.1:3306:3306"
 
   redis:
     image: redis:7-alpine
