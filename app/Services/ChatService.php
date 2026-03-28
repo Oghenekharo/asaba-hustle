@@ -12,15 +12,6 @@ use Illuminate\Validation\ValidationException;
 
 class ChatService
 {
-    protected const CHAT_ACTIVE_STATUSES = [
-        ServiceJob::STATUS_ASSIGNED,
-        ServiceJob::STATUS_WORKER_ACCEPTED,
-        ServiceJob::STATUS_IN_PROGRESS,
-        ServiceJob::STATUS_PAYMENT_PENDING,
-        ServiceJob::STATUS_COMPLETED,
-        ServiceJob::STATUS_RATED,
-    ];
-
     public function __construct(
         protected UserNotificationService $notificationService,
     ) {}
@@ -35,7 +26,7 @@ class ChatService
             $workerId = $job->assigned_to;
         }
 
-        if (!in_array($job->status, self::CHAT_ACTIVE_STATUSES, true)) {
+        if (!in_array($job->status, ServiceJob::chatEligibleStatuses(), true)) {
             throw ValidationException::withMessages([
                 'chat' => ['Chat is only available after a worker has been hired.']
             ]);
@@ -57,7 +48,7 @@ class ChatService
         $conversation = $conversation ?: $this->startConversation($job, $user);
         $conversation->loadMissing('job');
 
-        if (!in_array($conversation->job->status, self::CHAT_ACTIVE_STATUSES, true)) {
+        if (!in_array($conversation->job->status, ServiceJob::chatEligibleStatuses(), true)) {
             throw ValidationException::withMessages([
                 'chat' => ['This conversation is not active yet.']
             ]);

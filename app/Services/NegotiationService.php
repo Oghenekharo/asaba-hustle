@@ -83,15 +83,10 @@ class NegotiationService
     | Counter Offer
     |--------------------------------------------------------------------------
     */
-    public function counterOffer(ServiceJob $job, User $user, float $amount, ?string $message = null): JobNegotiation
+    public function counterOffer(JobNegotiation $negotiation, User $user, float $amount, ?string $message = null): JobNegotiation
     {
-        $latest = $this->getLatestNegotiation($job, $user);
-
-        if (!$latest) {
-            throw ValidationException::withMessages([
-                'negotiation' => ['Only workers can initiate negotiation.']
-            ]);
-        }
+        $negotiation->loadMissing(['job', 'worker', 'client']);
+        $job = $negotiation->job;
 
         if ($job->status !== ServiceJob::STATUS_OPEN) {
             throw ValidationException::withMessages([
@@ -99,37 +94,43 @@ class NegotiationService
             ]);
         }
 
-        if ($latest->status === 'accepted') {
+        if ($negotiation->status !== 'pending') {
             throw ValidationException::withMessages([
-                'negotiation' => ['Negotiation already accepted.']
+                'negotiation' => ['Only pending offers can be countered.']
             ]);
         }
 
-        if ($job->user_id === $user->id && !$latest) {
+        $actor = $this->resolveActor($job, $user);
+
+        if (!in_array($actor, ['client', 'worker'], true)) {
             throw ValidationException::withMessages([
-                'negotiation' => ['No offer to respond to.']
+                'negotiation' => ['You are not part of this negotiation.']
             ]);
         }
 
-        return DB::transaction(function () use ($job, $user, $amount, $message, $latest) {
-            $receiver = $latest->created_by === 'client'
-                ? $latest->worker
-                : $job->client;
+        if ($negotiation->created_by === $actor) {
+            throw ValidationException::withMessages([
+                'negotiation' => ['Wait for the other party before sending another counter offer.']
+            ]);
+        }
 
-            $latest->update([
+        return DB::transaction(function () use ($job, $user, $amount, $message, $negotiation, $actor) {
+            $receiver = $actor === 'client' ? $negotiation->worker : $job->client;
+
+            $negotiation->update([
                 'amount'     => $amount,
                 'message'    => $message,
-                'history'    => $this->appendHistoryEntry($latest),
+                'history'    => $this->appendHistoryEntry($negotiation),
                 'status'     => 'pending',
-                'created_by' => $this->resolveActor($job, $user),
+                'created_by' => $actor,
             ]);
-            $negotiation = $latest->fresh(['job', 'worker']);
+            $negotiation = $negotiation->fresh(['job', 'worker', 'client']);
 
             $this->activityLogService->log($user->id, 'negotiation_countered', [
                 'job_id' => $job->id,
                 'negotiation_id' => $negotiation->id,
                 'amount' => $amount,
-                'created_by' => $negotiation->created_by,
+                'created_by' => $actor,
                 'counterparty_id' => $receiver?->id,
             ]);
 
@@ -153,11 +154,11 @@ class NegotiationService
     | Accept Offer (THIS IS CRITICAL)
     |--------------------------------------------------------------------------
     */
-    public function acceptOffer(JobNegotiation $negotiation): JobNegotiation
+    public function acceptOffer(JobNegotiation $negotiation, User $user): JobNegotiation
     {
-        return DB::transaction(function () use ($negotiation) {
+        return DB::transaction(function () use ($negotiation, $user) {
             $negotiation = JobNegotiation::query()
-                ->with(['job', 'worker'])
+                ->with(['job', 'worker', 'client'])
                 ->lockForUpdate()
                 ->findOrFail($negotiation->id);
 
@@ -174,6 +175,20 @@ class NegotiationService
             if ($negotiation->status !== 'pending') {
                 throw ValidationException::withMessages([
                     'negotiation' => ['Only pending offers can be accepted.']
+                ]);
+            }
+
+            $actor = $this->resolveActor($job, $user);
+
+            if (!in_array($actor, ['client', 'worker'], true)) {
+                throw ValidationException::withMessages([
+                    'negotiation' => ['You are not part of this negotiation.']
+                ]);
+            }
+
+            if ($negotiation->created_by === $actor) {
+                throw ValidationException::withMessages([
+                    'negotiation' => ['You cannot accept your own latest offer.']
                 ]);
             }
 
@@ -194,19 +209,17 @@ class NegotiationService
                 'agreed_amount' => $negotiation->amount,
             ]);
 
-            $this->activityLogService->log($negotiation->client_id, 'negotiation_accepted', [
+            $this->activityLogService->log($user->id, 'negotiation_accepted', [
                 'job_id' => $job->id,
                 'negotiation_id' => $negotiation->id,
                 'worker_id' => $negotiation->worker_id,
                 'agreed_amount' => $negotiation->amount,
+                'accepted_by' => $actor,
             ]);
 
             DB::afterCommit(function () use ($negotiation) {
-                $this->notificationService->sendNegotiationUpdate(
-                    $negotiation->worker,
-                    $negotiation->job,
-                    'accepted'
-                );
+                $recipient = $negotiation->created_by === 'worker' ? $negotiation->worker : $negotiation->client;
+                $this->notificationService->sendNegotiationUpdate($recipient, $negotiation->job, 'accepted');
                 event(new NegotiationUpdated($negotiation));
             });
 
@@ -220,11 +233,11 @@ class NegotiationService
     | Reject Offer
     |--------------------------------------------------------------------------
     */
-    public function rejectOffer(JobNegotiation $negotiation, float $amount, string $message): JobNegotiation
+    public function rejectOffer(JobNegotiation $negotiation, User $user, ?string $message = null): JobNegotiation
     {
-        return DB::transaction(function () use ($negotiation, $amount, $message) {
+        return DB::transaction(function () use ($negotiation, $user, $message) {
             $negotiation = JobNegotiation::query()
-                ->with(['job', 'worker'])
+                ->with(['job', 'worker', 'client'])
                 ->lockForUpdate()
                 ->findOrFail($negotiation->id);
 
@@ -234,28 +247,37 @@ class NegotiationService
                 ]);
             }
 
+            $actor = $this->resolveActor($negotiation->job, $user);
+
+            if (!in_array($actor, ['client', 'worker'], true)) {
+                throw ValidationException::withMessages([
+                    'negotiation' => ['You are not part of this negotiation.']
+                ]);
+            }
+
+            if ($negotiation->created_by === $actor) {
+                throw ValidationException::withMessages([
+                    'negotiation' => ['You cannot reject your own latest offer.']
+                ]);
+            }
+
             $negotiation->update([
-                'amount' => $amount,
                 'message' => $message,
                 'history' => $this->appendHistoryEntry($negotiation),
                 'status' => 'rejected',
-                'created_by' => 'client',
             ]);
 
-            $this->activityLogService->log($negotiation->client_id, 'negotiation_rejected', [
+            $this->activityLogService->log($user->id, 'negotiation_rejected', [
                 'job_id' => $negotiation->job_id,
                 'negotiation_id' => $negotiation->id,
                 'worker_id' => $negotiation->worker_id,
-                'counter_amount' => $amount,
                 'message' => $message,
+                'rejected_by' => $actor,
             ]);
 
             DB::afterCommit(function () use ($negotiation) {
-                $this->notificationService->sendNegotiationUpdate(
-                    $negotiation->worker,
-                    $negotiation->job,
-                    'rejected'
-                );
+                $recipient = $negotiation->created_by === 'worker' ? $negotiation->worker : $negotiation->client;
+                $this->notificationService->sendNegotiationUpdate($recipient, $negotiation->job, 'rejected');
 
                 event(new NegotiationUpdated($negotiation));
             });

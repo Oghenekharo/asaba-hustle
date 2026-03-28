@@ -43,14 +43,23 @@ class ApplyJobRequest extends FormRequest
                     'account number' => $user->account_number,
                 ])->filter(fn($value) => !filled($value))->keys()->values();
 
-                if ($missingFields->isEmpty()) {
+                if ($missingFields->isEmpty() && $user->is_verified && filled($user->id_document)) {
                     return;
                 }
 
-                $validator->errors()->add(
-                    'account_details',
-                    'Update your ' . $missingFields->join(', ') . ' in your profile before applying for jobs.'
-                );
+                if ($missingFields->isNotEmpty()) {
+                    $validator->errors()->add(
+                        'account_details',
+                        'Update your ' . $missingFields->join(', ') . ' in your profile before applying for jobs.'
+                    );
+                }
+
+                if (!$user->is_verified || !filled($user->id_document)) {
+                    $validator->errors()->add(
+                        'verification',
+                        'You must complete ID verification before applying for jobs.'
+                    );
+                }
             },
         ];
     }

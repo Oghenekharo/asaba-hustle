@@ -15,6 +15,10 @@ class Rating extends Model
         'job_id',
         'client_id',
         'worker_id',
+        'rated_by_user_id',
+        'rated_user_id',
+        'rated_by_role',
+        'rated_role',
         'rating',
         'review'
     ];
@@ -36,6 +40,16 @@ class Rating extends Model
     public function worker()
     {
         return $this->belongsTo(User::class, 'worker_id');
+    }
+
+    public function rater()
+    {
+        return $this->belongsTo(User::class, 'rated_by_user_id');
+    }
+
+    public function ratee()
+    {
+        return $this->belongsTo(User::class, 'rated_user_id');
     }
 
     public function scopeAdminFilter(Builder $query, array $filters): Builder

@@ -37,6 +37,7 @@ class ServiceJobResource extends JsonResource
             'worker' => new UserResource($this->whenLoaded('worker')),
             'skill' => new SkillResource($this->whenLoaded('skill')),
             'rating' => new RatingResource($this->whenLoaded('rating')),
+            'worker_rating' => new RatingResource($this->whenLoaded('workerRating')),
 
             'created_at' => $this->created_at
         ];

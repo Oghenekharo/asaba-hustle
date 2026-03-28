@@ -6,6 +6,23 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class CreateJobRequest extends FormRequest
 {
+    public function after(): array
+    {
+        return [
+            function ($validator) {
+                $user = $this->user();
+
+                if (!$user || !$user->hasRole('client')) {
+                    return;
+                }
+
+                if ($user->phone_verified_at === null) {
+                    $validator->errors()->add('verification', 'Verify your phone number before posting jobs.');
+                }
+            },
+        ];
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      */

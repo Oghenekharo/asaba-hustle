@@ -123,7 +123,6 @@ $(function () {
             );
 
             if (checked) {
-                console.log("Initial channel:", checked.value);
                 toggleChannel(checked.value);
             }
         }
@@ -155,11 +154,17 @@ if ($("#resend-btn").length) {
                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
             },
 
+            beforeSend: function () {
+                showAlert(
+                    "Resending verification code sent.",
+                    "info",
+                    "#verify-phone-form",
+                );
+            },
             success: function (response) {
-                console.log(response);
                 if (response.success === true) {
                     showAlert(
-                        response.message || "Verification email sent.",
+                        response.message || "Verification code sent.",
                         "success",
                         "#verify-phone-form",
                     );

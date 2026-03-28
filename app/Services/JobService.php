@@ -40,8 +40,9 @@ class JobService
                 'status' => $job->status,
             ]);
 
-            DB::afterCommit(function () {
+            DB::afterCommit(function () use ($job) {
                 Cache::forget(CacheKeys::ADMIN_DASHBOARD_METRICS);
+                $this->notifyMatchingWorkers($job);
             });
 
             return $job;
@@ -159,7 +160,7 @@ class JobService
                 throw new \Exception('No pending negotiation was found for the selected worker.');
             }
 
-            $this->negotiationService->acceptOffer($negotiation);
+            $this->negotiationService->acceptOffer($negotiation, $job->client);
 
             $job->applications()->where('user_id', $worker->id)->update([
                 'status' => 'accepted',
@@ -267,6 +268,17 @@ class JobService
                 'job_id' => $job->id,
                 'status' => $job->status,
             ]);
+
+            DB::afterCommit(function () use ($job) {
+                $this->notificationService->create(
+                    $job->user_id,
+                    'Worker accepted your job',
+                    ($job->worker?->name ?? 'The worker') . ' accepted "' . $job->title . '" and is ready to begin.',
+                    'job_status_updated',
+                    route('web.app.jobs.show', $job),
+                    'View Job'
+                );
+            });
 
             $this->broadcastJobStatusUpdate($job);
 
@@ -378,6 +390,17 @@ class JobService
                 'job_id' => $job->id,
                 'status' => $job->status,
             ]);
+
+            DB::afterCommit(function () use ($job) {
+                $this->notificationService->create(
+                    $job->user_id,
+                    'Job is now in progress',
+                    ($job->worker?->name ?? 'The worker') . ' started work on "' . $job->title . '".',
+                    'job_status_updated',
+                    route('web.app.jobs.show', $job),
+                    'View Job'
+                );
+            });
 
             $this->broadcastJobStatusUpdate($job);
 
@@ -594,61 +617,113 @@ class JobService
         });
     }
 
-    public function rateWorker(ServiceJob $job, $clientId, $data)
+    public function rateParticipant(ServiceJob $job, int $actorId, array $data)
     {
-        return DB::transaction(function () use ($job, $clientId, $data) {
+        return DB::transaction(function () use ($job, $actorId, $data) {
 
             $job = ServiceJob::where('id', $job->id)
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($job->user_id !== $clientId) {
-                throw new \Exception('Only the job owner can rate.');
-            }
-
-            if ($job->status !== ServiceJob::STATUS_COMPLETED) {
+            if (!in_array($job->status, [ServiceJob::STATUS_COMPLETED, ServiceJob::STATUS_RATED], true)) {
                 throw new \Exception('Job must be completed before rating.');
             }
 
-            if ($job->rating) {
-                throw new \Exception('Job already rated.');
+            $isClient = (int) $job->user_id === $actorId;
+            $isWorker = (int) $job->assigned_to === $actorId;
+
+            if (!$isClient && !$isWorker) {
+                throw new \Exception('Only the job participants can rate each other.');
+            }
+
+            $ratedByRole = $isClient ? 'client' : 'worker';
+            $ratedRole = $isClient ? 'worker' : 'client';
+            $ratedUserId = $isClient ? (int) $job->assigned_to : (int) $job->user_id;
+
+            if ($ratedUserId <= 0) {
+                throw new \Exception('No valid participant found to rate.');
+            }
+
+            if (Rating::query()->where('job_id', $job->id)->where('rated_by_user_id', $actorId)->exists()) {
+                throw new \Exception('You have already submitted a rating for this job.');
             }
 
             $rating = Rating::create([
-
                 'job_id' => $job->id,
-                'client_id' => $clientId,
+                'client_id' => $job->user_id,
                 'worker_id' => $job->assigned_to,
+                'rated_by_user_id' => $actorId,
+                'rated_user_id' => $ratedUserId,
+                'rated_by_role' => $ratedByRole,
+                'rated_role' => $ratedRole,
                 'rating' => $data['rating'],
                 'review' => $data['review'] ?? null
-
             ]);
 
-            $worker = $job->worker()->first();
+            $ratedUser = User::find($ratedUserId);
 
-            if ($worker) {
-                $worker->syncAverageRating();
+            if ($ratedUser) {
+                $ratedUser->syncAverageRating();
             }
 
             $job->update([
                 'status' => ServiceJob::STATUS_RATED
             ]);
 
-            $this->activityLogService->log($clientId, 'worker_rated', [
+            $this->activityLogService->log($actorId, $ratedByRole === 'client' ? 'worker_rated' : 'client_rated', [
                 'job_id' => $job->id,
-                'worker_id' => $job->assigned_to,
                 'rating_id' => $rating->id,
+                'rated_user_id' => $ratedUserId,
+                'rated_by_role' => $ratedByRole,
+                'rated_role' => $ratedRole,
                 'score' => $rating->rating,
             ]);
 
-            DB::afterCommit(function () {
+            DB::afterCommit(function () use ($job, $ratedUser, $ratedByRole) {
                 Cache::forget(CacheKeys::ADMIN_DASHBOARD_METRICS);
+                if ($ratedUser) {
+                    $this->notificationService->create(
+                        $ratedUser->id,
+                        $ratedByRole === 'client' ? 'Worker rating received' : 'Client rating received',
+                        'A new rating was submitted on "' . $job->title . '".',
+                        'rating',
+                        route('web.app.jobs.show', $job),
+                        'View Job'
+                    );
+                }
             });
 
             $this->broadcastJobStatusUpdate($job);
 
             return $rating;
         });
+    }
+
+    protected function notifyMatchingWorkers(ServiceJob $job): void
+    {
+        $workerIds = User::query()
+            ->role('worker')
+            ->where('is_verified', true)
+            ->whereNotNull('id_document')
+            ->where(function ($query) use ($job) {
+                $query->where('primary_skill_id', $job->skill_id)
+                    ->orWhereHas('skills', function ($skillQuery) use ($job) {
+                        $skillQuery->where('skills.id', $job->skill_id);
+                    });
+            })
+            ->pluck('id')
+            ->unique();
+
+        foreach ($workerIds as $workerId) {
+            $this->notificationService->create(
+                $workerId,
+                'New job matches your skills',
+                'A new job titled "' . $job->title . '" matches your listed skills.',
+                'job_match',
+                route('web.app.jobs.show', $job),
+                'View Job'
+            );
+        }
     }
 
     public function cancelJobByAdmin(ServiceJob $job, int $adminId): ServiceJob

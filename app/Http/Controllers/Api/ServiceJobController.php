@@ -271,15 +271,15 @@ class ServiceJobController extends Controller
         $this->authorize('rate', $job);
 
         try {
-            $rating = $this->jobService->rateWorker(
+            $rating = $this->jobService->rateParticipant(
                 $job,
                 $request->user()->id,
                 $request->validated()
             );
 
             return $this->successResponse(
-                new RatingResource($rating->load('client')),
-                'Worker rated successfully.',
+                new RatingResource($rating->load(['client', 'worker', 'rater', 'ratee'])),
+                'Rating submitted successfully.',
                 201
             );
         } catch (Exception $e) {

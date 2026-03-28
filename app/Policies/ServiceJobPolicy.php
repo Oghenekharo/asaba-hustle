@@ -9,13 +9,16 @@ class ServiceJobPolicy
 {
     public function create(User $user): bool
     {
-        return $user->hasRole('client');
+        return $user->hasRole('client')
+            && $user->phone_verified_at !== null;
     }
 
     public function apply(User $user, ServiceJob $job): bool
     {
         return $user->hasRole('worker')
             && $user->availability_status === 'available'
+            && $user->is_verified
+            && filled($user->id_document)
             && $user->id !== $job->user_id
             && $job->status === ServiceJob::STATUS_OPEN
             && $job->assigned_to === null;
@@ -64,22 +67,34 @@ class ServiceJobPolicy
 
     public function rate(User $user, ServiceJob $job): bool
     {
-        return $user->id === $job->user_id
-            && $job->status === ServiceJob::STATUS_COMPLETED
-            && $job->rating === null;
+        $isClient = $user->id === $job->user_id;
+        $isWorker = $user->id === $job->assigned_to;
+
+        if (!$isClient && !$isWorker) {
+            return false;
+        }
+
+        if (!in_array($job->status, [ServiceJob::STATUS_COMPLETED, ServiceJob::STATUS_RATED], true)) {
+            return false;
+        }
+
+        return !$job->ratings()
+            ->where('rated_by_user_id', $user->id)
+            ->exists();
     }
 
     public function message(User $user, ServiceJob $job): bool
     {
+        if (!in_array($job->status, ServiceJob::chatEligibleStatuses(), true)) {
+            return false;
+        }
+
         if ($user->id === $job->user_id) {
             return $job->assigned_to !== null;
         }
 
         if ($user->hasRole('worker')) {
-            return $job->assigned_to === $user->id
-                || $job->applications()
-                    ->where('user_id', $user->id)
-                    ->exists();
+            return $job->assigned_to === $user->id;
         }
 
         return false;

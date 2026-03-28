@@ -70,6 +70,8 @@ Route::middleware(['token.active', 'auth:sanctum', 'account.active', 'throttle:a
 
         Route::post('/{job}/negotiate/{negotiation}/accept', [JobNegotiationController::class, 'accept']);
 
+        Route::post('/{job}/negotiate/{negotiation}/counter', [JobNegotiationController::class, 'counter']);
+
         Route::post('/{job}/negotiate/{negotiation}/reject', [JobNegotiationController::class, 'reject']);
 
         Route::post('/{job}/hire', [ServiceJobController::class, 'hire']);

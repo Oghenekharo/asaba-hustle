@@ -96,6 +96,8 @@ class JobController extends Controller
             'worker.skill',
             'skill',
             'rating',
+            'workerRating',
+            'ratings',
             'payment',
             'negotiations' => function ($q) use ($isOwner, $isWorker, $user) {
                 $q->with([
@@ -140,17 +142,29 @@ class JobController extends Controller
         $existingApplication = null;
         $existingConversation = null;
         $visibleNegotiations = $job->negotiations;
+        $acceptedNegotiation = $visibleNegotiations->firstWhere('status', 'accepted');
+
+        if ($acceptedNegotiation) {
+            if ($isOwner || ((int) $acceptedNegotiation->worker_id === (int) $user?->id)) {
+                $visibleNegotiations = collect([$acceptedNegotiation]);
+            } else {
+                $visibleNegotiations = collect();
+            }
+        }
+
         $latestNegotiation = $visibleNegotiations->first();
         $latestMine = $isWorker ? $visibleNegotiations->first() : null;
 
         if ($isWorker && $user) {
             $existingApplication = $job->applications
                 ->firstWhere('user_id', $user->id);
+        }
 
+        if ($job->assigned_to) {
             $existingConversation = Conversation::query()
                 ->where('job_id', $job->id)
                 ->where('client_id', $job->user_id)
-                ->where('worker_id', $user->id)
+                ->where('worker_id', $job->assigned_to)
                 ->first();
         }
 
@@ -393,7 +407,7 @@ class JobController extends Controller
         $this->authorize('rate', $job);
 
         try {
-            $rating = $this->jobService->rateWorker(
+            $rating = $this->jobService->rateParticipant(
                 $job,
                 $request->user()->id,
                 $request->validated()
@@ -403,8 +417,8 @@ class JobController extends Controller
         }
 
         return $this->successResponse(
-            new RatingResource($rating->load('client')),
-            'Worker rated successfully.',
+            new RatingResource($rating->load(['client', 'worker', 'rater', 'ratee'])),
+            'Rating submitted successfully.',
             201
         );
     }

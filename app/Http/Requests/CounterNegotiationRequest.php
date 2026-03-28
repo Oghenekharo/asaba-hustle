@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class RejectNegotiationRequest extends FormRequest
+class CounterNegotiationRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,6 +14,7 @@ class RejectNegotiationRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'amount' => ['required', 'numeric', 'min:0'],
             'message' => ['nullable', 'string', 'max:1000'],
         ];
     }

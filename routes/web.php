@@ -62,6 +62,7 @@ Route::middleware(['web', 'auth', 'session.active', 'account.active', 'phone.ver
         Route::post('/jobs/{job}/apply', [JobController::class, 'apply'])->name('jobs.apply');
         Route::post('/jobs/{job}/negotiate', [NegotiationController::class, 'create'])->name('negotiate.submit');
         Route::post('/jobs/negotiate/{negotiation}/accept', [NegotiationController::class, 'accept'])->name('negotiate.accept');
+        Route::post('/jobs/negotiate/{negotiation}/counter', [NegotiationController::class, 'counter'])->name('negotiate.counter');
         Route::post('/jobs/negotiate/{negotiation}/reject', [NegotiationController::class, 'reject'])->name('negotiate.reject');
         Route::post('/jobs/{job}/hire', [JobController::class, 'hire'])->name('jobs.hire');
         Route::post('/jobs/{job}/accept', [JobController::class, 'accept'])->name('jobs.accept');

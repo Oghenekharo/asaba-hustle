@@ -95,7 +95,17 @@ class ServiceJob extends Model
 
     public function rating()
     {
-        return $this->hasOne(Rating::class, 'job_id');
+        return $this->hasOne(Rating::class, 'job_id')->where('rated_by_role', 'client');
+    }
+
+    public function workerRating()
+    {
+        return $this->hasOne(Rating::class, 'job_id')->where('rated_by_role', 'worker');
+    }
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class, 'job_id');
     }
 
     public function payment()
@@ -136,6 +146,18 @@ class ServiceJob extends Model
             self::STATUS_ASSIGNED,
             self::STATUS_WORKER_ACCEPTED,
             self::STATUS_IN_PROGRESS,
+        ];
+    }
+
+    public static function chatEligibleStatuses(): array
+    {
+        return [
+            self::STATUS_ASSIGNED,
+            self::STATUS_WORKER_ACCEPTED,
+            self::STATUS_IN_PROGRESS,
+            self::STATUS_PAYMENT_PENDING,
+            self::STATUS_COMPLETED,
+            self::STATUS_RATED,
         ];
     }
 

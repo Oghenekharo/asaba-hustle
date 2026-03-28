@@ -1423,39 +1423,53 @@ export const initJobDetailPage = function () {
     window.openNegotiationDecisionModal = function (config = {}) {
         const action = String(config.action || "").toLowerCase();
         const isReject = action === "reject";
-        const heading = isReject ? "Reject This Offer?" : "Accept This Offer?";
+        const isCounter = action === "counter";
+        const heading = isReject
+            ? "Reject This Offer?"
+            : isCounter
+              ? "Send Counter Offer?"
+              : "Accept This Offer?";
         const body = isReject
-            ? `Rejecting this offer will send back your preferred amount${config.workerName ? ` to ${config.workerName}` : ""}.`
-            : "Accepting this negotiation will assign the worker to this job and move the job into the assigned stage.";
+            ? `Rejecting this offer will close the current negotiation${config.workerName ? ` with ${config.workerName}` : ""}.`
+            : isCounter
+              ? `Send your updated amount${config.workerName ? ` to ${config.workerName}` : ""} and keep the negotiation active.`
+              : "Accepting this negotiation will assign the worker to this job and move the job into the assigned stage.";
 
         $("#negotiationDecisionForm").attr("action", config.url || "");
         $("#negotiationDecisionHeading").text(heading);
         $("#negotiationDecisionText").text(body);
         $("#negotiationDecisionSubmitText").text(
-            isReject ? "Reject Offer" : "Accept Offer",
+            isReject ? "Reject Offer" : isCounter ? "Send Counter" : "Accept Offer",
         );
         $("#negotiationDecisionSubmit")
             .toggleClass("bg-rose-600 hover:bg-rose-700 shadow-rose-500/20", isReject)
-            .toggleClass("bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20", !isReject);
+            .toggleClass("bg-amber-500 hover:bg-amber-600 shadow-amber-500/20", isCounter)
+            .toggleClass(
+                "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20",
+                !isReject && !isCounter,
+            );
         $("#negotiationDecisionIcon")
             .toggleClass("bg-rose-50 text-rose-600", isReject)
-            .toggleClass("bg-emerald-50 text-emerald-600", !isReject)
+            .toggleClass("bg-amber-50 text-amber-600", isCounter)
+            .toggleClass("bg-emerald-50 text-emerald-600", !isReject && !isCounter)
             .html(
                 isReject
                     ? '<i data-lucide="octagon-x" class="h-8 w-8"></i>'
-                    : '<i data-lucide="handshake" class="h-8 w-8"></i>',
+                    : isCounter
+                      ? '<i data-lucide="arrow-left-right" class="h-8 w-8"></i>'
+                      : '<i data-lucide="handshake" class="h-8 w-8"></i>',
             );
         $("#negotiationDecisionSubmitIcon").attr(
             "data-lucide",
-            isReject ? "x-circle" : "check-circle",
+            isReject ? "x-circle" : isCounter ? "send" : "check-circle",
         );
-        $("#negotiationDecisionFields").toggleClass("hidden", !isReject);
+        $("#negotiationDecisionFields").toggleClass("hidden", !(isReject || isCounter));
         $("#negotiation_reject_amount")
-            .val(isReject ? config.amount || "" : "")
-            .prop("disabled", !isReject);
+            .val(isCounter ? config.amount || "" : "")
+            .prop("disabled", !isCounter);
         $("#negotiation_reject_message")
             .val("")
-            .prop("disabled", !isReject);
+            .prop("disabled", !(isReject || isCounter));
 
         openModal("negotiationDecisionModal");
 

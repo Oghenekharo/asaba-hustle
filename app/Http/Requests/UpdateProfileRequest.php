@@ -36,4 +36,31 @@ class UpdateProfileRequest extends FormRequest
             'account_number' => 'nullable|string|max:30',
         ];
     }
+
+    public function after(): array
+    {
+        return [
+            function ($validator) {
+                $user = $this->user();
+
+                if (!$user || !$user->hasRole('worker')) {
+                    return;
+                }
+
+                $skillIds = collect($this->input('skill_ids', []))
+                    ->filter()
+                    ->map(fn ($skillId) => (int) $skillId);
+
+                if ($this->filled('primary_skill_id')) {
+                    $skillIds->push((int) $this->input('primary_skill_id'));
+                } elseif ($user->primary_skill_id) {
+                    $skillIds->push((int) $user->primary_skill_id);
+                }
+
+                if ($skillIds->unique()->count() > 3) {
+                    $validator->errors()->add('skill_ids', 'Workers can have a maximum of 3 skills.');
+                }
+            },
+        ];
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CounterNegotiationRequest;
 use App\Http\Requests\CreateNegotiationRequest;
 use App\Http\Requests\RejectNegotiationRequest;
 use App\Models\JobNegotiation;
@@ -21,7 +22,10 @@ class JobNegotiationController extends Controller
     public function store(CreateNegotiationRequest $request, ServiceJob $job): JsonResponse
     {
         $user = $request->user();
-        $latest = $job->negotiations()->latest('id')->first();
+        $latest = $job->negotiations()
+            ->where('worker_id', $user->id)
+            ->latest('id')
+            ->first();
 
         try {
             if (!$latest) {
@@ -33,7 +37,7 @@ class JobNegotiationController extends Controller
                 );
             } else {
                 $negotiation = $this->negotiationService->counterOffer(
-                    $job,
+                    $latest,
                     $user,
                     $request->validated('amount'),
                     $request->validated('message')
@@ -59,12 +63,12 @@ class JobNegotiationController extends Controller
             return $this->errorResponse('Negotiation does not belong to this job.', 404);
         }
 
-        if ((int) $request->user()->id !== (int) $job->user_id) {
-            return $this->errorResponse('Only the job owner can accept offers.', 403);
+        if (!in_array((int) $request->user()->id, [(int) $negotiation->client_id, (int) $negotiation->worker_id], true)) {
+            return $this->errorResponse('Only negotiation participants can accept offers.', 403);
         }
 
         try {
-            $negotiation = $this->negotiationService->acceptOffer($negotiation);
+            $negotiation = $this->negotiationService->acceptOffer($negotiation, $request->user());
         } catch (ValidationException $exception) {
             return $this->errorResponse(
                 'The given data was invalid.',
@@ -79,20 +83,51 @@ class JobNegotiationController extends Controller
         );
     }
 
+    public function counter(CounterNegotiationRequest $request, ServiceJob $job, JobNegotiation $negotiation): JsonResponse
+    {
+        if ((int) $negotiation->job_id !== (int) $job->id) {
+            return $this->errorResponse('Negotiation does not belong to this job.', 404);
+        }
+
+        if (!in_array((int) $request->user()->id, [(int) $negotiation->client_id, (int) $negotiation->worker_id], true)) {
+            return $this->errorResponse('Only negotiation participants can counter offers.', 403);
+        }
+
+        try {
+            $negotiation = $this->negotiationService->counterOffer(
+                $negotiation,
+                $request->user(),
+                (float) $request->validated('amount'),
+                $request->validated('message')
+            );
+        } catch (ValidationException $exception) {
+            return $this->errorResponse(
+                'The given data was invalid.',
+                422,
+                $exception->errors()
+            );
+        }
+
+        return $this->successResponse(
+            $negotiation,
+            'Counter offer sent.'
+        );
+    }
+
     public function reject(RejectNegotiationRequest $request, ServiceJob $job, JobNegotiation $negotiation): JsonResponse
     {
         if ((int) $negotiation->job_id !== (int) $job->id) {
             return $this->errorResponse('Negotiation does not belong to this job.', 404);
         }
 
-        if ((int) $request->user()->id !== (int) $job->user_id) {
-            return $this->errorResponse('Only the job owner can reject offers.', 403);
+        if (!in_array((int) $request->user()->id, [(int) $negotiation->client_id, (int) $negotiation->worker_id], true)) {
+            return $this->errorResponse('Only negotiation participants can reject offers.', 403);
         }
 
         try {
             $this->negotiationService->rejectOffer(
                 $negotiation,
-                (float) $request->validated('amount'),
+                $request->user(),
                 $request->validated('message')
             );
         } catch (ValidationException $exception) {

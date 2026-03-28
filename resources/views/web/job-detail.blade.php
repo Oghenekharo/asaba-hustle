@@ -2,33 +2,44 @@
 
 @php
     use App\Models\Payment;
+    use App\Models\ServiceJob;
 
     $viewer = auth()->user();
     $isOwner = $viewer->id === $job->user_id;
     $isWorker = $viewer->hasRole('worker');
     $hasApplied = filled($existingApplication ?? null);
+    $clientRating = $job->rating;
+    $workerRating = $job->workerRating;
     $workerNeedsPayoutDetails =
         $isWorker && !$isOwner && (!filled($viewer->bank_name) || !filled($viewer->account_name) || !filled($viewer->account_number));
+    $workerNeedsVerification = $isWorker && (!$viewer->is_verified || !filled($viewer->id_document));
 
     $canApply =
         $isWorker &&
         !$isOwner &&
         !$hasApplied &&
         !$workerNeedsPayoutDetails &&
+        !$workerNeedsVerification &&
         $job->status === 'open' &&
         $job->assigned_to === null &&
         $viewer->availability_status === 'available';
 
-    $canChatAsWorker = $isWorker && !$isOwner && $hasApplied && $job->status === 'assigned';
     $isAssignedWorker = (int) $job->assigned_to === (int) $viewer->id;
     $canSeeAssignedWorker = $job->worker && ($isOwner || $isAssignedWorker);
+    $canChatOnJob =
+        $job->worker &&
+        in_array($job->status, ServiceJob::chatEligibleStatuses(), true) &&
+        ($isOwner || $isAssignedWorker);
+    $chatPartnerLabel = $isOwner ? 'Worker' : 'Client';
+    $chatPartnerName = $isOwner ? $job->worker?->name : $job->client?->name;
     $canAcceptJob = $isAssignedWorker && $job->status === 'assigned';
     $canRejectJob = $isAssignedWorker && $job->status === 'assigned';
     $canStartJob = $isAssignedWorker && $job->status === 'worker_accepted';
     $canCompleteJob = $isAssignedWorker && $job->status === 'in_progress';
     $canMarkPaid = $isOwner && $job->status === 'payment_pending' && $job->paid_at === null;
     $canConfirmPayment = $isAssignedWorker && $job->status === 'payment_pending' && $job->paid_at !== null;
-    $canRateWorker = $isOwner && $job->status === 'completed' && !$job->rating && $job->worker;
+    $canRateWorker = $isOwner && in_array($job->status, ['completed', 'rated']) && !$clientRating && $job->worker;
+    $canRateClient = $isAssignedWorker && in_array($job->status, ['completed', 'rated']) && !$workerRating && $job->client;
     $canViewTransferDetails =
         $isOwner &&
         $job->worker &&
@@ -232,21 +243,21 @@
                                 </p>
                             </div>
 
-                            @if ($isOwner)
+                            @if ($isOwner || $isAssignedWorker)
                                 <div
-                                    class="rounded-2xl border px-4 py-4 {{ $job->rating ? 'border-violet-200 bg-violet-50/70' : 'border-slate-200 bg-slate-50' }}">
+                                    class="rounded-2xl border px-4 py-4 {{ $clientRating || $workerRating ? 'border-violet-200 bg-violet-50/70' : 'border-slate-200 bg-slate-50' }}">
                                     <div class="flex items-start justify-between gap-3">
                                         <p
-                                            class="text-[10px] font-black uppercase tracking-widest {{ $job->rating ? 'text-violet-700' : 'text-slate-400' }}">
-                                            5. Rate Worker
+                                            class="text-[10px] font-black uppercase tracking-widest {{ $clientRating || $workerRating ? 'text-violet-700' : 'text-slate-400' }}">
+                                            5. Leave Rating
                                         </p>
-                                        @if ($job->rating)
+                                        @if ($clientRating || $workerRating)
                                             <i data-lucide="circle-check-big" class="h-4 w-4 text-violet-600"></i>
                                         @endif
                                     </div>
                                     <p
-                                        class="mt-2 text-sm font-medium {{ $job->rating ? 'text-violet-900' : 'text-slate-500' }}">
-                                        Leave a rating after payment is confirmed so the worker's profile reflects this job.
+                                        class="mt-2 text-sm font-medium {{ $clientRating || $workerRating ? 'text-violet-900' : 'text-slate-500' }}">
+                                        Leave a rating after payment is confirmed so both sides can build trust on the platform.
                                     </p>
                                 </div>
                             @endif
@@ -437,11 +448,28 @@
                     </div>
 
                     @if ($isOwner && $job->worker)
-                        <button type="button" onclick="openModal('assignedWorkerModal')"
-                            class="w-full mt-4 flex items-center justify-center gap-3 py-4 rounded-2xl bg-[var(--surface-soft)] text-[var(--brand)] font-black text-[10px] uppercase tracking-widest hover:bg-[var(--brand)] hover:text-white transition-all">
-                            <i data-lucide="user-round-search" class="w-4 h-4"></i>
-                            View Assigned Worker
-                        </button>
+                        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                            <button type="button" onclick="openModal('assignedWorkerModal')"
+                                class="flex items-center justify-center gap-3 py-4 rounded-2xl bg-[var(--surface-soft)] text-[var(--brand)] font-black text-[10px] uppercase tracking-widest hover:bg-[var(--brand)] hover:text-white transition-all">
+                                <i data-lucide="user-round-search" class="w-4 h-4"></i>
+                                Worker Profile
+                            </button>
+                            @if ($canChatOnJob)
+                                @if ($existingConversation)
+                                    <a href="{{ route('web.app.conversations', ['conversation' => $existingConversation->uuid]) }}"
+                                        class="flex items-center justify-center gap-3 py-4 rounded-2xl bg-[var(--surface-soft)] text-[var(--brand)] font-black text-[10px] uppercase tracking-widest hover:bg-[var(--brand)] hover:text-white transition-all">
+                                        <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                        Open Chat
+                                    </a>
+                                @else
+                                    <button type="button" onclick="openModal('jobChatStarterModal')"
+                                        class="flex items-center justify-center gap-3 py-4 rounded-2xl bg-[var(--surface-soft)] text-[var(--brand)] font-black text-[10px] uppercase tracking-widest hover:bg-[var(--brand)] hover:text-white transition-all">
+                                        <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                        Start Chat
+                                    </button>
+                                @endif
+                            @endif
+                        </div>
                     @elseif($isOwner)
                         <div
                             class="w-full mt-4 rounded-2xl border border-dashed border-slate-200 px-5 py-4 text-left bg-slate-50/80">
@@ -451,18 +479,18 @@
                                 cards.
                             </p>
                         </div>
-                    @elseif($canChatAsWorker)
+                    @elseif($canChatOnJob)
                         @if ($existingConversation)
                             <a href="{{ route('web.app.conversations', ['conversation' => $existingConversation->uuid]) }}"
                                 class="w-full mt-4 flex items-center justify-center gap-3 py-4 rounded-2xl bg-[var(--surface-soft)] text-[var(--brand)] font-black text-[10px] uppercase tracking-widest hover:bg-[var(--brand)] hover:text-white transition-all">
                                 <i data-lucide="message-circle" class="w-4 h-4"></i>
-                                Chat with Client
+                                Open Chat with {{ $chatPartnerLabel }}
                             </a>
                         @else
-                            <button type="button" onclick="openModal('workerChatModal')"
+                            <button type="button" onclick="openModal('jobChatStarterModal')"
                                 class="w-full mt-4 flex items-center justify-center gap-3 py-4 rounded-2xl bg-[var(--surface-soft)] text-[var(--brand)] font-black text-[10px] uppercase tracking-widest hover:bg-[var(--brand)] hover:text-white transition-all">
                                 <i data-lucide="message-circle" class="w-4 h-4"></i>
-                                Start Chat with Client
+                                Start Chat with {{ $chatPartnerLabel }}
                             </button>
                         @endif
                     @else
@@ -470,7 +498,7 @@
                             class="w-full mt-4 rounded-2xl border border-dashed border-slate-200 px-5 py-4 text-left bg-slate-50/80">
                             <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Chat Access</p>
                             <p class="mt-2 text-xs font-medium text-slate-500">
-                                Workers need to be assigned the job first before chat with the client is unlocked.
+                                Chat unlocks once a worker has been assigned to this job.
                             </p>
                         </div>
                     @endif
@@ -489,10 +517,10 @@
                                     <span class="text-[10px] font-bold">{{ $job->worker->rating }}</span>
                                 </div>
                             </div>
-                            <button type="button" onclick="openModal('assignedWorkerModal')"
-                                class="rounded-2xl border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-200 transition hover:border-[var(--brand)] hover:text-[var(--brand)]">
-                                View Details
-                            </button>
+                            <span
+                                class="rounded-2xl border border-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-300">
+                                Assigned
+                            </span>
                         </div>
                     </section>
                 @endif
@@ -510,6 +538,22 @@
                                 class="mt-4 inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition hover:bg-amber-600">
                                 <i data-lucide="badge-info" class="h-4 w-4"></i>
                                 Update Profile
+                            </a>
+                        </div>
+                    </section>
+                @elseif($isWorker && !$isOwner && $job->status === 'open' && $job->assigned_to === null && $workerNeedsVerification)
+                    <section class="rounded-[2rem] bg-white border border-amber-100 shadow-sm p-6">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-3">Verification Required
+                        </p>
+                        <div class="rounded-2xl bg-amber-50 border border-amber-100 px-4 py-4">
+                            <p class="text-xs font-black uppercase tracking-widest text-amber-700">ID verification pending</p>
+                            <p class="mt-2 text-sm font-medium text-amber-900">
+                                Complete ID verification from your profile before applying for jobs.
+                            </p>
+                            <a href="{{ route('web.app.me') }}"
+                                class="mt-4 inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition hover:bg-amber-600">
+                                <i data-lucide="shield-check" class="h-4 w-4"></i>
+                                Open Profile
                             </a>
                         </div>
                     </section>
@@ -753,23 +797,57 @@
                                                         class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-[9px] font-black uppercase tracking-widest text-slate-600 transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
                                                         onclick="openModal('negotiationWorkerModal{{ $negotiation->id }}')">
                                                         <i data-lucide="eye" class="w-3 h-3"></i>
-                                                        View Worker
+                                                        Worker Profile
                                                     </button>
                                                 </div>
                                             @endif
 
                                             @if ($isOwner && $negotiation->status === 'pending')
-                                                <div class="mt-4 grid grid-cols-2 gap-2">
+                                                <div class="mt-4 grid grid-cols-3 gap-2">
                                                     <button type="button"
                                                         class="reject-offer flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-100 bg-rose-50 text-[9px] font-black uppercase tracking-widest text-rose-600 transition-all hover:bg-rose-600 hover:text-white"
                                                         onclick="openNegotiationDecisionModal({
                                                             action: 'reject',
                                                             url: @js(route('web.app.negotiate.reject', $negotiation)),
-                                                            amount: @js($negotiation->amount),
                                                             workerName: @js($negotiation->worker->name)
                                                         })">
                                                         <i data-lucide="x" class="w-3 h-3"></i>
                                                         Reject
+                                                    </button>
+
+                                                    <button type="button"
+                                                        class="flex h-9 items-center justify-center gap-1.5 rounded-xl border border-amber-100 bg-amber-50 text-[9px] font-black uppercase tracking-widest text-amber-700 transition-all hover:bg-amber-500 hover:text-white"
+                                                        onclick="openNegotiationDecisionModal({
+                                                            action: 'counter',
+                                                            url: @js(route('web.app.negotiate.counter', $negotiation)),
+                                                            amount: @js($negotiation->amount),
+                                                            workerName: @js($negotiation->worker->name)
+                                                        })">
+                                                        <i data-lucide="arrow-left-right" class="w-3 h-3"></i>
+                                                        Counter
+                                                    </button>
+
+                                                    <button type="button"
+                                                        class="accept-offer flex h-9 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 text-[9px] font-black uppercase tracking-widest text-white shadow-md shadow-emerald-500/10 transition-all hover:bg-emerald-700"
+                                                        onclick="openNegotiationDecisionModal({
+                                                            action: 'accept',
+                                                            url: @js(route('web.app.negotiate.accept', $negotiation))
+                                                        })">
+                                                        <i data-lucide="check" class="w-3 h-3"></i>
+                                                        Accept
+                                                    </button>
+                                                </div>
+                                            @elseif(!$isOwner && $isWorker && $negotiation->status === 'pending' && (int) $negotiation->worker_id === (int) $viewer->id && $negotiation->created_by === 'client')
+                                                <div class="mt-4 grid grid-cols-2 gap-2">
+                                                    <button type="button"
+                                                        class="flex h-9 items-center justify-center gap-1.5 rounded-xl border border-amber-100 bg-amber-50 text-[9px] font-black uppercase tracking-widest text-amber-700 transition-all hover:bg-amber-500 hover:text-white"
+                                                        onclick="openNegotiationDecisionModal({
+                                                            action: 'counter',
+                                                            url: @js(route('web.app.negotiate.counter', $negotiation)),
+                                                            amount: @js($negotiation->amount)
+                                                        })">
+                                                        <i data-lucide="arrow-left-right" class="w-3 h-3"></i>
+                                                        Counter
                                                     </button>
 
                                                     <button type="button"
@@ -831,9 +909,11 @@
 
                 @endif
 
-                @if ($canRateWorker)
+                @if ($canRateWorker || $canRateClient)
                     <section class="rounded-[2rem] bg-white border border-slate-100 shadow-sm p-6">
-                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Rate Worker</p>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
+                            {{ $canRateWorker ? 'Rate Worker' : 'Rate Client' }}
+                        </p>
                         <form id="job-rate-form" action="{{ route('web.app.jobs.rate', $job) }}" method="POST"
                             class="space-y-4">
                             @csrf
@@ -841,7 +921,7 @@
                                 icon="star" label="Star Rating" placeholder="Give a score from 1 to 5" />
                             <x-input type="textarea" name="review" id="job_worker_review" rows="4"
                                 icon="message-square-quote" label="Review"
-                                placeholder="Share how the worker handled this job..." />
+                                placeholder="{{ $canRateWorker ? 'Share how the worker handled this job...' : 'Share how the client handled this job...' }}" />
                             <x-error />
                             <x-button id="job-rate-submit" type="submit" class="w-full">
                                 <x-slot:icon>
@@ -851,16 +931,29 @@
                             </x-button>
                         </form>
                     </section>
-                @elseif($isOwner && $job->rating)
+                @elseif($isOwner && $clientRating)
                     <section class="rounded-[2rem] bg-white border border-slate-100 shadow-sm p-6">
                         <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Worker Rating</p>
                         <div class="rounded-2xl border border-violet-100 bg-violet-50 px-4 py-4">
                             <div class="flex items-center gap-2 text-violet-700">
                                 <i data-lucide="star" class="h-4 w-4 fill-current"></i>
-                                <p class="text-sm font-black">{{ number_format($job->rating->rating, 1) }}/5</p>
+                                <p class="text-sm font-black">{{ number_format($clientRating->rating, 1) }}/5</p>
                             </div>
                             <p class="mt-3 text-sm font-medium text-violet-900">
-                                {{ $job->rating->review ?: 'You rated this worker after the job was closed.' }}
+                                {{ $clientRating->review ?: 'You rated this worker after the job was closed.' }}
+                            </p>
+                        </div>
+                    </section>
+                @elseif($isAssignedWorker && $workerRating)
+                    <section class="rounded-[2rem] bg-white border border-slate-100 shadow-sm p-6">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Client Rating</p>
+                        <div class="rounded-2xl border border-violet-100 bg-violet-50 px-4 py-4">
+                            <div class="flex items-center gap-2 text-violet-700">
+                                <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                <p class="text-sm font-black">{{ number_format($workerRating->rating, 1) }}/5</p>
+                            </div>
+                            <p class="mt-3 text-sm font-medium text-violet-900">
+                                {{ $workerRating->review ?: 'You rated this client after the job was closed.' }}
                             </p>
                         </div>
                     </section>
@@ -1156,8 +1249,8 @@
         </x-modal>
     @endif
 
-    @if ($canChatAsWorker && !$existingConversation)
-        <x-modal id="workerChatModal" title="Start Chat with Client" size="max-w-xl">
+    @if ($canChatOnJob && !$existingConversation)
+        <x-modal id="jobChatStarterModal" title="Start Chat with {{ $chatPartnerLabel }}" size="max-w-xl">
             <form id="job-chat-starter-form" action="{{ route('web.app.messages.send') }}" method="POST"
                 class="space-y-5">
                 @csrf
@@ -1165,18 +1258,18 @@
 
                 <div>
                     <p class="text-xs font-medium text-slate-500">
-                        Your application is already on this job. Send the first message to open the conversation with
-                        {{ $job->client->name }}.
+                        Send the first message to open the conversation with {{ $chatPartnerName }} for this job.
                     </p>
                 </div>
 
                 <x-input type="textarea" name="message" id="job_chat_message" rows="5" icon="message-square-text"
-                    label="Message" placeholder="Introduce yourself and tell the client how you can help..." />
+                    label="Message"
+                    placeholder="Send a quick message to coordinate the job details..." />
 
                 <x-error />
 
                 <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                    <x-button type="button" color="black" variant="outline" onclick="closeModal('workerChatModal')">
+                    <x-button type="button" color="black" variant="outline" onclick="closeModal('jobChatStarterModal')">
                         <x-slot:icon>
                             <i data-lucide="x" class="h-4 w-4"></i>
                         </x-slot:icon>
