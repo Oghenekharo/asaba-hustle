@@ -29,7 +29,6 @@ Route::get('/', [HomeController::class, 'index'])->name('web.home');
 Route::middleware('guest')->group(function () {
     Route::get('/login', [WebAuthController::class, 'showLogin'])->name('login');
     Route::get('/register', [WebAuthController::class, 'showRegister'])->name('web.register');
-    Route::get('/verify-phone', [WebAuthController::class, 'showVerifyPhone'])->name('web.verify.phone.page');
     Route::get('/forgot-password', [WebAuthController::class, 'showForgotPassword'])->name('web.password.request');
     Route::get('/reset-password', [WebAuthController::class, 'showResetPassword'])->name('web.password.reset');
 
@@ -37,10 +36,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [WebAuthController::class, 'register'])->name('web.register.submit');
     Route::post('/forgot-password', [WebAuthController::class, 'forgotPassword'])->name('web.password.email');
     Route::post('/reset-password', [WebAuthController::class, 'resetPassword'])->name('web.password.update');
-    Route::post('/verify-phone', [WebAuthController::class, 'verifyPhone'])->name('web.verify.phone.submit');
 });
 
-Route::middleware(['web', 'auth', 'session.active', 'account.active'])->group(function () {
+Route::get('/verify-phone', [WebAuthController::class, 'showVerifyPhone'])->name('web.verify.phone.page');
+Route::post('/verify-phone', [WebAuthController::class, 'verifyPhone'])->name('web.verify.phone.submit');
+
+Route::middleware(['web', 'auth', 'session.active', 'account.active', 'phone.verified'])->group(function () {
     Route::get('/app', [DashboardController::class, 'index'])->name('web.app');
     Route::post('/logout', [WebAuthController::class, 'logout'])->name('web.logout');
 

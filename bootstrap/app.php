@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'account.active' => \App\Http\Middleware\EnsureAccountIsActive::class,
+            'phone.verified' => \App\Http\Middleware\EnsurePhoneIsVerified::class,
             'session.active' => \App\Http\Middleware\EnsureSessionIsActive::class,
             'token.active' => \App\Http\Middleware\EnsureTokenIsActive::class,
         ]);

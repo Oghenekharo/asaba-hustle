@@ -109,7 +109,9 @@ class AuthController extends Controller
                 'user' => (new UserResource($user->load('skill')))->resolve(),
                 'redirect' => $user->hasRole('admin')
                     ? route('admin.dashboard')
-                    : route('web.app'),
+                    : ($user->phone_verified_at
+                        ? route('web.app')
+                        : route('web.verify.phone.page', ['phone' => $user->phone])),
             ],
             'Login successful.'
         );

@@ -201,13 +201,21 @@
 
 
                 <section class="p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="phone"
-                            class="w-5 h-5 text-{{ $user->phone_verified_at ? 'green' : 'slate' }}-500"></i>
-                        <div>
-                            <p class="text-[10px] font-black uppercase text-slate-400">SMS Verification</p>
-                            <p class="text-xs font-bold">{{ $user->phone_verified_at ? 'Verified' : 'Pending' }}</p>
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="phone"
+                                class="w-5 h-5 text-{{ $user->phone_verified_at ? 'green' : 'slate' }}-500"></i>
+                            <div>
+                                <p class="text-[10px] font-black uppercase text-slate-400">SMS Verification</p>
+                                <p class="text-xs font-bold">{{ $user->phone_verified_at ? 'Verified' : 'Pending' }}</p>
+                            </div>
                         </div>
+                        @unless ($user->phone_verified_at)
+                            <a href="{{ route('web.verify.phone.page', ['phone' => $user->phone]) }}"
+                                class="inline-flex items-center justify-center rounded-2xl border border-orange-200 bg-orange-50 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-orange-600 transition hover:border-orange-400 hover:bg-orange-100">
+                                Verify Phone
+                            </a>
+                        @endunless
                     </div>
                 </section>
 

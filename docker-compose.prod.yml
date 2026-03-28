@@ -42,8 +42,6 @@ services:
         condition: service_started
     volumes:
       - app_storage:/var/www/html/storage
-    ports:
-      - "127.0.0.1:8080:8080"
 
   reverb:
     image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
@@ -61,6 +59,8 @@ services:
         condition: service_started
     volumes:
       - app_storage:/var/www/html/storage
+    ports:
+      - "127.0.0.1:8080:8080"
 
   mysql:
     image: mysql:8.4
