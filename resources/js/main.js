@@ -19,6 +19,45 @@ function setButtonLoading($btn, state = true) {
     }
 }
 
+export function setActionButtonLoading(
+    $btn,
+    loadingText = "Processing...",
+    disabled = true,
+) {
+    if (!$btn?.length) return null;
+
+    const originalHtml = $btn.data("original-html") ?? $btn.html();
+    const originalText = $btn.data("original-text") ?? $.trim($btn.text());
+
+    $btn.data("original-html", originalHtml);
+    $btn.data("original-text", originalText);
+    $btn.data("action-loading", true);
+    $btn.prop("disabled", disabled);
+    $btn.attr("aria-busy", "true");
+    $btn.addClass("pointer-events-none opacity-70");
+    $btn.html(loadingText);
+
+    return {
+        originalHtml,
+        originalText,
+    };
+}
+
+export function resetActionButtonLoading($btn) {
+    if (!$btn?.length) return;
+
+    const originalHtml = $btn.data("original-html");
+
+    if (originalHtml !== undefined) {
+        $btn.html(originalHtml);
+    }
+
+    $btn.data("action-loading", false);
+    $btn.prop("disabled", false);
+    $btn.removeAttr("aria-busy");
+    $btn.removeClass("pointer-events-none opacity-70");
+}
+
 /**
  * Generic AJAX Form Handler for Fintech UI
  * @param {string} formId - The ID of the form (e.g., '#login-form')
@@ -1054,16 +1093,22 @@ export const initNavbarNotifications = function () {
     });
 
     $("#markAllNotificationsReadButton").on("click", function () {
-        $.post(config.notificationReadAllUrl).always(function () {
-            setNavNotificationBadge(0);
-            $("#navNotificationsList .js-nav-notification-item").each(
-                function () {
-                    const $item = $(this);
-                    $item.removeClass("bg-orange-50/50").addClass("bg-white");
-                    $item.find(".js-notification-unread-dot").remove();
-                },
-            );
-        });
+        const $button = $(this);
+
+        setActionButtonLoading($button, "Please wait...");
+
+        $.post(config.notificationReadAllUrl)
+            .always(function () {
+                setNavNotificationBadge(0);
+                $("#navNotificationsList .js-nav-notification-item").each(
+                    function () {
+                        const $item = $(this);
+                        $item.removeClass("bg-orange-50/50").addClass("bg-white");
+                        $item.find(".js-notification-unread-dot").remove();
+                    },
+                );
+                resetActionButtonLoading($button);
+            });
     });
 
     if (window.Echo && config.currentUserId) {
@@ -1133,6 +1178,8 @@ export const initNotificationsPage = function () {
         const notificationId = $button.data("notification-id");
         const $item = $button.closest(".js-notification-page-item");
 
+        setActionButtonLoading($button, "Please wait...");
+
         $.post(readUrl, {
             notification_id: notificationId,
         })
@@ -1163,10 +1210,15 @@ export const initNotificationsPage = function () {
                     "error",
                     "#notifications-page-feedback",
                 );
+                resetActionButtonLoading($button);
             });
     });
 
     $("#notifications-page-mark-all").on("click", function () {
+        const $button = $(this);
+
+        setActionButtonLoading($button, "Please wait...");
+
         $.post(readAllUrl)
             .done(function (response) {
                 showAlert(
@@ -1198,6 +1250,9 @@ export const initNotificationsPage = function () {
                     "error",
                     "#notifications-page-feedback",
                 );
+            })
+            .always(function () {
+                resetActionButtonLoading($button);
             });
     });
 };

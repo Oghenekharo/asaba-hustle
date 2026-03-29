@@ -384,6 +384,75 @@
 
     <section class="mt-6 grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
         <div class="space-y-8">
+            <div
+                class="relative overflow-hidden rounded-[2.5rem] border border-white bg-white/70 p-8 shadow-sm backdrop-blur-xl">
+                <div class="absolute left-0 top-0 h-full w-1 rounded-r-full bg-blue-400/70"></div>
+
+                <div class="flex items-center justify-between gap-4 mb-6">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="h-11 w-11 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-inner">
+                            <i data-lucide="user-round" class="h-5 w-5"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black uppercase text-slate-400">Client Desk</p>
+                            <h3 class="text-xl font-black text-[var(--ink)]">Client Details</h3>
+                        </div>
+                    </div>
+
+                    <a href="{{ route('admin.users.show', $job->client) }}"
+                        class="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700">
+                        <i data-lucide="eye" class="h-4 w-4"></i>
+                        View User
+                    </a>
+                </div>
+
+                <div class="flex flex-col gap-5 rounded-[2rem] bg-slate-50/70 p-5 sm:flex-row sm:items-start">
+                    <x-avatar :user="$job->client" size="h-16 w-16" text="text-lg" rounded="rounded-[1.5rem]"
+                        class="shadow-sm border border-white" />
+
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <h4 class="text-2xl font-black tracking-tight text-[var(--ink)]">
+                                {{ $job->client->name }}
+                            </h4>
+                            <span
+                                class="inline-flex rounded-xl border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] {{ $job->client->account_status === 'active'
+                                    ? 'border-emerald-100 bg-emerald-50 text-emerald-700'
+                                    : ($job->client->account_status === 'suspended'
+                                        ? 'border-amber-100 bg-amber-50 text-amber-700'
+                                        : 'border-rose-100 bg-rose-50 text-rose-700') }}">
+                                {{ $job->client->account_status }}
+                            </span>
+                        </div>
+                        <p class="mt-2 text-sm font-medium text-slate-500">
+                            {{ $job->client->email ?: 'No email on file.' }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-5 grid gap-4 sm:grid-cols-3">
+                    <div class="rounded-[1.5rem] border border-slate-100 bg-white px-4 py-5">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Phone</p>
+                        <p class="mt-3 text-sm font-black text-slate-900">
+                            {{ $job->client->phone ?: 'Not provided' }}
+                        </p>
+                    </div>
+                    <div class="rounded-[1.5rem] border border-slate-100 bg-white px-4 py-5">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Verification</p>
+                        <p class="mt-3 text-sm font-black text-slate-900">
+                            {{ $job->client->phone_verified_at ? 'Phone verified' : 'Phone pending' }}
+                        </p>
+                    </div>
+                    <div class="rounded-[1.5rem] border border-slate-100 bg-white px-4 py-5">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Joined</p>
+                        <p class="mt-3 text-sm font-black text-slate-900">
+                            {{ optional($job->client->created_at)->format('d M Y') ?: 'Unknown' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <!-- HUSTLE DESCRIPTION -->
             <div
                 class="relative overflow-hidden rounded-[2.5rem] border border-white bg-white/70 p-8 shadow-sm backdrop-blur-xl">

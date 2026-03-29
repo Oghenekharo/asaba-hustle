@@ -339,7 +339,7 @@
                                 <i data-lucide="slash" class="w-3 h-3 text-rose-500"></i> Ban
                             </button>
                         </form>
-                        <a
+                        <a href="{{ route('admin.users.show', $user) }}"
                             class="w-full col-span-2 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-amber-500/20 active:scale-95 transition-all">
                             <i data-lucide="eye" class="w-3 h-3 text-white"></i> View
                         </a>

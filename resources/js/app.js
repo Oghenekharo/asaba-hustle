@@ -7,6 +7,8 @@ import "aos/dist/aos.css";
 
 import {
     handleAjaxForm,
+    setActionButtonLoading,
+    resetActionButtonLoading,
     togglePasswordView,
     showAlert,
     handleModalsForms,
@@ -145,7 +147,7 @@ if ($("#resend-btn").length) {
         const $btn = $(this);
         const url = $btn.data("url");
 
-        $btn.prop("disabled", true);
+        setActionButtonLoading($btn, "Please wait...");
 
         $.ajax({
             url: url,
@@ -176,7 +178,7 @@ if ($("#resend-btn").length) {
                     );
                 }
 
-                $btn.prop("disabled", false);
+                resetActionButtonLoading($btn);
             },
 
             error: function (xhr) {
@@ -187,7 +189,7 @@ if ($("#resend-btn").length) {
                 }
                 showAlert(message, "error", "#verify-phone-form");
 
-                $btn.prop("disabled", false);
+                resetActionButtonLoading($btn);
             },
         });
     });
