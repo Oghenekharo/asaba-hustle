@@ -100,30 +100,29 @@ class JobController extends Controller
             'ratings',
             'payment',
             'negotiations' => function ($q) use ($isOwner, $isWorker, $user) {
-                $q->with([
-                    'worker' => function ($query) use ($isOwner) {
-                        $query->select([
-                            'id',
-                            'name',
-                            'bio',
-                            'primary_skill_id',
-                            'availability_status',
-                            'created_at',
-                            'is_verified',
-                            'profile_photo',
-                            'bank_name',
-                            'account_name',
-                            'account_number',
-                        ])->with('skill');
+                // $q->with([
+                //     'worker' => function ($query) use ($isOwner) {
+                //         $query->select([
+                //             'id',
+                //             'name',
+                //             'bio',
+                //             'primary_skill_id',
+                //             'availability_status',
+                //             'created_at',
+                //             'is_verified',
+                //             'profile_photo',
+                //             'bank_name',
+                //             'account_name',
+                //             'account_number',
+                //         ])->with('skill')
+                //             ->withCount('ratingsReceived');
 
-                        if ($isOwner) {
-                            $query
-                                ->with('skills')
-                                ->withCount('ratingsReceived')
-                                ->withAvg('ratingsReceived', 'rating');
-                        }
-                    },
-                ])->latest('id');
+                //         if ($isOwner) {
+                //             $query
+                //                 ->with('skills');
+                //         }
+                //     },
+                // ])->latest('id');
 
                 if (!$isOwner && $isWorker && $user) {
                     $q->where('worker_id', $user->id);

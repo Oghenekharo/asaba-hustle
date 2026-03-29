@@ -24,8 +24,7 @@
 
 <div {{ $attributes->only('class')->merge(['class' => 'space-y-1.5']) }}>
     @if ($label)
-        <label for="{{ $id }}"
-            class="ml-1 text-[10px] block font-black uppercase tracking-widest text-slate-400">
+        <label for="{{ $id }}" class="ml-1 text-[10px] block font-black uppercase text-slate-400">
             {{ $label }}
         </label>
     @endif
@@ -41,7 +40,7 @@
                     'class' =>
                         'w-full ' .
                         $pl .
-                        ' rounded-xl resize-none border border-slate-100 bg-slate-50 px-4 py-3 text-sm font-bold outline-none transition-all focus:border-[var(--brand)] focus:bg-white focus:ring-4 focus:ring-orange-500/5',
+                        ' rounded-xl resize-none border border-slate-100 bg-slate-50 px-4 py-3 text-[16px] md:text-sm font-bold outline-none transition-all focus:border-[var(--brand)] focus:bg-white focus:ring-4 focus:ring-orange-500/5',
                 ]) }}>{{ old($name, $value) }}</textarea>
         @else
             <input type="{{ $type }}" name="{{ $name }}" id="{{ $id }}"
@@ -50,7 +49,7 @@
                     'class' =>
                         'w-full ' .
                         $pl .
-                        ' rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm font-bold outline-none transition-all focus:border-[var(--brand)] focus:bg-white focus:ring-4 focus:ring-orange-500/5' .
+                        ' rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-[16px] md:text-sm font-bold outline-none transition-all focus:border-[var(--brand)] focus:bg-white focus:ring-4 focus:ring-orange-500/5' .
                         ($isPassword ? ' pr-11' : ''),
                 ]) }} />
 

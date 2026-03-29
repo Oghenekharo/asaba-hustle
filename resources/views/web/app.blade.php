@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'App | Asaba Hustle'])
+@extends('layouts.app', ['title' => 'Dashboard | Asaba Hustle'])
 
 @section('content')
     <div class="grid grid-cols-1 gap-10 pt-20 lg:grid-cols-12 max-w-7xl mx-auto">
@@ -15,11 +15,9 @@
 
                 <!-- Modern Search Pill -->
                 <form id="job-filter-form" action="{{ route('web.app') }}" method="GET" class="relative group">
-                    <input type="text" name="search" value="{{ $searchTerm }}"
+                    <x-input type="text" name="search" value="{{ $searchTerm }}" icon="search"
                         placeholder="{{ auth()->user()->hasRole('worker') ? 'Search jobs in your skills...' : 'Search skills (e.g. Painting)...' }}"
-                        class="w-full sm:w-72 rounded-2xl border-slate-100 bg-white/60 backdrop-blur-md pl-11 pr-4 py-3 text-sm focus:border-orange-500 focus:ring-0 transition-all shadow-sm group-hover:shadow-md">
-                    <i data-lucide="search"
-                        class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-orange-500 transition-colors"></i>
+                        class="w-full sm:w-72" />
                 </form>
             </header>
 
@@ -92,13 +90,13 @@
 
                 <h2 class="text-lg font-black text-slate-900 mb-2">
 
-                    {{ auth()->user()->hasRole('worker') ? 'Your Assigned Jobs' : 'Jobs You Posted' }}
+                    {{ auth()->user()->hasRole('worker') ? 'Your Assigned Jobs' : 'Recently Posted Jobs' }}
 
                 </h2>
 
                 <p class="text-xs text-slate-500 font-medium">
 
-                    {{ auth()->user()->hasRole('worker') ? 'Jobs currently assigned to you' : 'Jobs you have created' }}
+                    {{ auth()->user()->hasRole('worker') ? 'Jobs currently assigned to you' : 'Jobs created' }}
 
                 </p>
 
@@ -185,7 +183,7 @@
             </section>
 
 
-            <!-- My Active Jobs (Compact List) -->
+            {{-- My Active Jobs (Compact List) -->
             <section class="rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
@@ -207,7 +205,7 @@
                         @endforelse
                     @endif
                 </div>
-            </section>
+            </section> --}}
 
             <!-- Notifications Slide-over/List -->
             <section class="rounded-[2.5rem] bg-slate-900 text-white p-8 shadow-2xl shadow-slate-900/20">
@@ -256,9 +254,9 @@
 
     @if (auth()->user()->hasRole('client'))
         <button type="button" id="floating-create-job-button"
-            class="js-open-job-modal fixed bottom-8 right-6 z-40 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--brand)] text-white shadow-[0_18px_45px_rgba(255,122,0,0.35)] transition-all hover:scale-105 hover:shadow-[0_22px_55px_rgba(255,122,0,0.42)]"
+            class="js-open-job-modal cursor-pointer fixed bottom-8 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--brand)] text-white shadow-[0_18px_45px_rgba(255,122,0,0.35)] transition-all hover:scale-105 hover:shadow-[0_22px_55px_rgba(255,122,0,0.42)]"
             aria-label="Create new job">
-            <i data-lucide="plus" class="h-6 w-6"></i>
+            <i data-lucide="plus" class="h-5 w-5"></i>
         </button>
 
         <x-modal id="createJobModal" title="Post a New Hustle" size="max-w-2xl">
@@ -292,7 +290,7 @@
 
                     <div class="grid gap-4 md:grid-cols-2">
                         <x-input type="number" step="0.01" min="0" name="budget" id="job_budget"
-                            label="Budget" icon="badge-naira-sign" placeholder="e.g. 25000" />
+                            label="Budget" icon="piggy-bank" placeholder="e.g. 25000" />
 
                         <x-input name="location" id="job_location" label="Location" icon="map-pin"
                             placeholder="e.g. DBS Road, Asaba" />
@@ -305,7 +303,7 @@
                                 <p class="text-[10px] font-black uppercase tracking-widest text-[var(--brand)]">Job
                                     Location</p>
                                 <p class="mt-1 text-xs font-medium text-slate-500">
-                                    Existing account coordinates are used automatically. Refresh from your browser if
+                                    Existing account map are used automatically. Refresh from your browser if
                                     needed.
                                 </p>
                             </div>
@@ -315,22 +313,21 @@
                                 <x-slot:icon>
                                     <i data-lucide="locate-fixed" class="h-4 w-4"></i>
                                 </x-slot:icon>
-                                Use Current Location
+                                Use Map Location
                             </x-button>
                         </div>
 
                         <div class="mt-4 grid gap-4 md:grid-cols-2">
-                            <x-input type="number" step="0.000001" name="latitude" id="job_latitude" label="Latitude"
-                                icon="map-pinned" value="{{ auth()->user()->latitude }}" placeholder="e.g. 6.200000" />
+                            <input type="hidden" step="0.000001" name="latitude" id="job_latitude"
+                                value="{{ auth()->user()->latitude }}" />
 
-                            <x-input type="number" step="0.000001" name="longitude" id="job_longitude"
-                                label="Longitude" icon="navigation" value="{{ auth()->user()->longitude }}"
-                                placeholder="e.g. 6.730000" />
+                            <input type="hidden" step="0.000001" name="longitude" id="job_longitude"
+                                value="{{ auth()->user()->longitude }}" />
                         </div>
 
                         <p id="job-location-status"
                             class="mt-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                            {{ auth()->user()->latitude !== null && auth()->user()->longitude !== null ? 'Saved coordinates loaded' : 'Waiting for browser location' }}
+                            {{ auth()->user()->latitude !== null && auth()->user()->longitude !== null ? 'Saved map location loaded' : 'Waiting for browser location' }}
                         </p>
                     </div>
 

@@ -653,10 +653,12 @@ function buildMessageMarkup(message, currentUserId, options = {}) {
     const bubbleTone = isOwnMessage ? "msg-sent" : "msg-received";
     const singleEmoji = isSingleEmojiMessage(rawContent);
     const displayName = isOwnMessage
-        ? options.currentUserName ?? senderNameRaw ?? "You"
+        ? (options.currentUserName ?? senderNameRaw ?? "You")
         : senderNameRaw;
     const displayPhotoUrl = isOwnMessage
-        ? options.currentUserAvatarUrl ?? message?.sender?.profile_photo_url ?? ""
+        ? (options.currentUserAvatarUrl ??
+          message?.sender?.profile_photo_url ??
+          "")
         : senderPhotoUrl;
 
     return `
@@ -1097,18 +1099,17 @@ export const initNavbarNotifications = function () {
 
         setActionButtonLoading($button, "Please wait...");
 
-        $.post(config.notificationReadAllUrl)
-            .always(function () {
-                setNavNotificationBadge(0);
-                $("#navNotificationsList .js-nav-notification-item").each(
-                    function () {
-                        const $item = $(this);
-                        $item.removeClass("bg-orange-50/50").addClass("bg-white");
-                        $item.find(".js-notification-unread-dot").remove();
-                    },
-                );
-                resetActionButtonLoading($button);
-            });
+        $.post(config.notificationReadAllUrl).always(function () {
+            setNavNotificationBadge(0);
+            $("#navNotificationsList .js-nav-notification-item").each(
+                function () {
+                    const $item = $(this);
+                    $item.removeClass("bg-orange-50/50").addClass("bg-white");
+                    $item.find(".js-notification-unread-dot").remove();
+                },
+            );
+            resetActionButtonLoading($button);
+        });
     });
 
     if (window.Echo && config.currentUserId) {
@@ -1477,6 +1478,7 @@ export const initJobDetailPage = function () {
 
     window.openNegotiationDecisionModal = function (config = {}) {
         const action = String(config.action || "").toLowerCase();
+        const modal = String(config.modalToClose || "");
         const isReject = action === "reject";
         const isCounter = action === "counter";
         const heading = isReject
@@ -1489,16 +1491,26 @@ export const initJobDetailPage = function () {
             : isCounter
               ? `Send your updated amount${config.workerName ? ` to ${config.workerName}` : ""} and keep the negotiation active.`
               : "Accepting this negotiation will assign the worker to this job and move the job into the assigned stage.";
-
+        if (modal) closeModal(modal);
         $("#negotiationDecisionForm").attr("action", config.url || "");
         $("#negotiationDecisionHeading").text(heading);
         $("#negotiationDecisionText").text(body);
         $("#negotiationDecisionSubmitText").text(
-            isReject ? "Reject Offer" : isCounter ? "Send Counter" : "Accept Offer",
+            isReject
+                ? "Reject Offer"
+                : isCounter
+                  ? "Send Counter"
+                  : "Accept Offer",
         );
         $("#negotiationDecisionSubmit")
-            .toggleClass("bg-rose-600 hover:bg-rose-700 shadow-rose-500/20", isReject)
-            .toggleClass("bg-amber-500 hover:bg-amber-600 shadow-amber-500/20", isCounter)
+            .toggleClass(
+                "bg-rose-600 hover:bg-rose-700 shadow-rose-500/20",
+                isReject,
+            )
+            .toggleClass(
+                "bg-amber-500 hover:bg-amber-600 shadow-amber-500/20",
+                isCounter,
+            )
             .toggleClass(
                 "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20",
                 !isReject && !isCounter,
@@ -1506,7 +1518,10 @@ export const initJobDetailPage = function () {
         $("#negotiationDecisionIcon")
             .toggleClass("bg-rose-50 text-rose-600", isReject)
             .toggleClass("bg-amber-50 text-amber-600", isCounter)
-            .toggleClass("bg-emerald-50 text-emerald-600", !isReject && !isCounter)
+            .toggleClass(
+                "bg-emerald-50 text-emerald-600",
+                !isReject && !isCounter,
+            )
             .html(
                 isReject
                     ? '<i data-lucide="octagon-x" class="h-8 w-8"></i>'
@@ -1518,7 +1533,10 @@ export const initJobDetailPage = function () {
             "data-lucide",
             isReject ? "x-circle" : isCounter ? "send" : "check-circle",
         );
-        $("#negotiationDecisionFields").toggleClass("hidden", !(isReject || isCounter));
+        $("#negotiationDecisionFields").toggleClass(
+            "hidden",
+            !(isReject || isCounter),
+        );
         $("#negotiation_reject_amount")
             .val(isCounter ? config.amount || "" : "")
             .prop("disabled", !isCounter);

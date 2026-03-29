@@ -148,8 +148,14 @@ class User extends Authenticatable
 
     public function getAverageRatingAttribute()
     {
-        if (array_key_exists('ratings_received_avg_rating', $this->attributes)) {
-            return round((float) ($this->attributes['ratings_received_avg_rating'] ?? 0), 2);
+        // if (array_key_exists('ratings_received_avg_rating', $this->attributes)) {
+        //     return round((float) ($this->attributes['ratings_received_avg_rating'] ?? 0), 2);
+        // }
+        if (
+            array_key_exists('ratings_received_avg_rating', $this->attributes) &&
+            $this->attributes['ratings_received_avg_rating'] !== null
+        ) {
+            return round((float) $this->attributes['ratings_received_avg_rating'], 2);
         }
 
         if (array_key_exists('rating', $this->attributes) && $this->attributes['rating'] !== null) {

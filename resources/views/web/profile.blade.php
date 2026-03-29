@@ -139,7 +139,7 @@
                             <p class="mt-2 text-sm font-bold text-slate-900">
                                 {{ ucfirst($user->availability_status ?? 'Not set') }}</p>
                         </div>
-                        <div class="rounded-2xl bg-slate-50 px-4 py-4">
+                        {{-- <div class="rounded-2xl bg-slate-50 px-4 py-4">
                             <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Latitude</p>
                             <p class="mt-2 text-sm font-bold text-slate-900">
                                 {{ $user->latitude !== null ? number_format((float) $user->latitude, 6) : 'Not set' }}
@@ -150,7 +150,7 @@
                             <p class="mt-2 text-sm font-bold text-slate-900">
                                 {{ $user->longitude !== null ? number_format((float) $user->longitude, 6) : 'Not set' }}
                             </p>
-                        </div>
+                        </div> --}}
                         <div class="rounded-2xl bg-slate-50 px-4 py-4 sm:col-span-2">
                             <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">ID Document</p>
                             <p class="mt-2 text-sm font-bold text-slate-900">
@@ -480,9 +480,17 @@
                     </div>
                 @endif
 
+                @if ($user->id_document)
+                    <div class="flex flex-col gap-2">
+                        <h3 class="ml-1 text-[10px] block font-black uppercase text-slate-400">ID Document</h3>
+                        <p
+                            class="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-[16px] md:text-sm font-bold outline-none transition-all focus:border-[var(--brand)] focus:bg-white focus:ring-4 focus:ring-orange-500/5">
+                            Uploaded and ready for review</p>
+                    </div>
+                @else<x-input type="file" name="id_document" id="profile_id_document" icon="file-badge"
+                        label="ID Document" />
+                @endif
 
-                <x-input type="file" name="id_document" id="profile_id_document" icon="file-badge"
-                    label="ID Document" />
 
                 <div class="rounded-2xl border border-dashed border-[var(--brand)]/25 bg-[var(--surface-soft)] px-4 py-4">
                     <div class="flex flex-col gap-4">
@@ -498,23 +506,21 @@
                             <x-slot:icon>
                                 <i data-lucide="locate-fixed" class="h-4 w-4"></i>
                             </x-slot:icon>
-                            Use Current Location
+                            Use Map Location
                         </x-button>
                     </div>
 
                     <div class="mt-4 grid gap-4 md:grid-cols-2">
-                        <x-input type="number" step="0.000001" name="latitude" id="profile_latitude" icon="map-pinned"
-                            label="Latitude" placeholder="Fetched from browser location"
+                        <input type="hidden" step="0.000001" name="latitude" id="profile_latitude"
                             value="{{ $user->latitude }}" />
 
-                        <x-input type="number" step="0.000001" name="longitude" id="profile_longitude"
-                            icon="navigation" label="Longitude" placeholder="Fetched from browser location"
+                        <input type="hidden" step="0.000001" name="longitude" id="profile_longitude"
                             value="{{ $user->longitude }}" />
                     </div>
 
                     <p id="profile-location-status"
                         class="mt-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        {{ $user->latitude !== null && $user->longitude !== null ? 'Saved coordinates loaded' : 'Waiting for browser location' }}
+                        {{ $user->latitude !== null && $user->longitude !== null ? 'Saved map loacation loaded' : 'Waiting for browser location' }}
                     </p>
                 </div>
 

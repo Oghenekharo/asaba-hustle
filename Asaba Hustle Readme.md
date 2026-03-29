@@ -2,102 +2,46 @@
 
 Asaba Hustle is a Laravel 12 marketplace for connecting clients with nearby workers for local service jobs.
 
-This file is the project progress and implementation snapshot.
+This file tracks the current implementation state of the project.
 
-## Current Architecture
+## Current Product Snapshot
 
-The codebase is currently split across:
+The platform currently includes:
 
-- API controllers for mobile/external clients
-- focused web controllers for browser flows
-- services for business rules
-- request classes and policies for validation/authorization
-- Blade views for page rendering
-- jQuery AJAX in the web app
-- Reverb/Echo for realtime updates
+- a Blade web app for clients and workers
+- a JSON API for mobile and external use
+- an admin panel
+- realtime chat, notifications, and job status updates
+- negotiation-first hiring
+- manual payment closure using `cash` and `transfer`
+- legacy Paystack and Flutterwave payment code retained for compatibility
 
-## Local Docker
+## Major Current Rules
 
-Local container support is now available through:
+- only phone-verified clients can post jobs
+- only ID-verified workers can apply
+- workers must complete payout details before applying
+- workers can have at most 3 total skills
+- clients and workers can both rate each other after successful closeout
+- chat opens only after a worker has been assigned
 
-- `docker-compose.yml`
-- `docker/php/Dockerfile`
-- `.env.docker`
-- `.env.docker.prodlike.example`
-- `.dockerignore`
+## Current Job Flow
 
-Available services:
+1. Verified client creates a job
+2. Verified worker applies with `amount` and `message`
+3. A negotiation is created
+4. Either side can counter on the same negotiation row
+5. Client can reject, accept, or counter
+6. Worker can accept or counter the client's counter-offer
+7. Accepted negotiation assigns the worker and stores `agreed_amount`
+8. Worker accepts or rejects the assignment
+9. Worker starts the job
+10. Worker marks it completed
+11. Client marks payment sent
+12. Worker confirms payment
+13. Both parties can rate each other
 
-- `mysql` on port `3306` as the default database
-- `redis` on port `6379`
-- `mailhog` SMTP on `1025` and MailHog UI on `8025`
-- `app` on port `8000`
-- `queue` for background jobs
-- `vite` on port `5173`
-- optional `reverb` profile on port `8080`
-- `composer_deps` and `npm_deps` as one-time dependency/bootstrap helpers
-
-Typical local startup:
-
-1. Run `docker compose --env-file .env.docker --profile local up --build`
-2. Use `docker compose --env-file .env.docker --profile local --profile realtime up --build` when you want Reverb enabled
-
-For production-like container runs against external services:
-
-1. Copy `.env.docker.prodlike.example` to a real env file
-2. Replace the placeholder MySQL, Redis, SMTP, and Reverb values
-3. Run `docker compose --env-file your-prodlike-env-file up --build`
-
-The local profile uses MySQL and auto-handles bootstrap tasks such as hydrating `vendor` and `node_modules`, clearing cached Laravel config, waiting for MySQL, running first-run-only `php artisan migrate:fresh --seed --force`, and creating the storage symlink.
-
-SQLite remains optional for container use by overriding `DB_CONNECTION=sqlite` and `DB_DATABASE=/var/www/html/database/database.sqlite`. In that mode the app container creates the SQLite database file automatically before migrations.
-
-Realtime Docker wiring now distinguishes container and browser hosts:
-
-- Laravel containers publish to Reverb using `REVERB_HOST=reverb`
-- the browser connects using `VITE_REVERB_HOST=127.0.0.1`
-
-The old `AppController` has already been split into dedicated web controllers such as:
-
-- `DashboardController`
-- `ProfileController`
-- `JobController`
-- `NegotiationController`
-- `MessageController`
-- `NotificationController`
-- `WebPaymentController`
-
-## Implemented Product Flow
-
-### Authentication and Verification
-
-- phone and email registration
-- phone verification
-- email verification
-- forgot/reset password
-- Sanctum API auth
-- role support for `client`, `worker`, and `admin`
-- admin-controlled `is_verified`
-
-### Jobs and Negotiation
-
-The hiring flow is now negotiation-first.
-
-Implemented:
-
-- clients create jobs
-- workers apply with `amount` and `message`
-- application creates the initial offer
-- direct negotiation endpoint supports additional offers/counters
-- client rejection requires:
-  - a reason/message
-  - a counter amount
-- worker counters reuse the same negotiation row
-- prior states are appended to `job_negotiations.history`
-- client acceptance assigns the worker and stores `service_jobs.agreed_amount`
-- assigned workers can reject before accepting the job, which reopens the job
-
-Current statuses:
+Current job statuses:
 
 - `open`
 - `assigned`
@@ -106,43 +50,37 @@ Current statuses:
 - `payment_pending`
 - `completed`
 - `rated`
+- `cancelled`
 
-### Payments
+## Current Messaging And Notifications
 
-Current service-job payment methods:
+Messaging now supports:
 
-- `cash`
-- `transfer`
-
-Current closeout flow:
-
-- assigned worker can accept or reject while status is `assigned`
-- worker completes the job
-- client marks payment sent
-- worker confirms payment receipt
-- client rates the worker
-
-Important note:
-
-- Paystack and Flutterwave code still exist in the backend
-- webhook and verification code remains available
-- but current service-job creation validates only `cash` and `transfer`
-
-### Messaging and Notifications
-
-Implemented:
-
-- conversation listing
-- conversation messages
+- conversation list
+- conversation thread loading
 - AJAX send
-- read state handling
-- realtime message updates
-- realtime notification updates
-- job status broadcasts on job detail
+- unread state updates
+- realtime message broadcasts
+- client-initiated chat after assignment
+- worker-initiated chat after assignment
 
-### Admin
+Notifications now cover:
 
-Admin panel currently includes:
+- job matches worker skills
+- new job applications
+- worker hired
+- worker accepted assignment
+- worker started job
+- worker completed job
+- client marked paid
+- worker confirmed payment
+- new chat message
+- rating submitted
+- admin rollback and cancellation actions
+
+## Current Admin Coverage
+
+Admin areas currently include:
 
 - dashboard
 - users
@@ -151,156 +89,99 @@ Admin panel currently includes:
 - ratings
 - activity logs
 
-Recent admin updates:
+Admin job tooling now includes:
 
-- payment pages now emphasize manual methods
-- legacy gateway methods remain visible as legacy filters
-- dashboard payment card reflects settled volume
-- admin cancellation is now restricted to `open`, `assigned`, `worker_accepted`, and `in_progress`
+- cancellation on allowed active statuses
+- rollback to earlier valid job stages
+- richer job review with client and worker context
 
-### Activity Logging
+## Current Local Docker Setup
 
-Audit coverage was extended beyond auth/chat.
+Local Docker files:
 
-Now logged in the service layer:
+- `docker-compose.yml`
+- `docker/php/Dockerfile`
+- `.env.docker`
+- `.env.docker.prodlike.example`
+- `.dockerignore`
 
-- job creation
-- job application submission
-- worker hire
-- worker assignment acceptance
-- job start
-- job completion
-- payment marked sent
-- payment confirmed
-- worker rating
-- negotiation created
-- negotiation countered
-- negotiation accepted
-- negotiation rejected
-- gateway payment initialization
-- gateway payment verification success/failure
+Local services:
 
-## Seeded Demo Data
+- `mysql`
+- `redis`
+- `mailhog`
+- `app`
+- `queue`
+- `vite`
+- optional `reverb`
 
-The demo seeder now uses realistic full names and coherent relationships.
+Typical local commands:
 
-Seed data includes:
+- `docker compose --env-file .env.docker --profile local up --build`
+- `docker compose --env-file .env.docker --profile local --profile realtime up --build`
 
-- named client and workers
-- jobs that belong to the seeded client
-- assigned/in-progress/rated jobs that point to the correct worker
-- negotiation data aligned to seeded jobs
-- related conversations, messages, ratings, notifications, payments, and activity logs
+## Current Production Deployment Shape
 
-## Current API Workflow
+Production uses Docker plus Apache on the VPS.
 
-Recommended API happy path:
+Important files:
 
-1. Login as client and worker.
-2. Client creates a job.
-3. Worker applies with `amount` and `message`.
-4. Client reviews the negotiation.
-5. Client rejects with counter amount and reason, or accepts directly.
-6. Worker counters again if needed.
-7. Client accepts the negotiation.
-8. Worker accepts the job.
-9. Worker starts the job.
-10. Worker completes the job.
-11. Client marks paid.
-12. Worker confirms payment.
-13. Client rates worker.
+- `docker-compose.prod.yml`
+- `docker/php/Dockerfile.prod`
+- `docker/php/entrypoint.prod.sh`
+- `.env.production.example`
+- `VPS_DEPLOYMENT_RUNBOOK.md`
 
-Negotiation endpoints:
+Current production domains:
 
-- `POST /api/jobs/{job}/negotiate`
-- `POST /api/jobs/{job}/negotiate/{negotiation}/accept`
-- `POST /api/jobs/{job}/negotiate/{negotiation}/reject`
+- `hustle.currencyopts.com`
+- `ws.hustle.currencyopts.com`
 
-Job lifecycle endpoints:
+Runtime pattern:
 
-- `POST /api/jobs/{job}/apply`
-- `POST /api/jobs/{job}/accept`
-- `POST /api/jobs/{job}/reject`
-- `POST /api/jobs/{job}/start`
-- `POST /api/jobs/{job}/complete`
-- `POST /api/jobs/{job}/mark-paid`
-- `POST /api/jobs/{job}/confirm-payment`
-- `POST /api/jobs/{job}/rate`
-- `PATCH /api/jobs/{job}/cancel` for admin users only
+- Apache terminates public traffic
+- app container listens on `127.0.0.1:8000`
+- Reverb listens on `127.0.0.1:8080`
+- MySQL listens on `127.0.0.1:3306`
+- Apache reverse-proxies the app and websocket domains
 
-## Key Files
+Use the full deployment instructions in:
+
+- `VPS_DEPLOYMENT_RUNBOOK.md`
+
+## Important Current Files
 
 Backend:
 
 - `app/Services/JobService.php`
 - `app/Services/NegotiationService.php`
-- `app/Services/PaymentService.php`
-- `app/Services/ActivityLogService.php`
+- `app/Services/ChatService.php`
+- `app/Services/NigeriaBulkSmsService.php`
+- `app/Policies/ServiceJobPolicy.php`
+- `app/Http/Controllers/Web/JobController.php`
 - `app/Http/Controllers/Api/ServiceJobController.php`
 - `app/Http/Controllers/Api/JobNegotiationController.php`
-- `routes/api.php`
-- `routes/web.php`
 
 Frontend:
 
 - `resources/views/web/job-detail.blade.php`
-- `resources/views/admin/payments/index.blade.php`
-- `resources/views/admin/dashboard.blade.php`
+- `resources/views/web/messages.blade.php`
+- `resources/views/admin/jobs/show.blade.php`
+- `resources/views/admin/users/index.blade.php`
 - `resources/js/main.js`
+- `resources/js/app.js`
 
 Database:
 
 - `database/seeders/DemoDataSeeder.php`
-- `database/factories/UserFactory.php`
-- `database/factories/ServiceJobFactory.php`
-- `database/factories/JobNegotiationFactory.php`
-
-## VPS Production Deployment
-
-Production deployment files now included:
-
-- `docker/php/Dockerfile.prod`
-- `docker/php/entrypoint.prod.sh`
-- `docker/caddy/Caddyfile`
-- `docker-compose.prod.yml`
-- `.env.production.example`
-
-Recommended production hostnames:
-
-- `hustle.currencyopts.com`
-- `ws.hustle.currencyopts.com`
-
-Recommended rollout:
-
-1. Copy `.env.production.example` to `.env.production`
-2. Set `APP_KEY`, database credentials, SMTP credentials, image name/tag, and Reverb secrets
-3. Point both DNS records to the VPS
-4. Install Docker Engine and Docker Compose plugin on the VPS
-5. Build with:
-   - `docker compose -f docker-compose.prod.yml --env-file .env.production build`
-6. Or push/pull a tagged image:
-   - `docker push yourdockerhubname/asaba-hustle:latest`
-   - `docker compose -f docker-compose.prod.yml --env-file .env.production pull`
-7. Start with:
-   - `docker compose -f docker-compose.prod.yml --env-file .env.production up -d`
-
-Production runtime layout:
-
-- `app` serves the web app
-- `queue` handles queued jobs
-- `reverb` handles websockets
-- `caddy` terminates HTTPS and proxies the two domains
-- `mysql` and `redis` are included by default
-
-Operational notes:
-
-- keep `RUN_MIGRATIONS=true` for the first production boot, then switch to `false` if you want manual schema rollout control
-- frontend assets are built into the production image
-- use real SMTP in production
-- keep MySQL, Redis, and Reverb private to the Docker network
+- `database/seeders/ProductionSeeder.php`
+- `database/migrations/2026_03_28_190000_expand_ratings_for_two_sided_feedback.php`
 
 ## Remaining Gaps
 
-- more automated tests around negotiation transitions
-- more cleanup of stale legacy references
-- stronger production hardening and observability
+- broader automated coverage
+- more loading-state consistency across click-triggered UI actions
+- more production observability
+- further cleanup of legacy gateway code if no longer needed
+
+

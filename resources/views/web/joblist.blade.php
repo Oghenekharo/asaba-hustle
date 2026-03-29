@@ -19,7 +19,7 @@
             <div class="absolute left-0 top-0 h-full w-1.5 rounded-r-full bg-[var(--brand)]"></div>
 
             <div class="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-                <div class="max-w-2xl">
+                <div class="max-w-5xl">
                     <div class="inline-flex items-center gap-2 mb-3">
                         <span class="relative flex h-2 w-2">
                             <span
@@ -34,28 +34,6 @@
                     <p class="mt-3 text-xs md:text-sm font-medium leading-relaxed text-slate-500 max-w-md">
                         Search local opportunities, narrow by skill, and jump into the details when a hustle fits.
                     </p>
-                </div>
-
-                <!-- Stats Grid: 3-column layout on all screens to stay slim -->
-                <div class="grid grid-cols-3 gap-2 sm:gap-4 lg:min-w-[21rem]">
-                    <div
-                        class="rounded-2xl md:rounded-[1.75rem] border border-slate-50 bg-slate-50/50 px-3 py-4 md:px-5 text-center sm:text-left">
-                        <p class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Live</p>
-                        <p class="mt-1 md:mt-2 text-xl md:text-2xl font-black text-slate-900 leading-none">
-                            {{ $jobs->total() }}</p>
-                    </div>
-                    <div
-                        class="rounded-2xl md:rounded-[1.75rem] border border-slate-50 bg-slate-50/50 px-3 py-4 md:px-5 text-center sm:text-left">
-                        <p class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Skills</p>
-                        <p class="mt-1 md:mt-2 text-xl md:text-2xl font-black text-slate-900 leading-none">
-                            {{ $skills->count() }}</p>
-                    </div>
-                    <div
-                        class="rounded-2xl md:rounded-[1.75rem] border border-slate-50 bg-slate-50/50 px-3 py-4 md:px-5 text-center sm:text-left">
-                        <p class="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Page</p>
-                        <p class="mt-1 md:mt-2 text-xl md:text-2xl font-black text-slate-900 leading-none">
-                            {{ $jobs->currentPage() }}</p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -123,7 +101,7 @@
             </aside>
 
             <main class="min-w-0">
-                <div class="mb-6 rounded-[2.25rem] border border-slate-100 bg-white px-5 py-5 shadow-sm">
+                <div class="mb-6 rounded-2xl border border-slate-100 bg-white px-5 py-5 shadow-sm">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div>
                             <p class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
@@ -161,7 +139,8 @@
 
                 <div class="space-y-5">
                     @forelse ($jobs as $job)
-                        <x-job-card :job="$job" variant="feed" />
+                        <x-job-card :job="$job"
+                            variant="{{ auth()->user()?->hasRole('client') ? 'activity' : 'feed' }}" />
                     @empty
                         <div
                             class="rounded-[2.5rem] border border-dashed border-slate-200 bg-white px-3 md:px-8 py-14 shadow-sm">

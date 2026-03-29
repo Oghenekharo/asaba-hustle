@@ -52,14 +52,14 @@ class DashboardController extends Controller
             }])
             ->withMax('messages', 'created_at')
             ->orderByDesc('messages_max_created_at')
-            ->take(4)
+            ->take(2)
             ->get();
 
         if ($user->hasRole('client')) {
             $myJobs = ServiceJob::query()
                 ->where('user_id', $user->id)
                 ->latest()
-                ->take(5)
+                ->take(1)
                 ->with(['worker:id,name,phone', 'skill:id,name,icon'])
                 ->get();
         } elseif ($user->hasRole('worker')) {

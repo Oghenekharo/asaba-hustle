@@ -21,7 +21,7 @@
 
             <!-- Left Sidebar: Conversations List -->
             <aside id="mobile-conversations-panel"
-                class="fixed inset-y-0 left-0 z-40 flex w-[88vw] max-w-sm -translate-x-[105%] flex-col bg-white/95 backdrop-blur-xl border-r border-white shadow-2xl transition-transform duration-300 lg:static lg:z-auto lg:w-80 lg:max-w-none lg:translate-x-0 lg:rounded-[2.5rem] lg:border lg:border-white lg:shadow-sm overflow-hidden">
+                class="fixed md:h-117.5 inset-y-0 left-0 z-40 flex w-[88vw] max-w-sm -translate-x-[105%] flex-col bg-white/95 backdrop-blur-xl border-r border-white shadow-2xl transition-transform duration-300 lg:static lg:z-auto lg:w-80 lg:max-w-none lg:translate-x-0 lg:rounded-[2.5rem] lg:border lg:border-white lg:shadow-sm overflow-auto">
                 <div class="flex items-center justify-between pt-24 md:py-6 px-6 border-b border-slate-50">
                     <div>
                         <h1 class="text-xl font-black tracking-tighter text-[var(--ink)]">Inbox</h1>

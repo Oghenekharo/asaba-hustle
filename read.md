@@ -1,18 +1,18 @@
 # Asaba Hustle Agent Handoff
 
-This file summarizes the repository state as of March 19, 2026.
+This file summarizes the repository state as of March 29, 2026.
 
 ## High-Level Summary
 
 Asaba Hustle is a Laravel 12 local-services marketplace with:
 
-- an API-first backend
-- a Blade web client enhanced with Tailwind CSS and jQuery AJAX
-- an admin panel for moderation and review
-- Laravel Reverb and Echo for realtime chat, notifications, and job-status updates
-- legacy Paystack and Flutterwave gateway integrations at the payment-service layer
-
-The project is no longer backend-only. The browser app is now a role-aware product surface for clients and workers, and the API has largely been kept in sync with the same job lifecycle.
+- a JSON API for mobile and external clients
+- a role-aware Blade web app
+- an admin panel
+- realtime chat, notifications, and job-status updates through Reverb
+- negotiation-first hiring
+- manual payment completion with `cash` and `transfer`
+- legacy Paystack and Flutterwave support still present for compatibility
 
 ## Current Stack
 
@@ -22,194 +22,64 @@ The project is no longer backend-only. The browser app is now a role-aware produ
 - Spatie Laravel Permission
 - Laravel Reverb
 - Blade
-- Tailwind CSS v4
-- jQuery
+- Tailwind CSS
+- jQuery AJAX
 - Vite
-- SQLite for tests/local fallback
-- MySQL or MariaDB for normal deployment
+- MySQL for normal deployment
+- SQLite for tests and fallback/local scenarios
 
 ## Current Product State
 
-### API Layer
+### Authentication and Verification
 
-Implemented and routed:
+- phone and email registration still exist in the backend
+- the web frontend is now SMS-first for user-facing verification and recovery
+- phone verification is enforced for clients before posting jobs
+- worker ID verification is enforced before applying to jobs
+- `is_verified` remains admin-controlled platform verification
+- OTPs are no longer returned in responses or logged for real environments
+- Nigeria Bulk SMS is used directly through the app service layer instead of the old incompatible package
 
-- auth
-- skills
-- jobs
-- messages
-- notifications
-- payments
-- payment webhooks
+### Worker Profile Rules
 
-The API response shape is standardized:
-
-```json
-{
-    "success": true,
-    "message": "...",
-    "data": {},
-    "meta": {}
-}
-```
-
-Validation, auth, authorization, and not-found errors are normalized for API consumers in `bootstrap/app.php`.
-
-The API now includes the current job lifecycle endpoints:
-
-```text
-POST /api/jobs/{job}/apply
-POST /api/jobs/{job}/hire
-POST /api/jobs/{job}/accept
-POST /api/jobs/{job}/start
-POST /api/jobs/{job}/complete
-POST /api/jobs/{job}/mark-paid
-POST /api/jobs/{job}/confirm-payment
-POST /api/jobs/{job}/rate
-```
-
-`ServiceJobResource` now exposes `paid_at` and can include the related rating when loaded.
-
-### Web Layer
-
-Current browser routes/pages include:
-
-```text
-GET  /
-GET  /login
-POST /login
-GET  /register
-POST /register
-GET  /verify-phone
-POST /verify-phone
-GET  /forgot-password
-POST /forgot-password
-GET  /reset-password
-POST /reset-password
-POST /logout
-
-GET  /app
-GET  /app/me
-PUT  /app/profile
-POST /app/change-password
-POST /app/upload-id
-POST /app/availability
-POST /app/send-verification-token
-POST /app/verify-contact
-
-GET  /app/jobs
-POST /app/jobs
-GET  /app/jobs/{job}
-POST /app/jobs/{job}/apply
-POST /app/jobs/{job}/hire
-POST /app/jobs/{job}/accept
-POST /app/jobs/{job}/start
-POST /app/jobs/{job}/complete
-POST /app/jobs/{job}/mark-paid
-POST /app/jobs/{job}/confirm-payment
-POST /app/jobs/{job}/rate
-GET  /app/jobs/{job}/suggested-workers
-GET  /app/my-jobs
-
-GET  /app/conversations
-GET  /app/conversations/{conversation}/messages
-POST /app/conversations/{conversation}/read
-POST /app/messages
-
-GET  /app/notifications
-POST /app/notifications/read
-POST /app/notifications/read-all
-```
-
-Admin routes:
-
-```text
-/admin/dashboard
-/admin/users
-/admin/jobs
-/admin/payments
-/admin/ratings
-/admin/activity-logs
-```
-
-## What Exists Now
-
-### Dashboard and Role-Aware Home
-
-`/app` behaves differently by role:
-
-- clients search and browse skills
-- clicking a skill opens a modal to post a new job
-- clients get a floating create-job button
-- workers search open jobs related to their own skills
-- dashboard shows recent chats instead of a static placeholder
-
-The dashboard search is server-driven through `AppController@index()`.
-
-### Profile and Identity
-
-The profile page supports updating:
+Workers can manage:
 
 - name
 - bio
-- `primary_skill_id`
-- additional worker skills
-- `availability_status`
-- `id_document`
-- `latitude`
-- `longitude`
-- worker bank details:
+- primary skill
+- extra skills
+- availability
+- ID upload
+- payout details:
   - `bank_name`
   - `account_name`
   - `account_number`
 
-Location behavior:
+Rules now enforced:
 
-- saved coordinates are prefilled automatically
-- if missing, browser geolocation is used
-- the user can manually refresh coordinates
+- workers can have at most 3 total skills
+- workers must complete payout details before applying
+- workers must be ID-verified before applying
 
-Verification rules are now split:
+### Job and Negotiation Flow
 
-- phone/email verification only confirms contact ownership
-- `is_verified` is platform verification only
-- new users stay `is_verified = 0`
-- only admin can change `is_verified` to `1`
-- admin approval requires an uploaded `id_document`
+Current verified flow:
 
-### Multi-Skill Workers
+1. Verified client creates a job
+2. Verified worker applies with `amount` and `message`
+3. A negotiation row is created
+4. Either side can counter on the same negotiation row
+5. Client can reject, accept, or counter
+6. Worker can accept or counter a client counter-offer
+7. Once accepted, the job is assigned and `agreed_amount` is stored
+8. Assigned worker accepts or rejects the assignment
+9. Worker starts work
+10. Worker marks work completed
+11. Client marks payment sent
+12. Worker confirms payment
+13. Client and worker can both rate the other participant
 
-Workers no longer have only one skill.
-
-Current model:
-
-- `primary_skill_id` still exists for compatibility
-- extra worker skills are stored through `skill_user`
-- worker discovery and dashboard matching use both primary and attached skills
-
-Migration added:
-
-- `database/migrations/2026_03_18_210000_create_skill_user_table.php`
-
-### Jobs, Hiring, Payment, and Rating Flow
-
-Job detail is now much more complete:
-
-- workers can apply through AJAX
-- workers cannot chat until they apply
-- after applying, workers can start or continue chat with the client
-- clients see applications instead of a direct chat CTA
-- clients can inspect an applicant before hiring
-- clients can view assigned worker details after assignment
-- clients can see worker account details when payment becomes relevant
-
-Assigned job protections now exist:
-
-- assigned jobs do not show apply UI again
-- non-assigned workers cannot apply to already assigned jobs
-- non-assigned workers cannot see the assigned worker identity
-
-Current job lifecycle:
+Current job statuses:
 
 - `open`
 - `assigned`
@@ -218,205 +88,207 @@ Current job lifecycle:
 - `payment_pending`
 - `completed`
 - `rated`
+- `cancelled`
 
-Current job payment options:
+Important behavior:
 
-- `cash`
-- `transfer`
+- once a negotiation has been accepted, stale negotiations are hidden from the web job detail flow
+- workers can rate clients
+- clients can rate workers
 
-Current closeout flow:
+### Chat and Notifications
 
-- worker marks work completed
-- job moves to `payment_pending`
-- client marks payment as sent
-- worker confirms payment receipt
-- job moves to `completed`
-- client rates the worker
-- job moves to `rated`
+Chat is now available only when a job has an assigned worker and the job is in one of:
 
-The worker's stored `rating` value is now synchronized from the average of all received job ratings whenever a new rating is created.
+- `assigned`
+- `worker_accepted`
+- `in_progress`
+- `payment_pending`
+- `completed`
+- `rated`
 
-### Messaging
+Chat behavior:
 
-Messaging is now a real inbox flow instead of a placeholder.
+- assigned worker can initiate chat
+- client can initiate chat after assignment
+- conversations use UUID route keys
+- conversation previews and unread states update in realtime
 
-Implemented:
+Notifications currently cover:
 
-- conversation list page
-- conversation thread loading
-- AJAX send
-- optimistic message append
-- duplicate optimistic/realtime reconciliation
-- unread badges in the conversation sidebar
-- latest message preview updating in the sidebar
-- active conversation click does not reopen/reload
-- mobile off-canvas conversation list
-- realtime chat via Echo/Reverb
-- conversation ordering by latest message activity so newly active chats rise to the top
+- new job application
+- job matched to worker skills
+- worker hired
+- worker accepted assignment
+- worker started job
+- worker completed job
+- client marked paid
+- worker confirmed payment
+- new chat message
+- ratings submitted
+- admin cancellation and rollback actions
 
-Conversation identifiers now use UUIDs instead of exposing only numeric IDs.
+### Admin
 
-Relevant work includes:
+Admin currently manages:
 
-- UUID route model binding for conversations
-- private channel naming by conversation UUID
-- message links that deep-link into a selected conversation
+- users
+- jobs
+- payments
+- ratings
+- activity logs
+- dashboard summaries
 
-### Notifications
+Admin job controls now include:
 
-Navbar notifications are now functional:
+- cancel for allowed active statuses
+- rollback to earlier valid statuses
+- job review with client and worker context
 
-- dropdown list in the navbar
-- unread badge count
-- fetch notifications from the web endpoint
-- mark one as read
-- mark all as read
-- realtime updates via Echo on `private-user.{id}`
-- job/chat notifications can now carry action links to the relevant job or conversation
+### Realtime Channels
 
-Message and job flows now create notifications:
-
-- new chat message -> receiver gets notification
-- worker applies for a job -> client gets notification
-- client hires a worker -> worker gets notification
-- later payment/job status actions continue through the shared notification service where implemented
-
-### Realtime / Broadcast State
-
-Broadcasting is active in the codebase for:
-
-- chat messages
-- user notifications
-- job status updates
-
-Important channels:
+Current broadcast channels:
 
 - `private-conversation.{uuid}`
 - `private-user.{id}`
 - `private-job.{id}`
 
-### Conversations
+## Current API Surface
 
-Conversation list and message loading now use:
+Main public/auth endpoints:
 
-- direct `conversation->client` and `conversation->worker`
-- not `job->worker` as a fallback for pre-hire threads
+```text
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/forgot-password
+POST /api/auth/reset-password
+POST /api/auth/verify-phone
+GET  /api/auth/verify-email/{user}/{hash}
+```
 
-This fixed the earlier "Deleted user" problem in the conversation list.
+Authenticated auth/profile endpoints:
 
-## Key Files Touched In Recent Progress
+```text
+GET  /api/auth/me
+POST /api/auth/logout
+POST /api/auth/change-password
+PUT  /api/auth/profile
+POST /api/auth/upload-id
+POST /api/auth/availability
+POST /api/auth/send-verification-token
+POST /api/auth/verify-contact
+```
 
-### Backend
+Job and negotiation endpoints:
 
-- `app/Http/Controllers/Web/AppController.php`
-- `app/Http/Controllers/Api/ServiceJobController.php`
-- `app/Http/Controllers/Admin/AdminUserController.php`
-- `app/Policies/ServiceJobPolicy.php`
-- `app/Services/AuthSecurityService.php`
+```text
+GET   /api/jobs
+POST  /api/jobs
+GET   /api/jobs/{job}
+POST  /api/jobs/{job}/apply
+POST  /api/jobs/{job}/negotiate
+POST  /api/jobs/{job}/negotiate/{negotiation}/accept
+POST  /api/jobs/{job}/negotiate/{negotiation}/counter
+POST  /api/jobs/{job}/negotiate/{negotiation}/reject
+POST  /api/jobs/{job}/hire
+POST  /api/jobs/{job}/accept
+POST  /api/jobs/{job}/reject
+POST  /api/jobs/{job}/start
+POST  /api/jobs/{job}/complete
+POST  /api/jobs/{job}/mark-paid
+POST  /api/jobs/{job}/confirm-payment
+POST  /api/jobs/{job}/rate
+PATCH /api/jobs/{job}/cancel
+PATCH /api/jobs/{job}/rollback
+GET   /api/jobs/{job}/suggested-workers
+GET   /api/jobs/my/jobs
+GET   /api/jobs/search
+```
+
+Messaging and notifications:
+
+```text
+GET  /api/messages/conversations
+GET  /api/messages/conversation/{conversation}
+POST /api/messages/send
+POST /api/messages/conversation/{conversation}/read
+
+GET  /api/notifications
+POST /api/notifications/read
+POST /api/notifications/read-all
+```
+
+## Deployment State
+
+Current production setup is Docker + Apache, not Apache-served Laravel files and not Caddy as the live front door.
+
+Production pieces:
+
+- `docker-compose.prod.yml`
+- `docker/php/Dockerfile.prod`
+- `docker/php/entrypoint.prod.sh`
+- `.env.production.example`
+- `VPS_DEPLOYMENT_RUNBOOK.md`
+
+Current VPS pattern:
+
+- Apache terminates public traffic on `80/443`
+- app container binds `127.0.0.1:8000`
+- Reverb binds `127.0.0.1:8080`
+- MySQL binds `127.0.0.1:3306`
+- Apache proxies:
+  - `hustle.currencyopts.com` -> `127.0.0.1:8000`
+  - `ws.hustle.currencyopts.com` -> `127.0.0.1:8080`
+
+## Important Files
+
+Backend:
+
 - `app/Services/JobService.php`
+- `app/Services/NegotiationService.php`
 - `app/Services/ChatService.php`
-- `app/Services/WorkerDiscoveryService.php`
-- `app/Services/UserNotificationService.php`
-- `app/Models/User.php`
-- `app/Models/Skill.php`
-- `app/Models/Conversation.php`
-- `app/Events/JobStatusUpdated.php`
-- `app/Events/ChatMessageBroadcasted.php`
-- `app/Events/NotificationBroadcasted.php`
-- `routes/channels.php`
-- `routes/api.php`
+- `app/Services/AuthSecurityService.php`
+- `app/Services/NigeriaBulkSmsService.php`
+- `app/Policies/ServiceJobPolicy.php`
+- `app/Http/Controllers/Web/JobController.php`
+- `app/Http/Controllers/Web/NegotiationController.php`
+- `app/Http/Controllers/Web/MessageController.php`
+- `app/Http/Controllers/Api/ServiceJobController.php`
+- `app/Http/Controllers/Api/JobNegotiationController.php`
 
-### Requests / Resources
+Frontend:
 
-- `app/Http/Requests/UpdateProfileRequest.php`
-- `app/Http/Requests/Admin/UpdateUserStatusRequest.php`
-- `app/Http/Resources/UserResource.php`
-- `app/Http/Resources/ServiceJobResource.php`
-
-### Frontend / Views
-
-- `resources/views/web/app.blade.php`
-- `resources/views/web/profile.blade.php`
 - `resources/views/web/job-detail.blade.php`
 - `resources/views/web/messages.blade.php`
-- `resources/views/partials/nav.blade.php`
-- `resources/views/admin/users/show.blade.php`
-- `resources/views/components/select.blade.php`
-- `resources/js/app.js`
+- `resources/views/web/auth/verify-phone.blade.php`
+- `resources/views/admin/jobs/show.blade.php`
+- `resources/views/admin/users/index.blade.php`
 - `resources/js/main.js`
+- `resources/js/app.js`
 
-### Database
+Database and seeders:
 
-- `database/migrations/2026_03_18_190000_add_uuid_to_conversations_table.php`
-- `database/migrations/2026_03_18_210000_create_skill_user_table.php`
-- `database/migrations/2026_03_19_120000_update_service_job_payment_flow.php`
-- `database/migrations/2026_03_19_130000_add_account_details_to_users_table.php`
+- `database/seeders/DemoDataSeeder.php`
+- `database/seeders/ProductionSeeder.php`
+- `database/migrations/2026_03_28_190000_expand_ratings_for_two_sided_feedback.php`
 
-## Frontend Architecture Direction
+## Verification Pattern
 
-Current frontend pattern:
+Recent verification has mainly used:
 
-- Blade renders pages and modal shells
-- `resources/js/main.js` contains reusable page logic
-- `resources/js/app.js` boots shared functionality
-- forms mutate state over AJAX
-- realtime UI updates are handled through Echo listeners where relevant
+- `php -l` on changed PHP and Blade-backed files
+- `php artisan route:list` after route changes
+- `npm run build` after JS or Blade interaction changes
 
-This pattern is intentional and should be preserved unless there is a strong reason to change it.
+Do not assume a full PHPUnit pass has been run after every change.
 
-## Operational Notes
+## Remaining Gaps
 
-Do not assume assets were production-built.
-
-The user previously said they prefer to run `npm run dev` themselves.
-
-That means:
-
-- `npm install` has already been run
-- `jquery` is installed
-- do not claim `vite build` is verified unless you actually run it
-
-Realtime features depend on the runtime environment being up:
-
-- Vite/dev assets
-- Reverb server
-- queue worker where queued listeners are used
-
-## Tests / Verification Notes
-
-Recent verification done during implementation was mostly targeted:
-
-- `php -l` on changed PHP files
-- `node --check` on changed JS files
-- `php artisan view:cache` after larger Blade changes
-- targeted `php artisan test` runs for auth/admin changes
-
-Not all work was followed by a full `php artisan test` pass after every change.
-
-Earlier there were mismatches between older tests and the newer Blade/AJAX browser behavior, so do not assume the full test suite completely reflects the current UI contracts.
-
-## Known Gaps / Remaining Work
-
-Still incomplete or worth refining:
-
-- polished public marketing/landing experience
-- richer map/location display on job detail instead of placeholder map block
-- end-to-end test coverage for realtime and notification flows
-- better browser-side pagination/filter UX for larger job/message datasets
-- deeper queue/listener audit
-- real SMS integration
-- production hardening around observability and retries
-
-## Suggested Next Tasks
-
-Pick one direction at a time:
-
-1. Harden tests around current browser behavior and API parity
-2. Improve payment/browser callback UX
-3. Add richer worker public profile pages beyond the modal preview
-4. Improve chat persistence/search and conversation ordering
-5. Add stronger admin tools for verification review, disputes, and moderation
+- broader automated coverage for negotiation, payment, and realtime flows
+- more UI consistency for loading states across all admin and web action buttons
+- more production observability and retry hardening
+- deeper cleanup of legacy gateway paths if they are no longer needed
 
 ## One-Line Status
 
-The repository now has a solid API, a working admin panel, a role-aware AJAX-driven Blade app, realtime chat and notifications, realtime job-status updates, multi-skill workers, admin-controlled verification, and a functional application-to-payment-to-rating job flow, but it still needs product polishing and broader automated coverage.
+The project currently supports verified client job posting, verified worker application, negotiation-first hiring with counter-offers, assignment-based chat, manual closeout, two-sided ratings, realtime notifications, admin rollback/cancel tools, and Docker + Apache VPS deployment.
