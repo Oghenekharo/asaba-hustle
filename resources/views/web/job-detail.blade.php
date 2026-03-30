@@ -448,11 +448,11 @@
                             class="space-y-4">
                             @csrf
                             <x-select :options="[
-                                '{{ (int) 1 }}' => '1 Star',
-                                '{{ (int) 2 }}' => '2 Stars',
-                                '{{ (int) 3 }}' => '3 Stars',
-                                '{{ (int) 4 }}' => '4 Stars',
-                                '{{ (int) 5 }}' => '5 Stars',
+                                1 => '1 Star',
+                                2 => '2 Stars',
+                                3 => '3 Stars',
+                                4 => '4 Stars',
+                                5 => '5 Stars',
                             ]" name="rating" icon="star" id="job_worker_rating"
                                 label="Star Rating" placeholder="Give a score from 1 to 5" required />
 
