@@ -1707,3 +1707,49 @@ export const initJobDetailPage = function () {
         );
     }
 };
+
+function getActionColor(action) {
+    const map = {
+        client_rated: "bg-yellow-100 text-yellow-700",
+        worker_rated: "bg-yellow-100 text-yellow-700",
+
+        job_payment_confirmed: "bg-green-100 text-green-700",
+        job_payment_marked_sent: "bg-green-100 text-green-700",
+
+        job_started: "bg-blue-100 text-blue-700",
+        job_marked_completed: "bg-blue-100 text-blue-700",
+
+        negotiation_created: "bg-purple-100 text-purple-700",
+        negotiation_accepted: "bg-purple-100 text-purple-700",
+
+        job_application_submitted: "bg-indigo-100 text-indigo-700",
+
+        user_login: "bg-slate-200 text-slate-700",
+        job_posted: "bg-slate-200 text-slate-700",
+    };
+
+    return map[action] || "bg-gray-100 text-gray-600";
+}
+
+export const openLogModal = function (log) {
+    const userName = log.user.name || "Undefined";
+    const action = log.action || "Undefined";
+    const dateLogged = log.created_at || "Undefined";
+    const ipAddress = log.ip_address || "Undefined";
+    const metadataContent =
+        JSON.stringify(log.metadata, null, 2) || "Undefined";
+    const color = getActionColor(action);
+
+    $("#user-name").text(userName);
+    $("#user-action")
+        .text(action)
+        .removeClass()
+        .addClass(
+            `rounded-full px-3 py-1 text-xs font-bold uppercase ${color}`,
+        );
+    $("#date-logged").text(dateLogged);
+    $("#ip-address").text(ipAddress);
+    $("#metadata-content").text(metadataContent);
+
+    openModal("activityModal");
+};

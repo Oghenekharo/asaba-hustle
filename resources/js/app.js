@@ -12,6 +12,7 @@ import {
     togglePasswordView,
     showAlert,
     handleModalsForms,
+    openLogModal,
     toggleChannel,
     toggleFilter,
     initUserDropdown,
@@ -35,6 +36,7 @@ window.showAlert = showAlert;
 window.handleModalsForms = handleModalsForms;
 window.toggleChannel = toggleChannel;
 window.toggleFilter = toggleFilter;
+window.openLogModal = openLogModal;
 
 $(document).on("click", ".alert-close", function () {
     $(this).closest("#js-error-container").addClass("hidden");

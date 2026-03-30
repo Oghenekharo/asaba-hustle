@@ -7,7 +7,8 @@
 
             <!-- Compact Header -->
             <div class="mb-8 text-center">
-                <div class="inline-flex h-10 w-10 items-center justify-center rounded-xl mb-4 shadow-md shadow-orange-500/10 text-white"
+                <div onclick="location.href='{{ route('web.home') }}'"
+                    class="inline-flex cursor-pointer h-10 w-10 items-center justify-center rounded-xl mb-4 shadow-md shadow-orange-500/10 text-white"
                     style="background: var(--brand)">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"

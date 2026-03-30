@@ -245,19 +245,19 @@ Production flow:
 
 1. Copy `.env.production.example` to `.env.production`
 2. Fill in:
-   - `APP_KEY`
-   - DB passwords
-   - SMTP credentials
-   - `APP_IMAGE` / `APP_IMAGE_TAG`
-   - `REVERB_APP_KEY` / `REVERB_APP_SECRET`
+    - `APP_KEY`
+    - DB passwords
+    - SMTP credentials
+    - `APP_IMAGE` / `APP_IMAGE_TAG`
+    - `REVERB_APP_KEY` / `REVERB_APP_SECRET`
 3. Point DNS `A` records for both domains to your VPS
 4. Build locally or on the VPS with:
-   - `docker compose -f docker-compose.prod.yml --env-file .env.production build`
+    - `docker compose -f docker-compose.prod.yml --env-file .env.production build`
 5. Or push and pull a tagged image:
-   - `docker push yourdockerhubname/asaba-hustle:latest`
-   - `docker compose -f docker-compose.prod.yml --env-file .env.production pull`
+    - `docker push yourdockerhubname/asaba-hustle:latest`
+    - `docker compose -f docker-compose.prod.yml --env-file .env.production pull`
 6. Start the stack:
-   - `docker compose -f docker-compose.prod.yml --env-file .env.production up -d`
+    - `docker compose -f docker-compose.prod.yml --env-file .env.production up -d`
 
 Production stack:
 

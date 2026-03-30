@@ -7,7 +7,7 @@
 
             <!-- Header: Tighter & Icon-focused -->
             <div class="mb-8 text-center">
-                <div
+                <div onclick="location.href='{{ route('web.home') }}'"
                     class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-600 mb-4 shadow-sm">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"

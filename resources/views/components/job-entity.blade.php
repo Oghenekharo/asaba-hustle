@@ -25,8 +25,10 @@
     <div class="flex items-center justify-center gap-4 py-4 border-t border-slate-50">
         <div>
             <p class="text-[10px] font-black opacity-30 uppercase">Rating</p>
-            <p class="font-black text-sm">
-                {{ $user->average_rating > 0 ? $user->average_rating : 'New' }}</p>
+            <p class="font-black flex items-center gap-1 text-sm">
+                <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                {{ $user->average_rating > 0 ? $user->average_rating : 'New' }}
+            </p>
         </div>
         <div class="w-px h-6 bg-slate-100"></div>
         <div>
@@ -44,13 +46,13 @@
         @if ($canChat)
             @if ($existingConversation)
                 <a href="{{ route('web.app.conversations', ['conversation' => $existingConversation->uuid]) }}"
-                    class="w-full mt-4 flex items-center justify-center gap-3 py-4 rounded-2xl bg-[var(--surface-soft)] text-[var(--brand)] font-black text-[10px] uppercase hover:bg-[var(--brand)] hover:text-white transition-all">
+                    class="w-full cursor-pointer mt-4 flex items-center justify-center gap-3 py-4 rounded-2xl bg-[var(--surface-soft)] text-[var(--brand)] font-black text-[10px] uppercase hover:bg-[var(--brand)] hover:text-white transition-all">
                     <i data-lucide="message-circle" class="w-4 h-4"></i>
                     Open Chat with {{ $partnerLabel }}
                 </a>
             @else
                 <button type="button" onclick="openModal('jobChatStarterModal')"
-                    class="w-full mt-4 flex items-center justify-center gap-3 py-4 rounded-2xl bg-[var(--surface-soft)] text-[var(--brand)] font-black text-[10px] uppercase hover:bg-[var(--brand)] hover:text-white transition-all">
+                    class="w-full cursor-pointer mt-4 flex items-center justify-center gap-3 py-4 rounded-2xl bg-[var(--surface-soft)] text-[var(--brand)] font-black text-[10px] uppercase hover:bg-[var(--brand)] hover:text-white transition-all">
                     <i data-lucide="message-circle" class="w-4 h-4"></i>
                     Start Chat with {{ $partnerLabel }}
                 </button>

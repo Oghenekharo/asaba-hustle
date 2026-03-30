@@ -19,6 +19,7 @@ class RatingResource extends JsonResource
             'rating' => $this->rating,
             'review' => $this->review,
             'client' => new UserResource($this->whenLoaded('client')),
+            'worker' => new UserResource($this->whenLoaded('worker')),
             'created_at' => $this->created_at
 
         ];

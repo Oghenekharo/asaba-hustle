@@ -26,7 +26,7 @@ return new class extends Migration
                 ->constrained('users')
                 ->cascadeOnDelete();
 
-            $table->integer('rating');
+            $table->decimal('rating', 3, 2)->default(0.0);
 
             $table->text('review')->nullable();
 

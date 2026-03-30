@@ -125,14 +125,14 @@
                         <a href="{{ route('web.app') }}"
                             class="flex flex-col items-center gap-2 rounded-2xl bg-white/5 py-3 text-[9px] font-black uppercase tracking-widest text-white/50 hover:bg-white/10 hover:text-white transition-all">
                             <i data-lucide="external-link" class="h-4 w-4 text-orange-400"></i>
-                            <span>Live Site</span>
+                            <span>User Site</span>
                         </a>
                         <form method="POST" action="{{ route('web.logout') }}">
                             @csrf
                             <button type="submit"
-                                class="w-full flex flex-col items-center gap-2 rounded-2xl bg-rose-500/10 py-3 text-[9px] font-black uppercase tracking-widest text-rose-400 hover:bg-rose-500 hover:text-white transition-all">
+                                class="w-full cursor-pointer flex flex-col items-center gap-2 rounded-2xl bg-rose-500/10 py-3 text-[9px] font-black uppercase tracking-widest text-rose-400 hover:bg-rose-500 hover:text-white transition-all">
                                 <i data-lucide="log-out" class="h-4 w-4"></i>
-                                <span>Exit</span>
+                                <span>Logout</span>
                             </button>
                         </form>
                     </div>

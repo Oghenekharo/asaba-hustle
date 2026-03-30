@@ -14,7 +14,8 @@
 
                 <!-- Header -->
                 <div class="mb-5 text-center">
-                    <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl mb-6 shadow-lg shadow-orange-500/20 text-white"
+                    <div onclick="location.href='{{ route('web.home') }}'"
+                        class="inline-flex cursor-pointer h-12 w-12 items-center justify-center rounded-2xl mb-6 shadow-lg shadow-orange-500/20 text-white"
                         style="background: var(--brand)">
                         <i data-lucide="smartphone" class="w-6 h-6"></i> <!-- Replaced with Lucide -->
                     </div>

@@ -8,6 +8,7 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Storage;
 
 class ChatMessageBroadcasted implements ShouldBroadcastNow
 {
@@ -53,7 +54,7 @@ class ChatMessageBroadcasted implements ShouldBroadcastNow
                 'id' => $this->message->sender?->id,
                 'name' => $this->message->sender?->name,
                 'profile_photo_url' => $this->message->sender?->profile_photo
-                    ? \Storage::url($this->message->sender->profile_photo)
+                    ? Storage::url($this->message->sender->profile_photo)
                     : null,
             ],
         ];
