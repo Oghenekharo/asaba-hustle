@@ -666,9 +666,15 @@ class JobService
                 $ratedUser->syncAverageRating();
             }
 
-            $job->update([
-                'status' => ServiceJob::STATUS_RATED
-            ]);
+            if ($job->status === 'rated') {
+                $job->update([
+                    'status' => ServiceJob::STATUS_COMPLETED
+                ]);
+            } else {
+                $job->update([
+                    'status' => ServiceJob::STATUS_RATED
+                ]);
+            }
 
             $this->activityLogService->log($actorId, $ratedByRole === 'client' ? 'worker_rated' : 'client_rated', [
                 'job_id' => $job->id,
