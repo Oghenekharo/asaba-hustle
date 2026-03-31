@@ -3,11 +3,29 @@
 
 <head>
     <meta charset="UTF-8">
+    <link rel="manifest" href="/manifest.json">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="icon" href="/images/icons/icon-192.png">
+    <meta name="theme-color" content="#ff7a00">
     <title>Asaba Hustle | Local Marketplace</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-
+<style id="pwa-splash">
+    #app-splash {
+        position: fixed;
+        inset: 0;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        color: #ff7a00;
+        font-size: 24px;
+        font-weight: bold;
+    }
+</style>
 @php
     $departments = [
         ['name' => 'Cleaning', 'icon' => '✨', 'image' => 'https://unsplash.com', 'size' => 'col-span-1'],
@@ -20,6 +38,10 @@
 @endphp
 
 <body class="antialiased bg-[#fafafa] text-[#1a1a1a]">
+    <div id="app-splash" class="flex flex-col gap-2">
+        <img src="/images/icons/asaba-hustle.svg" class="w-16 h-16" />
+        <p class="uppercase text-sm">Asaba Hustle...</p>
+    </div>
 
     @include('partials.nav')
 
@@ -140,9 +162,7 @@
     <footer class="pb-32 md:pb-12 pt-12 bg-slate-50 border-t border-slate-200">
         <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
             <div class="flex items-center gap-2">
-                <div
-                    class="h-6 w-6 rounded-lg bg-orange-600 text-[10px] font-black text-white flex items-center justify-center">
-                    A</div>
+                <img src="/images/icons/asaba-hustle.svg" class="w-7 h-7" />
                 <span class="text-sm font-black tracking-tighter text-slate-900">AsabaHustle</span>
             </div>
 
@@ -157,28 +177,21 @@
             </div>
         </div>
     </footer>
-
-    {{-- <!-- FOOTER: MINIMALIST -->
-    <footer class="py-16 bg-[#fafafa]">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col items-center">
-            <div class="flex items-center gap-2 mb-8 grayscale opacity-50">
-                <div class="h-6 w-6 rounded-lg bg-slate-900"></div>
-                <span class="text-sm font-black tracking-tighter text-slate-900">AsabaHustle</span>
-            </div>
-
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">
-                © {{ date('Y') }} — API-First Distributed Marketplace
-            </p>
-
-            <div class="mt-8 flex items-center gap-3 px-4 py-2 rounded-full bg-white border border-slate-100 shadow-sm">
-                <span class="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">System Operational</span>
-                <span class="text-[9px] text-slate-300 font-mono tracking-tighter">v2.0.4-asaba</span>
-            </div>
-        </div>
-    </footer> --}}
-
+    <div id="installBanner"
+        class="hidden fixed bottom-0 w-full bg-white border-t p-3 flex justify-between items-center shadow">
+        <span>Install Asaba Hustle for a better experience</span>
+        <button id="installBtn" class="bg-orange-500 text-white px-3 py-1 rounded">
+            Install
+        </button>
+    </div>
 </body>
-
+<script id="hide-splash">
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const splash = document.getElementById('app-splash');
+            if (splash) splash.remove();
+        }, 500);
+    });
+</script>
 
 </html>

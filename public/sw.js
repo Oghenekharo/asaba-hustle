@@ -37,3 +37,35 @@ self.addEventListener("push", function (event) {
 
     console.log("Push received:", event);
 });
+
+const CACHE_NAME = "hustle-v1";
+const STATIC_ASSETS = [
+    "/",
+    "/offline.html",
+    "/images/icons/asaba-hustle.png", // ✅ add this
+];
+
+self.addEventListener("install", (event) => {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(STATIC_ASSETS);
+        }),
+    );
+});
+
+self.addEventListener("fetch", (event) => {
+    event.respondWith(
+        caches.match(event.request).then((cached) => {
+            // 1. Return cached asset if available
+            if (cached) return cached;
+
+            // 2. Otherwise try network
+            return fetch(event.request).catch(() => {
+                // 3. Only fallback for HTML pages
+                if (event.request.destination === "document") {
+                    return caches.match("/offline.html");
+                }
+            });
+        }),
+    );
+});

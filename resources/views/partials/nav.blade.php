@@ -1,56 +1,3 @@
-{{-- <!-- Modern Sticky Nav -->
-<nav class="sticky top-0 z-50 border-b border-[var(--brand)]/5 bg-[var(--surface)]/80 backdrop-blur-xl">
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 h-20">
-
-        <!-- Branding -->
-        <a href="/" class="group flex items-center space-x-2">
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-lg shadow-orange-500/20"
-                style="background: var(--brand)">
-                <span class="font-black text-sm">A</span>
-            </div>
-            <div class="text-xl font-black tracking-tighter italic transition-all group-hover:opacity-80"
-                style="color: var(--brand)">
-                ASABA<span style="color: var(--ink)">HUSTLE</span>
-            </div>
-        </a>
-
-        <!-- Navigation Links (Contextual) -->
-        <div class="hidden md:flex items-center space-x-8 text-sm font-bold uppercase tracking-widest opacity-60">
-            <a href="{{ route('web.app.jobs') }}" class="hover:text-[var(--brand)] transition">Find Work</a>
-            <a href="{{ route('web.app.my-jobs') }}" class="hover:text-[var(--brand)] transition">My Tasks</a>
-        </div>
-
-        <!-- Action Area -->
-        <div class="flex items-center gap-3">
-            <!-- Notifications -->
-            <button id="load-notifications"
-                class="relative group p-2.5 rounded-xl hover:bg-[var(--brand)]/5 transition-all">
-                <svg class="h-6 w-6 opacity-70 group-hover:opacity-100 group-hover:text-[var(--brand)] transition-all"
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
-                    </path>
-                </svg>
-                <!-- Pulse Indicator -->
-                <span class="absolute top-2 right-2.5 flex h-2 w-2">
-                    <span
-                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2" style="background: var(--brand)"></span>
-                </span>
-            </button>
-
-            <div class="h-8 w-px bg-[var(--brand)]/10 mx-2"></div>
-
-            <!-- Profile/Logout -->
-            <button id="logout-button"
-                class="px-5 py-2.5 rounded-xl text-sm font-bold uppercase tracking-tighter border-2 border-[var(--ink)]/5 hover:border-[var(--brand)] hover:text-[var(--brand)] transition-all bg-[var(--surface)] shadow-sm">
-                Logout
-            </button>
-        </div>
-    </div>
-</nav> --}}
-
-<!-- ULTRA-SLEEK NAV -->
 @php
     $navUnreadNotifications = auth()->check() ? auth()->user()->notifications()->where('is_read', false)->count() : 0;
     $navUnreadMessages = auth()->check()
@@ -59,9 +6,7 @@
             ->where('is_read', false)
             ->whereHas('conversation', function ($query) {
                 $query->where(function ($conversationQuery) {
-                    $conversationQuery
-                        ->where('client_id', auth()->id())
-                        ->orWhere('worker_id', auth()->id());
+                    $conversationQuery->where('client_id', auth()->id())->orWhere('worker_id', auth()->id());
                 });
             })
             ->count()
@@ -75,10 +20,7 @@
 
         <!-- Brand -->
         <a href="{{ auth()->check() ? '/app' : '/' }}" class="flex items-center gap-3">
-            <div
-                class="h-9 w-9 rounded-2xl flex items-center justify-center font-black text-white bg-gradient-to-br from-orange-500 to-rose-500 shadow-inner">
-                A
-            </div>
+            <img src="/images/icons/asaba-hustle.svg" class="w-9 h-9" />
             <div class="text-lg font-black tracking-tight text-slate-900 leading-none">
                 Asaba<span class="block text-[10px] uppercase tracking-[0.2em] text-orange-500">Hustle</span>
             </div>
@@ -116,18 +58,18 @@
                         </span>
                     @endif
                 </a>
-            @endif
-        </div>
+                @endif
+            </div>
 
 
             <!-- Action Area -->
             <div class="flex items-center gap-2">
                 @if (!Auth::check())
-                    <a href="/login"
-                        class="hidden sm:block px-4 text-xs font-bold text-slate-600 hover:text-slate-900">Login</a>
                     <a href="/register"
+                        class="hidden sm:block px-4 text-xs font-bold text-slate-600 hover:text-slate-900">Join</a>
+                    <a href="/login"
                         class="flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-900 text-white transition-transform active:scale-95 shadow-xl shadow-slate-900/10 hover:shadow-orange-500/20">
-                        <span class="text-xs font-bold uppercase tracking-wider">Join</span>
+                        <span class="text-xs font-bold uppercase tracking-wider">Login</span>
                         <svg xmlns="http://w3.org" class="h-4 w-4 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
                                 d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
@@ -135,7 +77,8 @@
                         </svg>
                     </a>
                 @else
-                    <div id="notificationDrawerOverlay" class="fixed inset-0 z-40 hidden bg-slate-900/35 backdrop-blur-[2px] md:hidden"></div>
+                    <div id="notificationDrawerOverlay"
+                        class="fixed inset-0 z-40 hidden bg-slate-900/35 backdrop-blur-[2px] md:hidden"></div>
                     <div class="relative" id="notificationDropdownWrapper">
                         <button id="notificationDropdownTrigger"
                             class="relative flex items-center bg-slate-100 hover:bg-slate-200 transition-all shadow-sm rounded-xl p-2 justify-center cursor-pointer">
@@ -183,7 +126,8 @@
                         </div>
                     </div>
                     <!-- User Dropdown Container -->
-                    <div id="userDrawerOverlay" class="fixed inset-0 z-40 hidden bg-slate-900/35 backdrop-blur-[2px] md:hidden"></div>
+                    <div id="userDrawerOverlay"
+                        class="fixed inset-0 z-40 hidden bg-slate-900/35 backdrop-blur-[2px] md:hidden"></div>
                     <div class="relative" id="userDropdownWrapper">
                         <button id="userDropdownTrigger"
                             class="flex cursor-pointer items-center gap-2 p-1 pr-4 rounded-2xl bg-slate-100 hover:bg-slate-200 transition-all active:scale-95 border border-white/50">

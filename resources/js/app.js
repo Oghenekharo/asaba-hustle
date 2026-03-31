@@ -283,14 +283,42 @@ if ($("#negotiation-form").length) {
         },
     );
 }
-
-
 registerPush();
-// if ($("#resend-form").length) {
-//     handleAjaxForm("#resend-form", "#submit-btn", function (response) {
-//         // Since we want to stay on page but show success
-//         showAlert(response.message, response.status ?? "error");
-//         // alert("Success! Please check your email.");
-//         setTimeout(() => window.location.reload(), 1500);
-//     });
-// }
+
+let deferredPrompt;
+const installBtn = document.getElementById("installBtn");
+
+// 1. Listen for install availability
+window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault(); // stop auto prompt
+
+    deferredPrompt = e;
+
+    // Show button
+    installBtn.classList.remove("hidden");
+});
+
+// 2. Handle button click
+installBtn.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === "accepted") {
+        console.log("User installed the app");
+    } else {
+        console.log("User dismissed install");
+    }
+
+    deferredPrompt = null;
+    installBtn.classList.add("hidden");
+});
+
+// 3. Hide button after install
+window.addEventListener("appinstalled", () => {
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+        installBtn.classList.add("hidden");
+    }
+});

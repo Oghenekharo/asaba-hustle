@@ -19,12 +19,6 @@ use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\WebPaymentController;
 
 Route::get('/', [HomeController::class, 'index'])->name('web.home');
-// Route::get('/', function () {
-//     return view('welcome');
-// })->name('web.home');
-// Route::get('/home', function () {
-//     return view('home');
-// })->name('home');
 Route::post('/push/subscribe', [HomeController::class, 'subscribe'])
     ->middleware('auth');
 

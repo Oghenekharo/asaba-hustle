@@ -6,6 +6,10 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#ff7a00">
+    <link rel="icon" href="/images/icons/icon-192.png">
     <title>{{ $title ?? config('app.name', 'Asaba Hustle') }}</title>
 
     <!-- Fonts -->
@@ -58,29 +62,6 @@
             @yield('content')
         </div>
     </main>
-
-    <!-- App Configuration -->
-    <script>
-        window.asabaAppConfig = {
-            meUrl: "{{ route('web.app.me') }}",
-            jobsUrl: "{{ route('web.app.jobs') }}",
-            myJobsUrl: "{{ route('web.app.my-jobs') }}",
-            notificationsUrl: "{{ route('web.app.notifications') }}",
-            notificationReadUrl: "{{ route('web.app.notifications.read') }}",
-            notificationReadAllUrl: "{{ route('web.app.notifications.read-all') }}",
-            currentUserId: {{ auth()->id() ?? 'null' }},
-            jobShowBase: "/app/jobs"
-        };
-        window.asabaLogoutUrl = "{{ route('web.logout') }}";
-
-        // // Modern Logout Handling with jQuery
-        // $('#logout-button').on('click', function(e) {
-        //     e.preventDefault();
-        //     if (confirm('Are you sure you want to logout?')) {
-        //         window.location.href = window.asabaLogoutUrl;
-        //     }
-        // });
-    </script>
 </body>
 
 </html>
