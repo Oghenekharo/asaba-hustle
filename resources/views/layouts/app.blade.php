@@ -6,7 +6,7 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#ff7a00">
     <link rel="icon" href="/images/icons/icon-192.png">
@@ -45,6 +45,8 @@
     [&_.h-20]:!h-16 [&_.w-20]:!w-16 md:[&_.h-20]:!h-20 md:[&_.w-20]:!w-20
     [&_.h-14]:!h-12 [&_.w-14]:!w-12
     [&_.h-12]:!h-11">
+
+    <x-splash-screen />
 
     @if (
         !request()->is('login') &&

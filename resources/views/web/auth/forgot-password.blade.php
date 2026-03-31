@@ -5,18 +5,22 @@
         <div
             class="rounded-[2.5rem] border border-slate-100 bg-white p-8 md:p-10 shadow-[0_32px_64px_-16px_rgba(255,122,0,0.1)]">
 
-            <!-- Header -->
-            <div class="mb-8 text-center">
-                <div onclick="location.href='{{ route('web.home') }}'"
-                    class="inline-flex cursor-pointer h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-600 mb-4 shadow-sm">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                    </svg>
+            <!-- Compact Header -->
+            <div class="relative mb-8 text-center">
+                <!-- Back Home Button -->
+                <a href="{{ route('web.home') }}"
+                    class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all hover:bg-orange-50 hover:text-orange-500 active:scale-95"
+                    title="Go Home">
+                    <i data-lucide="chevron-left" class="h-5 w-5"></i>
+                </a>
+
+                <div class="inline-flex items-center justify-center mb-4">
+                    <img src="/images/icons/asaba-hustle.svg" class="w-12 h-12 drop-shadow-sm" alt="Asaba Hustle" />
                 </div>
-                <p class="text-[10px] font-black uppercase tracking-[0.4em] text-orange-500">Security</p>
-                <h1 class="mt-2 text-2xl font-black tracking-tight text-slate-900">Forgot Password?</h1>
-                <p class="mt-1 text-xs font-bold text-slate-400">Choose a channel to receive your reset token.</p>
+
+                <h1 class="text-2xl font-black tracking-tight text-slate-900 leading-tight">Forgot Password?</h1>
+                <p class="mt-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Enter your phone number
+                    below to reset your password.</p>
             </div>
 
             <form id="forgot-password-form" method="POST" action="{{ route('web.password.email') }}"

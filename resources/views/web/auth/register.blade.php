@@ -5,20 +5,35 @@
         <div
             class="rounded-[2.5rem] border border-slate-100 bg-white p-8 md:p-10 shadow-[0_32px_64px_-16px_rgba(255,122,0,0.1)]">
 
-            <!-- Header: Tighter & Focused -->
-            <div class="mb-10">
-                <div class="inline-flex items-center px-3 py-1 rounded-full bg-orange-50 border border-orange-100 mb-4">
-                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-orange-600">Join Asaba Hustle</span>
+            <!-- Header: Branded & Focused -->
+            <div class="relative mb-10 group">
+                <!-- Back Home Action -->
+                <a href="{{ route('web.home') }}"
+                    class="absolute right-0 top-0 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400 transition-all hover:bg-orange-50 hover:text-orange-500 active:scale-90"
+                    title="Exit to Home">
+                    <i data-lucide="x" class="h-5 w-5"></i>
+                </a>
+
+                <!-- Logo + Badge Row -->
+                <div class="flex items-center gap-3 mb-6">
+                    <img src="/images/icons/asaba-hustle.svg"
+                        class="w-10 h-10 drop-shadow-sm transition-transform group-hover:rotate-12" alt="Asaba Hustle" />
+                    <div class="inline-flex items-center px-3 py-1 rounded-full bg-orange-50 border border-orange-100">
+                        <span class="text-[9px] font-black uppercase tracking-[0.2em] text-orange-600">Join the
+                            Hustle</span>
+                    </div>
                 </div>
-                <h1 class="text-3xl font-black tracking-tight text-slate-900">Start your journey.</h1>
-                <p class="mt-2 text-sm font-bold text-slate-400">Join the marketplace to hire or provide services.</p>
+
+                <h1 class="text-3xl font-black tracking-tighter text-slate-900 leading-tight">Start your <br />journey.</h1>
+                <p class="mt-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                    Join the marketplace to <span class="text-orange-500">hire</span> or <span
+                        class="text-orange-500">provide</span> services.
+                </p>
             </div>
 
-            <div id="register-feedback"
-                class="mb-8 hidden rounded-xl border px-5 py-3 text-[11px] font-black uppercase tracking-wider animate-in fade-in slide-in-from-top-2">
-            </div>
 
-            <form id="register-form" action="{{ route('web.register.submit') }}" class="grid gap-x-5 gap-y-4 md:grid-cols-2">
+            <form id="register-form" action="{{ route('web.register.submit') }}"
+                class="grid gap-x-5 gap-y-4 md:grid-cols-2">
                 @csrf
                 <input type="hidden" name="verification_method" value="phone">
 

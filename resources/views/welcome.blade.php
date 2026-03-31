@@ -5,27 +5,14 @@
     <meta charset="UTF-8">
     <link rel="manifest" href="/manifest.json">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="icon" href="/images/icons/icon-192.png">
     <meta name="theme-color" content="#ff7a00">
     <title>Asaba Hustle | Local Marketplace</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<style id="pwa-splash">
-    #app-splash {
-        position: fixed;
-        inset: 0;
-        background: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        color: #ff7a00;
-        font-size: 24px;
-        font-weight: bold;
-    }
-</style>
 @php
     $departments = [
         ['name' => 'Cleaning', 'icon' => '✨', 'image' => 'https://unsplash.com', 'size' => 'col-span-1'],
@@ -38,10 +25,7 @@
 @endphp
 
 <body class="antialiased bg-[#fafafa] text-[#1a1a1a]">
-    <div id="app-splash" class="flex flex-col gap-2">
-        <img src="/images/icons/asaba-hustle.svg" class="w-16 h-16" />
-        <p class="uppercase text-sm">Asaba Hustle...</p>
-    </div>
+    <x-splash-screen />
 
     @include('partials.nav')
 
@@ -177,21 +161,84 @@
             </div>
         </div>
     </footer>
-    <div id="installBanner"
-        class="hidden fixed bottom-0 w-full bg-white border-t p-3 flex justify-between items-center shadow">
-        <span>Install Asaba Hustle for a better experience</span>
-        <button id="installBtn" class="bg-orange-500 text-white px-3 py-1 rounded">
-            Install
-        </button>
+
+    <div id="installBanner" class="hidden fixed bottom-6 left-4 right-4 md:left-auto md:right-8 md:w-96 z-50">
+        <div
+            class="bg-gradient-to-r from-orange-600 to-orange-500 p-4 rounded-2xl shadow-2xl border border-orange-400/30 backdrop-blur-sm">
+            <div class="flex items-center gap-3"> <!-- Icon -->
+                <div
+                    class="flex-shrink-0 w-11 h-11 sm:w-12 sm:h-12 bg-white/20 rounded-xl flex items-center justify-center text-white shadow-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-7 sm:w-7" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                </div> <!-- Text -->
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-white font-semibold text-sm truncate"> Install Asaba Hustle </h4>
+                    <p class="text-white/80 text-xs mt-0.5 leading-tight"> Faster access & offline updates </p>
+                </div> <!-- Close (top-right for mobile) -->
+                <button onclick="document.getElementById('installBanner').classList.add('hidden')"
+                    class="text-white/70 hover:text-white text-lg leading-none px-1"> × </button>
+            </div> <!-- Actions -->
+            <div class="mt-3 flex gap-2"> <button id="installBtn"
+                    class="flex-1 bg-white text-orange-600 px-4 py-2.5 rounded-xl font-semibold text-sm active:scale-95 transition shadow-md">
+                    Install </button> <button onclick="document.getElementById('installBanner').classList.add('hidden')"
+                    class="flex-1 text-white border border-white px-4 py-2.5 rounded-xl text-sm font-medium active:scale-95">
+                    Later </button> </div>
+        </div>
     </div>
+    <x-modal id="installGuideModal" title="Install App">
+        <div class="space-y-5">
+            <!-- Icon + Title -->
+            <div class="flex items-center gap-3">
+                <img src="/images/icons/asaba-hustle.png" class="w-10 h-10 rounded-xl" />
+                <div>
+                    <h3 class="font-semibold text-gray-900">Install Asaba Hustle</h3>
+                    <p class="text-xs text-gray-500">Get faster access & offline support</p>
+                </div>
+            </div>
+
+            <!-- Android / Chrome -->
+            <div class="space-y-2">
+                <h4 class="text-sm font-semibold text-gray-800">📱 Android (Chrome)</h4>
+                <ol class="text-sm text-gray-600 space-y-1 list-decimal list-inside">
+                    <li>Tap the menu (⋮) at the top right</li>
+                    <li>Select <strong>Install App</strong></li>
+                    <li>Tap <strong>Install</strong></li>
+                </ol>
+            </div>
+
+            <!-- Firefox -->
+            <div class="space-y-2">
+                <h4 class="text-sm font-semibold text-gray-800">🦊 Firefox</h4>
+                <ol class="text-sm text-gray-600 space-y-1 list-decimal list-inside">
+                    <li>Tap the menu (⋮)</li>
+                    <li>Select <strong>Add to Home screen</strong></li>
+                    <li>Confirm installation</li>
+                </ol>
+            </div>
+
+            <!-- iOS Safari -->
+            <div class="space-y-2">
+                <h4 class="text-sm font-semibold text-gray-800">🍎 iPhone (Safari)</h4>
+                <ol class="text-sm text-gray-600 space-y-1 list-decimal list-inside">
+                    <li>Tap the share icon <span class="font-bold">⬆️</span></li>
+                    <li>Select <strong>Add to Home Screen</strong></li>
+                    <li>Tap <strong>Add</strong></li>
+                </ol>
+            </div>
+
+            <!-- CTA -->
+            <div class="pt-2">
+                <button onclick="closeModal('installGuideModal')"
+                    class="w-full bg-orange-500 text-white py-2.5 rounded-xl font-semibold active:scale-95 transition">
+                    Got it
+                </button>
+            </div>
+
+        </div>
+    </x-modal>
 </body>
-<script id="hide-splash">
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            const splash = document.getElementById('app-splash');
-            if (splash) splash.remove();
-        }, 500);
-    });
-</script>
 
 </html>

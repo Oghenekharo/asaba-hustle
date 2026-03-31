@@ -5,23 +5,20 @@
         <div
             class="rounded-[3rem] border border-[var(--brand)]/5 bg-[var(--surface)] p-8 md:p-10 shadow-[0_40px_100px_-20px_rgba(255,122,0,0.12)]">
 
-            <div class="relative"> <!-- Ensure the parent container is relative -->
-
-                <!-- MINIMALIST LOGOUT CORNER -->
+            <!-- Compact Header -->
+            <div class="relative mb-8 text-center">
+                <!-- Logout Button -->
                 <div class="absolute -top-4 -right-4">
                     <x-logout />
                 </div>
 
-                <!-- Header -->
-                <div class="mb-5 text-center">
-                    <div onclick="location.href='{{ route('web.home') }}'"
-                        class="inline-flex cursor-pointer h-12 w-12 items-center justify-center rounded-2xl mb-6 shadow-lg shadow-orange-500/20 text-white"
-                        style="background: var(--brand)">
-                        <i data-lucide="smartphone" class="w-6 h-6"></i> <!-- Replaced with Lucide -->
-                    </div>
-                    <h1 class="text-2xl font-black tracking-tighter text-[var(--ink)]">Verify Phone</h1>
-                    <p class="mt-3 text-sm font-medium opacity-50">We've sent a 6-digit code to your device.</p>
+                <div class="inline-flex items-center justify-center mb-4">
+                    <img src="/images/icons/asaba-hustle.svg" class="w-12 h-12 drop-shadow-sm" alt="Asaba Hustle" />
                 </div>
+
+                <h1 class="text-2xl font-black tracking-tight text-slate-900 leading-tight">Verify Phone</h1>
+                <p class="mt-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Fill the fields below to
+                    verify your phone number.</p>
             </div>
 
             <form id="verify-phone-form" method="POST" action="{{ route('web.verify.phone.submit') }}" class="space-y-6">

@@ -6,18 +6,22 @@
             class="rounded-[2.5rem] border border-[var(--brand)]/5 bg-white p-8 shadow-[0_32px_64px_-16px_rgba(255,122,0,0.1)]">
 
             <!-- Compact Header -->
-            <div class="mb-8 text-center">
-                <div onclick="location.href='{{ route('web.home') }}'"
-                    class="inline-flex cursor-pointer h-10 w-10 items-center justify-center rounded-xl mb-4 shadow-md shadow-orange-500/10 text-white"
-                    style="background: var(--brand)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
+            <div class="relative mb-8 text-center">
+                <!-- Back Home Button -->
+                <a href="{{ route('web.home') }}"
+                    class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all hover:bg-orange-50 hover:text-orange-500 active:scale-95"
+                    title="Go Home">
+                    <i data-lucide="chevron-left" class="h-5 w-5"></i>
+                </a>
+
+                <div class="inline-flex items-center justify-center mb-4">
+                    <img src="/images/icons/asaba-hustle.svg" class="w-12 h-12 drop-shadow-sm" alt="Asaba Hustle" />
                 </div>
-                <h1 class="text-2xl font-black tracking-tight text-slate-900">Welcome Back</h1>
-                <p class="mt-1 text-xs font-bold text-slate-400">Manage your hustles & bookings.</p>
+
+                <h1 class="text-2xl font-black tracking-tight text-slate-900 leading-tight">Welcome Back</h1>
+                <p class="mt-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Manage your hustles</p>
             </div>
+
 
             @php
                 $vState = request()->query('verified');

@@ -118,7 +118,15 @@ if ($("#register-form").length) {
 }
 
 if ($("#forgot-password-form").length) {
-    handleAjaxForm("#forgot-password-form", "#forgot-password-submit");
+    handleAjaxForm(
+        "#forgot-password-form",
+        "#forgot-password-submit",
+        function (response) {
+            if (response.success === true) {
+                location.reload();
+            }
+        },
+    );
 }
 
 $(function () {
@@ -285,40 +293,74 @@ if ($("#negotiation-form").length) {
 }
 registerPush();
 
-let deferredPrompt;
-const installBtn = document.getElementById("installBtn");
+$(document).ready(function () {
+    let deferredPrompt = null;
+    const installBanner = $("#installBanner");
+    const installBtn = $("#installBtn");
 
-// 1. Listen for install availability
-window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault(); // stop auto prompt
+    const isStandalone = window.matchMedia(
+        "(display-mode: standalone)",
+    ).matches;
 
-    deferredPrompt = e;
-
-    // Show button
-    installBtn.classList.remove("hidden");
-});
-
-// 2. Handle button click
-installBtn.addEventListener("click", async () => {
-    if (!deferredPrompt) return;
-
-    deferredPrompt.prompt();
-
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === "accepted") {
-        console.log("User installed the app");
-    } else {
-        console.log("User dismissed install");
+    if (isStandalone) {
+        installBanner.hide();
     }
 
-    deferredPrompt = null;
-    installBtn.classList.add("hidden");
-});
+    // -----------------------------
+    // CHROME / EDGE
+    // -----------------------------
+    window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
 
-// 3. Hide button after install
-window.addEventListener("appinstalled", () => {
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-        installBtn.classList.add("hidden");
+        installBanner.removeClass("hidden").show();
+        installBtn.text("Install");
+    });
+
+    // -----------------------------
+    // FIREFOX / SAFARI (fallback)
+    // -----------------------------
+    if (!("BeforeInstallPromptEvent" in window) && !isStandalone) {
+        installBanner.removeClass("hidden").show();
+
+        installBtn.text("How to Install");
+
+        installBtn
+            .off("click")
+            .on("click", () => window.openModal("installGuideModal"));
     }
+
+    // -----------------------------
+    // INSTALL BUTTON (Chrome only)
+    // -----------------------------
+    installBtn.on("click", async () => {
+        if (!deferredPrompt) return;
+
+        deferredPrompt.prompt();
+
+        const { outcome } = await deferredPrompt.userChoice;
+
+        console.log(
+            outcome === "accepted"
+                ? "User installed the app"
+                : "User dismissed install",
+        );
+
+        deferredPrompt = null;
+        installBanner.addClass("hidden");
+    });
+
+    // -----------------------------
+    // AFTER INSTALL
+    // -----------------------------
+    window.addEventListener("appinstalled", () => {
+        installBanner.addClass("hidden");
+    });
+
+    // -----------------------------
+    // AUTO HIDE
+    // -----------------------------
+    setTimeout(() => {
+        installBanner.addClass("hidden");
+    }, 20000);
 });
