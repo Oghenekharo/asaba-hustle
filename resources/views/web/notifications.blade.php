@@ -34,7 +34,7 @@
             <div class="space-y-3">
                 @forelse ($notifications as $notification)
                     @php
-                        $meta = \App\Support\NotificationType::meta($notification->data['type']);
+                        $meta = \App\Support\NotificationType::meta($notification->type);
                     @endphp
                     <article
                         class="js-notification-page-item rounded-[1.75rem] border px-5 py-5 transition {{ $notification->is_read ? 'border-slate-100 bg-' . $meta['color'] . '-50' : 'border-orange-100 bg-orange-50/50' }}"

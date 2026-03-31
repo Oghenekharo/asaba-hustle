@@ -293,7 +293,9 @@ if ($("#negotiation-form").length) {
         },
     );
 }
-registerPush();
+if (window.asabaAppConfig.currentUserId) {
+    registerPush();
+}
 
 $(document).ready(function () {
     let deferredPrompt = null;

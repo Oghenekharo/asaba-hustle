@@ -62,12 +62,12 @@ class UserNotificationService
                 default => 'Negotiation Update',
             },
             'body' => match ($type) {
-                'new_offer' => 'You have received a new offer on a job.',
-                'counter_offer' => 'The offer has been updated.',
-                'accepted' => 'Your offer has been accepted.',
-                'counter_offer_sent' => 'A counter offer was sent on this negotiation.',
-                'rejected' => 'Your offer was rejected.',
-                default => 'There is an update on your negotiation.',
+                'new_offer' => "A new offer was made for \"{$job->title}\"",
+                'counter_offer' => "You received a counter offer for \"{$job->title}\"",
+                'accepted' => "Your offer was accepted for \"{$job->title}\"",
+                'counter_offer_sent' => "A counter offer was sent for \"{$job->title}\"",
+                'rejected' => "Your offer was rejected for \"{$job->title}\"",
+                default => "There is an update on your negotiation.",
             },
         ];
     }
