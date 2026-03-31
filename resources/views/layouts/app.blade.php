@@ -65,5 +65,18 @@
         </div>
     </main>
 </body>
+<script>
+    window.asabaAppConfig = {
+        meUrl: "{{ route('web.app.me') }}",
+        jobsUrl: "{{ route('web.app.jobs') }}",
+        myJobsUrl: "{{ route('web.app.my-jobs') }}",
+        notificationsUrl: "{{ route('web.app.notifications') }}",
+        notificationReadUrl: "{{ route('web.app.notifications.read') }}",
+        notificationReadAllUrl: "{{ route('web.app.notifications.read-all') }}",
+        currentUserId: {{ auth()->id() ?? 'null' }},
+        jobShowBase: "/app/jobs"
+    };
+    window.asabaLogoutUrl = "{{ route('web.logout') }}";
+</script>
 
 </html>

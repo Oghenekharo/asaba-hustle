@@ -39,6 +39,8 @@ window.toggleChannel = toggleChannel;
 window.toggleFilter = toggleFilter;
 window.openLogModal = openLogModal;
 window.registerPush = registerPush;
+window.initNavbarNotifications = initNavbarNotifications;
+window.initNotificationsPage = initNotificationsPage;
 
 $(document).on("click", ".alert-close", function () {
     $(this).closest("#js-error-container").addClass("hidden");
