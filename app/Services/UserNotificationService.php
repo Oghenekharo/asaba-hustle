@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Events\NotificationBroadcasted;
 use App\Models\UserNotification;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\NegotiationUpdateNotification;
 
 class UserNotificationService
 {
@@ -31,9 +32,28 @@ class UserNotificationService
 
     public function sendNegotiationUpdate($user, $job, $type, $data = [])
     {
-        return $this->create(
+        $message = $this->resolveMessage($type, $job);
+        $notification = $this->create(
             $user->id,
-            match ($type) {
+            $message['title'],
+            $message['body'],
+            'negotiation',
+        );
+
+
+        $user->notify(new NegotiationUpdateNotification(
+            type: $type,
+            jobTitle: $job->title,
+            url: route('web.app.jobs.show', $job)
+        ));
+
+        return $notification;
+    }
+
+    protected function resolveMessage($type, $job)
+    {
+        return [
+            'title' => match ($type) {
                 'new_offer' => 'New Offer Received',
                 'counter_offer' => 'Offer Updated',
                 'accepted' => 'Offer Accepted',
@@ -41,7 +61,7 @@ class UserNotificationService
                 'rejected' => 'Offer Rejected',
                 default => 'Negotiation Update',
             },
-            match ($type) {
+            'body' => match ($type) {
                 'new_offer' => 'You have received a new offer on a job.',
                 'counter_offer' => 'The offer has been updated.',
                 'accepted' => 'Your offer has been accepted.',
@@ -49,10 +69,6 @@ class UserNotificationService
                 'rejected' => 'Your offer was rejected.',
                 default => 'There is an update on your negotiation.',
             },
-            'negotiation',
-            // array_merge([
-            //     'job_id' => $job->id,
-            // ], $data),
-        );
+        ];
     }
 }

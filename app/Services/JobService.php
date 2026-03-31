@@ -84,31 +84,29 @@ class JobService
             ]);
 
             DB::afterCommit(function () use ($job, $user) {
-                $this->notificationService->create(
-                    $job->user_id,
-                    'New job application',
-                    $user->name . ' applied for "' . $job->title . '".',
-                    'job_application',
-                    route('web.app.jobs.show', $job),
-                    'View Job'
-                );
+                $client = User::find($job->user_id);
+
+                if ($client) {
+                    $this->notificationService->create(
+                        $job->user_id,
+                        'New job application',
+                        $user->name . ' applied for "' . $job->title . '".',
+                        'job',
+                        route('web.app.jobs.show', $job),
+                        'View Job'
+                    );
+
+                    $client->notify(new \App\Notifications\JobApplicationNotification(
+                        workerName: $user->name,
+                        jobTitle: $job->title,
+                        url: route('web.app.jobs.show', $job)
+                    ));
+                }
             });
 
             return $application;
         });
     }
-
-    // public function hireWorker(ServiceJob $job, $workerId)
-    // {
-    //     $job->update([
-    //         'assigned_to' => $workerId,
-    //         'status' => 'assigned'
-    //     ]);
-
-
-
-    //     return $job;
-    // }
 
     public function hireWorker(ServiceJob $job, int $workerId)
     {
@@ -184,14 +182,25 @@ class JobService
             DB::afterCommit(function () use ($job, $worker) {
                 Cache::forget(CacheKeys::ADMIN_DASHBOARD_METRICS);
                 event(new WorkerHired($job));
-                $this->notificationService->create(
-                    $worker->id,
-                    'You were hired!',
-                    'You have been hired for "' . $job->title . '".',
-                    'job_hired',
-                    route('web.app.jobs.show', $job),
-                    'View Job'
-                );
+                $workerModel = User::find($worker->id);
+
+                if ($workerModel) {
+                    $this->notificationService->create(
+                        $worker->id,
+                        'You were hired!',
+                        'You have been hired for "' . $job->title . '".',
+                        'job',
+                        route('web.app.jobs.show', $job),
+                        'View Job'
+                    );
+
+
+                    $workerModel->notify(new \App\Notifications\WorkerHiredNotification(
+                        jobTitle: $job->title,
+                        clientName: $job->client->name ?? 'Client',
+                        url: route('web.app.jobs.show', $job)
+                    ));
+                }
             });
 
             $this->broadcastJobStatusUpdate($job);
@@ -199,50 +208,6 @@ class JobService
             return $job->fresh(['client', 'worker', 'skill']);
         });
     }
-
-    /*public function hireWorker(ServiceJob $job, int $workerId)
-    {
-        return DB::transaction(function () use ($job, $workerId) {
-
-            // Lock the job row to prevent concurrent updates
-            $job = ServiceJob::where('id', $job->id)
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            // Ensure job is still open
-            if ($job->status !== 'open') {
-                throw new \Exception('Job is no longer available for hiring.');
-            }
-
-            // Fetch worker
-            $worker = User::findOrFail($workerId);
-
-            // Worker availability checks
-            if ($worker->availability_status === 'offline') {
-                throw new \Exception('Worker is currently offline.');
-            }
-
-            if ($worker->availability_status === 'busy') {
-                throw new \Exception('Worker is currently busy.');
-            }
-
-            // Assign worker
-            $job->update([
-                'assigned_to' => $worker->id,
-                'status' => 'assigned'
-            ]);
-
-
-
-            // Mark worker as busy
-            $worker->update([
-                'availability_status' => 'busy'
-            ]);
-
-            return $job->fresh(['client', 'worker', 'skill']);
-        });
-
-    }*/
 
     public function workerAcceptJob(ServiceJob $job, $workerId)
     {
@@ -270,14 +235,25 @@ class JobService
             ]);
 
             DB::afterCommit(function () use ($job) {
-                $this->notificationService->create(
-                    $job->user_id,
-                    'Worker accepted your job',
-                    ($job->worker?->name ?? 'The worker') . ' accepted "' . $job->title . '" and is ready to begin.',
-                    'job_status_updated',
-                    route('web.app.jobs.show', $job),
-                    'View Job'
-                );
+                $client = User::find($job->user_id);
+
+                if ($client) {
+                    $this->notificationService->create(
+                        $job->user_id,
+                        'Worker accepted your job',
+                        ($job->worker?->name ?? 'The worker') . ' accepted "' . $job->title . '" and is ready to begin.',
+                        'job',
+                        route('web.app.jobs.show', $job),
+                        'View Job'
+                    );
+
+
+                    $client->notify(new \App\Notifications\WorkerAcceptedJobNotification(
+                        workerName: $job->worker?->name ?? 'Worker',
+                        jobTitle: $job->title,
+                        url: route('web.app.jobs.show', $job)
+                    ));
+                }
             });
 
             $this->broadcastJobStatusUpdate($job);
@@ -350,14 +326,25 @@ class JobService
 
             DB::afterCommit(function () use ($job) {
                 Cache::forget(CacheKeys::ADMIN_DASHBOARD_METRICS);
-                $this->notificationService->create(
-                    $job->user_id,
-                    'Assigned worker declined the job',
-                    'The assigned worker declined "' . $job->title . '". The job is open again for negotiation.',
-                    'job_assignment_rejected',
-                    route('web.app.jobs.show', $job),
-                    'Review Job'
-                );
+                $client = User::find($job->user_id);
+
+                if ($client) {
+                    $this->notificationService->create(
+                        $job->user_id,
+                        'Assigned worker declined the job',
+                        'The assigned worker declined "' . $job->title . '". The job is open again for negotiation.',
+                        'job',
+                        route('web.app.jobs.show', $job),
+                        'Review Job'
+                    );
+
+
+                    $client->notify(new \App\Notifications\WorkerRejectedJobNotification(
+                        jobTitle: $job->title,
+                        workerName: $job->worker?->name ?? 'Worker',
+                        url: route('web.app.jobs.show', $job)
+                    ));
+                }
             });
 
             $this->broadcastJobStatusUpdate($job);
@@ -392,14 +379,23 @@ class JobService
             ]);
 
             DB::afterCommit(function () use ($job) {
-                $this->notificationService->create(
-                    $job->user_id,
-                    'Job is now in progress',
-                    ($job->worker?->name ?? 'The worker') . ' started work on "' . $job->title . '".',
-                    'job_status_updated',
-                    route('web.app.jobs.show', $job),
-                    'View Job'
-                );
+                $client = User::find($job->user_id);
+
+                if ($client) {
+                    $this->notificationService->create(
+                        $job->user_id,
+                        'Job is now in progress',
+                        ($job->worker?->name ?? 'The worker') . ' started work on "' . $job->title . '".',
+                        'job',
+                        route('web.app.jobs.show', $job),
+                        'View Job'
+                    );
+                    $client->notify(new \App\Notifications\JobStartedNotification(
+                        workerName: $job->worker?->name ?? 'Worker',
+                        jobTitle: $job->title,
+                        url: route('web.app.jobs.show', $job)
+                    ));
+                }
             });
 
             $this->broadcastJobStatusUpdate($job);
@@ -458,14 +454,24 @@ class JobService
 
             DB::afterCommit(function () use ($job) {
                 Cache::forget(CacheKeys::ADMIN_DASHBOARD_METRICS);
-                $this->notificationService->create(
-                    $job->user_id,
-                    'Job marked completed',
-                    $job->worker->name . ' marked "' . $job->title . '" as completed. Please proceed to make payment after confirming the work is completed.',
-                    'job_completed',
-                    route('web.app.jobs.show', $job),
-                    'Review Job'
-                );
+                $client = User::find($job->user_id);
+
+                if ($client) {
+                    $this->notificationService->create(
+                        $job->user_id,
+                        'Job marked completed',
+                        $job->worker->name . ' marked "' . $job->title . '" as completed. Please proceed to make payment after confirming the work is completed.',
+                        'job',
+                        route('web.app.jobs.show', $job),
+                        'Review Job'
+                    );
+
+                    $client->notify(new \App\Notifications\JobCompletedNotification(
+                        workerName: $job->worker->name ?? 'Worker',
+                        jobTitle: $job->title,
+                        url: route('web.app.jobs.show', $job)
+                    ));
+                }
             });
 
             $this->broadcastJobStatusUpdate($job);
@@ -533,14 +539,24 @@ class JobService
             DB::afterCommit(function () use ($job) {
                 Cache::forget(CacheKeys::ADMIN_DASHBOARD_METRICS);
                 if ($job->assigned_to) {
-                    $this->notificationService->create(
-                        $job->assigned_to,
-                        'Payment marked as sent',
-                        'The client marked "' . $job->title . '" as paid. Please confirm payment receipt.',
-                        'job_paid',
-                        route('web.app.jobs.show', $job),
-                        'Review Job'
-                    );
+                    $worker = User::find($job->assigned_to);
+
+                    if ($worker) {
+                        $this->notificationService->create(
+                            $job->assigned_to,
+                            'Payment marked as sent',
+                            'The client marked "' . $job->title . '" as paid. Please confirm payment receipt.',
+                            'payment',
+                            route('web.app.jobs.show', $job),
+                            'Review Job'
+                        );
+
+                        $worker->notify(new \App\Notifications\PaymentMarkedSentNotification(
+                            jobTitle: $job->title,
+                            clientName: $job->client->name ?? 'Client',
+                            url: route('web.app.jobs.show', $job)
+                        ));
+                    }
                 }
             });
 
@@ -601,14 +617,24 @@ class JobService
 
             DB::afterCommit(function () use ($job) {
                 Cache::forget(CacheKeys::ADMIN_DASHBOARD_METRICS);
-                $this->notificationService->create(
-                    $job->user_id,
-                    'Payment confirmed',
-                    'The worker confirmed payment for "' . $job->title . '". The job is now closed.',
-                    'payment_confirmed',
-                    route('web.app.jobs.show', $job),
-                    'View Job'
-                );
+                $client = User::find($job->user_id);
+
+                if ($client) {
+                    $this->notificationService->create(
+                        $job->user_id,
+                        'Payment confirmed',
+                        'The worker confirmed payment for "' . $job->title . '". The job is now closed.',
+                        'payment',
+                        route('web.app.jobs.show', $job),
+                        'View Job'
+                    );
+
+                    $client->notify(new \App\Notifications\PaymentConfirmedNotification(
+                        workerName: $job->worker->name ?? 'Worker',
+                        jobTitle: $job->title,
+                        url: route('web.app.jobs.show', $job)
+                    ));
+                }
             });
 
             $this->broadcastJobStatusUpdate($job);
@@ -685,17 +711,19 @@ class JobService
                 'score' => $rating->rating,
             ]);
 
-            DB::afterCommit(function () use ($job, $ratedUser, $ratedByRole) {
+            DB::afterCommit(function () use ($job, $ratedUser, $ratedUserId, $rating, $ratedByRole) {
                 Cache::forget(CacheKeys::ADMIN_DASHBOARD_METRICS);
                 if ($ratedUser) {
-                    $this->notificationService->create(
-                        $ratedUser->id,
-                        $ratedByRole === 'client' ? 'Worker rating received' : 'Client rating received',
-                        'A new rating was submitted on "' . $job->title . '".',
-                        'rating',
-                        route('web.app.jobs.show', $job),
-                        'View Job'
-                    );
+                    $ratedUser = User::find($ratedUserId);
+
+                    if ($ratedUser) {
+                        $ratedUser->notify(new \App\Notifications\RatingReceivedNotification(
+                            raterName: auth()->user()->name,
+                            score: $rating->rating,
+                            jobTitle: $job->title,
+                            url: route('web.app.jobs.show', $job)
+                        ));
+                    }
                 }
             });
 
@@ -721,14 +749,28 @@ class JobService
             ->unique();
 
         foreach ($workerIds as $workerId) {
-            $this->notificationService->create(
-                $workerId,
-                'New job matches your skills',
-                'A new job titled "' . $job->title . '" matches your listed skills.',
-                'job_match',
-                route('web.app.jobs.show', $job),
-                'View Job'
-            );
+            $workerModel = User::find($workerId);
+
+            if ($workerModel) {
+                if ((int) $workerModel->id === (int) $job->user_id) {
+                    continue;
+                }
+
+                $workerModel->notify(new \App\Notifications\NewJobAvailableNotification(
+                    jobTitle: $job->title,
+                    location: $job->location ?? 'your area',
+                    url: route('web.app.jobs.show', $job)
+                ));
+
+                $this->notificationService->create(
+                    $workerModel->id,
+                    'New job available',
+                    $job->title . ' is available near you.',
+                    'job',
+                    route('web.app.jobs.show', $job),
+                    'View Job'
+                );
+            }
         }
     }
 

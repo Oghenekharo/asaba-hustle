@@ -33,12 +33,16 @@
         <section class="mt-8 rounded-[2rem] border border-slate-100 bg-white p-4 shadow-sm md:p-6">
             <div class="space-y-3">
                 @forelse ($notifications as $notification)
+                    @php
+                        $meta = \App\Support\NotificationType::meta($notification->data['type']);
+                    @endphp
                     <article
-                        class="js-notification-page-item rounded-[1.75rem] border px-5 py-5 transition {{ $notification->is_read ? 'border-slate-100 bg-white' : 'border-orange-100 bg-orange-50/50' }}"
+                        class="js-notification-page-item rounded-[1.75rem] border px-5 py-5 transition {{ $notification->is_read ? 'border-slate-100 bg-' . $meta['color'] . '-50' : 'border-orange-100 bg-orange-50/50' }}"
                         data-notification-id="{{ $notification->id }}">
                         <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                             <div class="min-w-0 flex-1">
                                 <div class="flex flex-wrap items-center gap-3">
+                                    <span class="text-lg">{{ $meta['icon'] }}</span>
                                     <span
                                         class="inline-flex items-center rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest {{ $notification->is_read ? 'bg-slate-100 text-slate-500' : 'bg-orange-100 text-orange-600' }}">
                                         {{ $notification->is_read ? 'Read' : 'Unread' }}

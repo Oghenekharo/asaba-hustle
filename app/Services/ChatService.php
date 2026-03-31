@@ -72,14 +72,25 @@ class ChatService
                     : $conversation->client_id;
 
                 if ($receiverId) {
-                    $this->notificationService->create(
-                        $receiverId,
-                        'New message',
-                        $chatMessage->message,
-                        'message',
-                        route('web.app.conversations', ['conversation' => $conversation->uuid]),
-                        'Open Chat',
-                    );
+                    $receiver = \App\Models\User::find($receiverId);
+
+                    if ($receiver) {
+                        $this->notificationService->create(
+                            $receiverId,
+                            'New message',
+                            $chatMessage->message,
+                            'chat',
+                            route('web.app.conversations', ['conversation' => $conversation->uuid]),
+                            'Open Chat',
+                        );
+
+
+                        $receiver->notify(new \App\Notifications\ChatMessageNotification(
+                            message: $chatMessage->message,
+                            url: route('web.app.conversations', ['conversation' => $conversation->uuid]),
+                            senderName: $chatMessage->sender->name
+                        ));
+                    }
                 }
             });
 

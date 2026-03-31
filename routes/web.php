@@ -25,6 +25,8 @@ Route::get('/', [HomeController::class, 'index'])->name('web.home');
 // Route::get('/home', function () {
 //     return view('home');
 // })->name('home');
+Route::post('/push/subscribe', [HomeController::class, 'subscribe'])
+    ->middleware('auth');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [WebAuthController::class, 'showLogin'])->name('login');

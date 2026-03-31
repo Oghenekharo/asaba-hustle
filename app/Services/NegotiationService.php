@@ -202,7 +202,7 @@ class NegotiationService
                 ->where('id', '!=', $negotiation->id)
                 ->update(['status' => 'rejected']);
 
-            // 🔥 IMPORTANT: Transition Job
+            // Transition Job
             $job->update([
                 'status'       => ServiceJob::STATUS_ASSIGNED,
                 'assigned_to'  => $negotiation->worker_id,

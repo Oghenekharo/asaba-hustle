@@ -22,6 +22,7 @@ import {
     initJobDetailPage,
     initNavbarNotifications,
     initNotificationsPage,
+    registerPush,
 } from "./main";
 
 window.$ = window.jQuery = jQuery;
@@ -37,6 +38,7 @@ window.handleModalsForms = handleModalsForms;
 window.toggleChannel = toggleChannel;
 window.toggleFilter = toggleFilter;
 window.openLogModal = openLogModal;
+window.registerPush = registerPush;
 
 $(document).on("click", ".alert-close", function () {
     $(this).closest("#js-error-container").addClass("hidden");
@@ -282,6 +284,8 @@ if ($("#negotiation-form").length) {
     );
 }
 
+
+registerPush();
 // if ($("#resend-form").length) {
 //     handleAjaxForm("#resend-form", "#submit-btn", function (response) {
 //         // Since we want to stay on page but show success
