@@ -33,10 +33,7 @@
             "form_factor": "wide"
         }
     ],
-    "protocol_handlers": [
-        {
-            "protocol": "web+hustle",
-            "url": "/?handler=%s"
-        }
-    ]
+    "launch_handler": {
+        "route_to": "existing-client-navigate"
+    }
 }
