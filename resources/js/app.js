@@ -389,19 +389,30 @@ if (document.getElementById("enableNotifications")) {
     document
         .getElementById("enableNotifications")
         .addEventListener("click", async () => {
+            // 1. Basic Support Check
             if (!("Notification" in window)) {
-                alert("Notifications not supported");
+                alert("Your browser doesn't support notifications.");
                 return;
             }
 
-            const permission = await Notification.requestPermission();
+            // 2. iOS Safari Check (Must be a PWA)
+            const isStandalone =
+                window.matchMedia("(display-mode: standalone)").matches ||
+                window.navigator.standalone;
+            if (!isStandalone && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
+                window.openModal("installGuideModal");
+                return;
+            }
 
-            console.log("Permission:", permission);
+            try {
+                // 3. Request Permission & Register for Push
+                // We call the function you defined earlier!
+                await registerPush();
 
-            if (permission === "granted") {
-                alert("Notifications enabled!");
-            } else {
-                console.warn("Notification permission denied.");
+                alert("Success! You'll now receive updates.");
+            } catch (err) {
+                console.error("Registration failed:", err);
+                alert("Something went wrong during setup.");
             }
         });
 }

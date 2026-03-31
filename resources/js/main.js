@@ -1767,26 +1767,41 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 export async function registerPush() {
-    if (!("serviceWorker" in navigator)) return;
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+        console.warn("Push messaging is not supported in this browser/mode.");
+        return;
+    }
 
+    // iOS requires a user gesture for this prompt
     const permission = await Notification.requestPermission();
     if (permission !== "granted") return;
 
-    const registration = await navigator.serviceWorker.register("/sw.js");
+    // Ensure SW is registered and fully ready
+    await navigator.serviceWorker.register("/sw.js");
+    const registration = await navigator.serviceWorker.ready; // Use .ready for iOS stability
 
-    const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-    });
+    try {
+        const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        });
 
-    await fetch("/push/subscribe", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-        },
-        body: JSON.stringify(subscription),
-    });
+        // iOS subscription objects can be strict; stringify it explicitly
+        await fetch("/push/subscribe", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute("content"),
+            },
+            body: JSON.stringify(subscription.toJSON()), // Use .toJSON() to ensure all keys are included
+        });
+
+        console.log("iOS Push Registered Successfully");
+    } catch (error) {
+        console.error("Push subscription failed:", error);
+    }
 }
 
 export function getNotificationStyle(type) {
