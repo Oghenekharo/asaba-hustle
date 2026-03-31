@@ -116,12 +116,16 @@
                                 </div>
                             </div>
 
-                            <div class="border-t border-slate-50 p-3">
+                            <div class="border-t border-slate-50 p-3 space-y-2">
                                 <a href="{{ route('web.app.notifications') }}"
                                     class="flex items-center justify-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-700 transition hover:bg-orange-50 hover:text-orange-600">
                                     <i data-lucide="external-link" class="h-4 w-4"></i>
                                     View All Notifications
                                 </a>
+                                <button id="enableNotifications"
+                                    class="px-6 w-full py-3 bg-orange-500 text-white rounded-xl font-bold transition-all active:scale-95">
+                                    Enable Notifications
+                                </button>
                             </div>
                         </div>
                     </div>

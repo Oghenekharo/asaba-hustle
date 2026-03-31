@@ -383,3 +383,23 @@ if (handler) {
         window.location.href = `/app/conversations/${id}`;
     }
 }
+if (document.getElementById("enableNotifications")) {
+    document
+        .getElementById("enableNotifications")
+        .addEventListener("click", async () => {
+            if (!("Notification" in window)) {
+                alert("Notifications not supported");
+                return;
+            }
+
+            const permission = await Notification.requestPermission();
+
+            console.log("Permission:", permission);
+
+            if (permission === "granted") {
+                alert("Notifications enabled!");
+            } else {
+                console.warn("Notification permission denied.");
+            }
+        });
+}
