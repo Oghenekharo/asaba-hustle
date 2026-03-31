@@ -366,3 +366,20 @@ $(document).ready(function () {
         installBanner.addClass("hidden");
     }, 20000);
 });
+
+const params = new URLSearchParams(window.location.search);
+const handler = params.get("handler");
+
+if (handler) {
+    const url = handler.replace("web+hustle://", "");
+
+    if (url.startsWith("job/")) {
+        const id = url.split("/")[1];
+        window.location.href = `/app/jobs/${id}`;
+    }
+
+    if (url.startsWith("chat/")) {
+        const id = url.split("/")[1];
+        window.location.href = `/app/conversations/${id}`;
+    }
+}

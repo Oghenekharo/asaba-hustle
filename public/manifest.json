@@ -32,5 +32,11 @@
             "type": "image/png",
             "form_factor": "wide"
         }
+    ],
+    "protocol_handlers": [
+        {
+            "protocol": "web+hustle",
+            "url": "/?handler=%s"
+        }
     ]
 }
