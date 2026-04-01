@@ -47,6 +47,8 @@ Route::middleware(['token.active', 'auth:sanctum', 'account.active', 'throttle:a
 
         Route::post('/upload-id', [AuthController::class, 'uploadId']);
 
+        Route::post('/upload-photo', [AuthController::class, 'uploadPhoto']);
+
         Route::post('/availability', [AuthController::class, 'updateAvailability']);
 
         Route::post('/send-verification-token', [AuthController::class, 'sendVerificationToken']);

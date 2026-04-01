@@ -33,11 +33,12 @@ class NegotiationUpdateNotification extends Notification
     protected function title(): string
     {
         return match ($this->type) {
-            'new_offer' => '🛠️ New offer received',
-            'counter_offer' => '🔁 Counter offer received',
-            'accepted' => '✅ Offer accepted',
-            'rejected' => '⚠️ Offer rejected',
-            default => '🔔 Negotiation update',
+            'new_offer' => 'New offer received',
+            'counter_offer' => 'Counter offer received',
+            'counter_offer_sent' => 'Counter offer sent',
+            'accepted' => 'Offer accepted',
+            'rejected' => 'Offer rejected',
+            default => 'Negotiation update',
         };
     }
 
@@ -46,6 +47,7 @@ class NegotiationUpdateNotification extends Notification
         return match ($this->type) {
             'new_offer' => "A new offer was made for \"{$this->jobTitle}\"",
             'counter_offer' => "You received a counter offer for \"{$this->jobTitle}\"",
+            'counter_offer_sent' => "A counter offer was sent for \"{$this->jobTitle}\"",
             'accepted' => "Your offer was accepted for \"{$this->jobTitle}\"",
             'rejected' => "Your offer was rejected for \"{$this->jobTitle}\"",
             default => "Negotiation update for \"{$this->jobTitle}\"",

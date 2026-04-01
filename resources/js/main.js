@@ -342,81 +342,168 @@ export const toggleFilter = function (id) {
     arrow.classList.toggle("rotate-180");
 };
 
+// export const initUserDropdown = function () {
+//     const $trigger = $("#userDropdownTrigger");
+//     const $menu = $("#userDropdownMenu");
+//     const $arrow = $("#dropdownArrow");
+//     const $overlay = $("#userDrawerOverlay");
+//     const $close = $("#userDrawerClose");
+
+//     if (!$trigger.length || !$menu.length) return;
+
+//     const isMobileDrawer = () => window.innerWidth < 768;
+//     const mobileClosedClasses =
+//         "hidden -translate-x-full opacity-0 pointer-events-none";
+//     const mobileOpenClasses = "translate-x-0 opacity-100 pointer-events-auto";
+//     const overlayClosedClasses = "opacity-0 pointer-events-none";
+//     const overlayOpenClasses = "opacity-100 pointer-events-auto";
+
+//     function openMenu() {
+//         if (isMobileDrawer()) {
+//             $menu.removeClass(mobileClosedClasses);
+
+//             requestAnimationFrame(() => {
+//                 $menu.addClass(mobileOpenClasses);
+//             });
+
+//             $overlay.removeClass(overlayClosedClasses);
+//             requestAnimationFrame(() => {
+//                 $overlay.addClass(overlayOpenClasses);
+//             });
+
+//             $arrow.addClass("rotate-180");
+//             return;
+//         }
+
+//         $menu.removeClass("hidden");
+//         $arrow.addClass("rotate-180");
+//     }
+
+//     function closeMenu() {
+//         if (isMobileDrawer()) {
+//             $menu.removeClass(mobileOpenClasses).addClass(
+//                 "-translate-x-full opacity-0 pointer-events-none",
+//             );
+//             $overlay.removeClass(overlayOpenClasses).addClass(
+//                 overlayClosedClasses,
+//             );
+//             $arrow.removeClass("rotate-180");
+
+//             setTimeout(() => {
+//                 if (isMobileDrawer() && $menu.hasClass("opacity-0")) {
+//                     $menu.addClass("hidden");
+//                 }
+//             }, 300);
+
+//             return;
+//         }
+
+//         $menu.addClass("hidden");
+//         $arrow.removeClass("rotate-180");
+//     }
+
+//     $trigger.on("click", function (e) {
+//         e.stopPropagation();
+
+//         if (isMobileDrawer()) {
+//             if ($menu.hasClass("hidden") || $menu.hasClass("opacity-0")) {
+//                 openMenu();
+//             } else {
+//                 closeMenu();
+//             }
+
+//             return;
+//         }
+
+//         $menu.toggleClass("hidden");
+//         $arrow.toggleClass("rotate-180");
+//     });
+
+//     $close.on("click", closeMenu);
+//     $overlay.on("click", closeMenu);
+
+//     $(window).on("click", function (e) {
+//         if (
+//             !$trigger.is(e.target) &&
+//             $trigger.has(e.target).length === 0 &&
+//             !$menu.is(e.target) &&
+//             $menu.has(e.target).length === 0
+//         ) {
+//             closeMenu();
+//         }
+//     });
+
+//     $(window).on("resize", function () {
+//         if (!isMobileDrawer()) {
+//             $menu.addClass("hidden").removeClass(
+//                 "translate-x-0 opacity-100 pointer-events-auto -translate-x-full opacity-0 pointer-events-none",
+//             );
+//             $overlay.removeClass(overlayOpenClasses).addClass(
+//                 overlayClosedClasses,
+//             );
+//             $arrow.removeClass("rotate-180");
+//             return;
+//         }
+
+//         if ($menu.hasClass("hidden")) {
+//             $menu.addClass("-translate-x-full opacity-0 pointer-events-none");
+//         }
+//     });
+// };
+
 export const initUserDropdown = function () {
     const $trigger = $("#userDropdownTrigger");
     const $menu = $("#userDropdownMenu");
-    const $arrow = $("#dropdownArrow");
     const $overlay = $("#userDrawerOverlay");
     const $close = $("#userDrawerClose");
+    const $arrow = $("#dropdownArrow");
 
-    if (!$trigger.length || !$menu.length) return;
+    const isMobile = () => window.innerWidth < 768;
 
-    const isMobileDrawer = () => window.innerWidth < 768;
-
-    function openMenu() {
-        if (isMobileDrawer()) {
-            $menu.removeClass("hidden translate-x-[105%]");
-            $overlay.removeClass("hidden");
-            return;
-        }
-
+    function open() {
         $menu.removeClass("hidden");
+        if (isMobile()) {
+            $overlay.removeClass("hidden");
+            setTimeout(() => $menu.removeClass("-translate-x-full"), 10);
+        }
         $arrow.addClass("rotate-180");
     }
 
-    function closeMenu() {
-        if (isMobileDrawer()) {
-            $menu.addClass("translate-x-[105%]");
+    function close() {
+        if (isMobile()) {
+            $menu.addClass("-translate-x-full");
             $overlay.addClass("hidden");
-
-            setTimeout(() => {
-                if (isMobileDrawer()) {
-                    $menu.addClass("hidden");
-                }
-            }, 300);
-
-            return;
+            setTimeout(() => $menu.addClass("hidden"), 300);
+        } else {
+            $menu.addClass("hidden");
         }
-
-        $menu.addClass("hidden");
         $arrow.removeClass("rotate-180");
     }
 
     $trigger.on("click", function (e) {
         e.stopPropagation();
-
-        if (isMobileDrawer()) {
-            if ($menu.hasClass("hidden")) {
-                openMenu();
-            } else {
-                closeMenu();
-            }
-
-            return;
-        }
-
-        $menu.toggleClass("hidden");
-        $arrow.toggleClass("rotate-180");
+        $menu.hasClass("hidden") ? open() : close();
     });
 
-    $close.on("click", closeMenu);
-    $overlay.on("click", closeMenu);
+    $close.on("click", close);
+    $overlay.on("click", close);
 
-    $(window).on("click", function (e) {
+    // Close when clicking outside
+    $(document).on("click", function (e) {
         if (
-            !$trigger.is(e.target) &&
-            $trigger.has(e.target).length === 0 &&
             !$menu.is(e.target) &&
-            $menu.has(e.target).length === 0
+            $menu.has(e.target).length === 0 &&
+            !$trigger.is(e.target)
         ) {
-            closeMenu();
+            close();
         }
     });
 
+    // Fix state on resize
     $(window).on("resize", function () {
-        if (!isMobileDrawer()) {
+        if (!isMobile()) {
+            $menu.removeClass("-translate-x-full").addClass("hidden");
             $overlay.addClass("hidden");
-            $menu.removeClass("translate-x-[105%]");
         }
     });
 };
@@ -1452,6 +1539,34 @@ export const initMessagesPage = function () {
 export const initJobDetailPage = function () {
     const $jobPage = $("#job-detail-page");
 
+    if (!$jobPage.length) return;
+
+    const jobId = $jobPage.data("job-id");
+    const initialStatus = String($jobPage.data("job-status") || "");
+    const canOpenRatingModal =
+        String($jobPage.data("can-open-rating-modal") || "false") === "true";
+    const ratingModalId = String($jobPage.data("rating-modal-id") || "");
+    const ratingPromptStorageKey = jobId
+        ? `job-rating-prompt:${jobId}:${initialStatus}`
+        : "";
+
+    function maybeOpenRatingModal() {
+        if (!canOpenRatingModal || !ratingModalId || !ratingPromptStorageKey) {
+            return;
+        }
+
+        if (sessionStorage.getItem(ratingPromptStorageKey) === "shown") {
+            return;
+        }
+
+        sessionStorage.setItem(ratingPromptStorageKey, "shown");
+        openModal(ratingModalId);
+    }
+
+    if (["completed", "rated"].includes(initialStatus)) {
+        setTimeout(maybeOpenRatingModal, 250);
+    }
+
     window.copyTransferDetail = async function (value, label = "Detail") {
         if (!value) {
             showAlert(
@@ -1589,6 +1704,9 @@ export const initJobDetailPage = function () {
     if ($("#job-rate-form").length) {
         handleAjaxForm("#job-rate-form", "#job-rate-submit", function () {
             setTimeout(() => {
+                if (ratingModalId) {
+                    closeModal(ratingModalId);
+                }
                 window.location.reload();
             }, 1200);
         });
@@ -1647,6 +1765,12 @@ export const initJobDetailPage = function () {
         const loadingText = $form.data("loading-text") || "Updating...";
         const feedbackTarget =
             $form.data("success-target") || "#job-lifecycle-feedback";
+        const isMultipart =
+            $form.attr("enctype") === "multipart/form-data" ||
+            $form.find('input[type="file"]').length > 0;
+        const payload = isMultipart
+            ? new FormData($form[0])
+            : $form.serialize();
 
         $button.prop("disabled", true);
         $buttonText.text(loadingText);
@@ -1654,7 +1778,11 @@ export const initJobDetailPage = function () {
         $.ajax({
             url: $form.attr("action"),
             method: "POST",
-            data: $form.serialize(),
+            data: payload,
+            processData: !isMultipart,
+            contentType: isMultipart
+                ? false
+                : "application/x-www-form-urlencoded; charset=UTF-8",
         })
             .done(function (response) {
                 showAlert(
@@ -1679,9 +1807,6 @@ export const initJobDetailPage = function () {
             });
     });
 
-    const jobId = $jobPage.data("job-id");
-    const initialStatus = String($jobPage.data("job-status") || "");
-
     if (window.Echo && jobId) {
         window.Echo.private(`job.${jobId}`).listen(
             ".job.status.updated",
@@ -1690,8 +1815,12 @@ export const initJobDetailPage = function () {
 
                 const nextStatus = String(payload.status || "");
                 const hasRating = Boolean(payload.has_rating);
+                const paidAt = payload.paid_at ?? null;
+                const statusChanged = nextStatus !== initialStatus;
+                const paymentStateChanged =
+                    initialStatus === "payment_pending" && paidAt !== null;
 
-                if (nextStatus === initialStatus && !hasRating) {
+                if (!statusChanged && !hasRating && !paymentStateChanged) {
                     return;
                 }
 
@@ -1766,41 +1895,60 @@ function urlBase64ToUint8Array(base64String) {
     return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
 }
 
-export async function registerPush() {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-        console.warn("Push messaging is not supported in this browser/mode.");
-        return;
+async function persistPushSubscription(subscription) {
+    const response = await fetch("/push/subscribe", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute("content"),
+        },
+        body: JSON.stringify(subscription.toJSON()),
+    });
+
+    if (!response.ok) {
+        throw new Error("Unable to save push subscription.");
     }
 
-    // iOS requires a user gesture for this prompt
-    const permission = await Notification.requestPermission();
+    return response.json().catch(() => ({}));
+}
+
+export async function registerPush() {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+        throw new Error("Push messaging is not supported in this browser.");
+    }
+
+    if (!VAPID_PUBLIC_KEY) {
+        throw new Error("Missing VAPID public key.");
+    }
+
+    const currentPermission = Notification.permission;
+    const permission =
+        currentPermission === "granted"
+            ? currentPermission
+            : await Notification.requestPermission();
+
     if (permission !== "granted") return;
 
-    // Ensure SW is registered and fully ready
     await navigator.serviceWorker.register("/sw.js");
-    const registration = await navigator.serviceWorker.ready; // Use .ready for iOS stability
+    const registration = await navigator.serviceWorker.ready;
 
     try {
-        const subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-        });
+        const existingSubscription =
+            await registration.pushManager.getSubscription();
+        const subscription =
+            existingSubscription ||
+            (await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+            }));
 
-        // iOS subscription objects can be strict; stringify it explicitly
-        await fetch("/push/subscribe", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": document
-                    .querySelector('meta[name="csrf-token"]')
-                    .getAttribute("content"),
-            },
-            body: JSON.stringify(subscription.toJSON()), // Use .toJSON() to ensure all keys are included
-        });
-
-        console.log("iOS Push Registered Successfully");
+        await persistPushSubscription(subscription);
+        return subscription;
     } catch (error) {
         console.error("Push subscription failed:", error);
+        throw error;
     }
 }
 

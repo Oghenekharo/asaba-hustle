@@ -70,6 +70,26 @@
                         {{ $paymentLifecycleLabel }}
                     </div>
                 @endif
+                @if ($paymentReceiptUrl)
+                    <div class="mt-4 rounded-2xl border border-amber-200 bg-white/80 px-4 py-4">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">
+                            Transfer Receipt Uploaded
+                        </p>
+                        <p class="mt-2 text-sm font-medium text-amber-900">
+                            {{ $paymentReceiptOriginalName ?: 'Transfer receipt' }}
+                        </p>
+                        @if ($paymentReceiptUploadedAt)
+                            <p class="mt-1 text-[10px] font-black uppercase tracking-widest text-amber-500">
+                                {{ \Illuminate\Support\Carbon::parse($paymentReceiptUploadedAt)->diffForHumans() }}
+                            </p>
+                        @endif
+                        <button type="button" onclick="openModal('paymentReceiptModal')"
+                            class="mt-4 inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-white px-4 py-3 text-[10px] font-black uppercase tracking-widest text-amber-700 transition hover:border-amber-300 hover:text-amber-800">
+                            <i data-lucide="receipt-text" class="h-4 w-4"></i>
+                            View Receipt
+                        </button>
+                    </div>
+                @endif
                 @if ($showCashPaymentNote)
                     <div class="mt-4 rounded-2xl border border-amber-200 bg-white/70 px-4 py-3">
                         <p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">
@@ -183,9 +203,22 @@
                         </div>
                     @endif
                     <form id="job-mark-paid-form" class="job-status-form"
-                        action="{{ route('web.app.jobs.mark-paid', $job) }}" method="POST"
+                        action="{{ route('web.app.jobs.mark-paid', $job) }}" method="POST" enctype="multipart/form-data"
                         data-success-target="#job-lifecycle-feedback" data-loading-text="Updating...">
                         @csrf
+                        @if ($canUploadTransferReceipt)
+                            <div class="mb-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                                <label for="payment_receipt"
+                                    class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                    Transfer Receipt
+                                </label>
+                                <input type="file" name="receipt" id="payment_receipt" accept=".jpg,.jpeg,.png,.pdf"
+                                    class="mt-3 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-orange-50 file:px-3 file:py-2 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:text-orange-600" />
+                                <p class="mt-2 text-xs font-medium text-slate-500">
+                                    Upload a JPG, PNG, or PDF transfer receipt before marking this job as paid.
+                                </p>
+                            </div>
+                        @endif
                         <x-button id="job-mark-paid-submit" type="submit" class="w-full">
                             <x-slot:icon>
                                 <i data-lucide="wallet" class="h-4 w-4"></i>
@@ -258,4 +291,46 @@
             <div id="job-lifecycle-feedback" class="mt-4 hidden rounded-2xl border px-4 py-3 text-sm"></div>
         </div>
     </section>
+@endif
+
+@if ($canViewTransferReceipt)
+    <x-modal id="paymentReceiptModal" title="Transfer Receipt" size="max-w-2xl">
+        <div class="space-y-5">
+            <div class="rounded-[1.75rem] border border-amber-100 bg-amber-50/80 px-5 py-4">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">Receipt Evidence</p>
+                <p class="mt-2 text-sm font-medium text-amber-900">
+                    Review the uploaded transfer receipt before confirming payment.
+                </p>
+            </div>
+
+            <div class="rounded-[1.75rem] border border-slate-100 bg-white px-5 py-5">
+                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">File</p>
+                <p class="mt-2 text-sm font-bold text-slate-900">
+                    {{ $paymentReceiptOriginalName ?: 'Transfer receipt' }}
+                </p>
+                @if ($paymentReceiptUploadedAt)
+                    <p class="mt-1 text-xs font-medium text-slate-500">
+                        Uploaded {{ \Illuminate\Support\Carbon::parse($paymentReceiptUploadedAt)->diffForHumans() }}
+                    </p>
+                @endif
+                <a href="{{ $paymentReceiptUrl }}" target="_blank" rel="noopener noreferrer"
+                    class="mt-4 inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition hover:opacity-90">
+                    <i data-lucide="external-link" class="h-4 w-4"></i>
+                    Open Receipt
+                </a>
+            </div>
+
+            @if (\Illuminate\Support\Str::endsWith(\Illuminate\Support\Str::lower($paymentReceiptUrl), '.pdf'))
+                <div class="rounded-[1.75rem] border border-slate-100 bg-slate-50 px-5 py-10 text-center">
+                    <p class="text-sm font-medium text-slate-600">
+                        PDF receipts open in a new tab for full viewing.
+                    </p>
+                </div>
+            @else
+                <div class="overflow-hidden rounded-[1.75rem] border border-slate-100 bg-slate-50">
+                    <img src="{{ $paymentReceiptUrl }}" alt="Transfer receipt" class="max-h-[32rem] w-full object-contain" />
+                </div>
+            @endif
+        </div>
+    </x-modal>
 @endif

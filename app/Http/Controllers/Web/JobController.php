@@ -86,6 +86,8 @@ class JobController extends Controller
 
     public function showJob(ServiceJob $job)
     {
+        $this->authorize('view', $job);
+
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
         $isOwner = $user && (int) $user->id === (int) $job->user_id;
@@ -373,8 +375,21 @@ class JobController extends Controller
     {
         $this->authorize('markPaid', $job);
 
+        $validated = $request->validate([
+            'receipt' => [
+                $job->payment_method === 'transfer' ? 'required' : 'nullable',
+                'file',
+                'mimes:jpg,jpeg,png,pdf',
+                'max:5120',
+            ],
+        ]);
+
         try {
-            $job = $this->jobService->markJobPaid($job, $request->user()->id);
+            $job = $this->jobService->markJobPaid(
+                $job,
+                $request->user()->id,
+                $validated['receipt'] ?? null
+            );
         } catch (Exception $exception) {
             return $this->errorResponse($exception->getMessage(), 400);
         }

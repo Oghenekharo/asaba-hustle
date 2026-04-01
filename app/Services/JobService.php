@@ -12,8 +12,10 @@ use App\Models\Rating;
 use App\Models\User;
 use App\Services\UserNotificationService;
 use App\Support\CacheKeys;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class JobService
@@ -480,9 +482,9 @@ class JobService
         });
     }
 
-    public function markJobPaid(ServiceJob $job, int $clientId)
+    public function markJobPaid(ServiceJob $job, int $clientId, ?UploadedFile $receipt = null)
     {
-        return DB::transaction(function () use ($job, $clientId) {
+        return DB::transaction(function () use ($job, $clientId, $receipt) {
 
             $job = ServiceJob::where('id', $job->id)
                 ->lockForUpdate()
@@ -494,6 +496,10 @@ class JobService
 
             if ($job->status !== ServiceJob::STATUS_PAYMENT_PENDING) {
                 throw new \Exception('Job is not awaiting payment confirmation.');
+            }
+
+            if ($job->payment_method === 'transfer' && !$receipt) {
+                throw new \Exception('Upload a transfer receipt before marking this job as paid.');
             }
 
             $job->update([
@@ -527,6 +533,25 @@ class JobService
                 ]);
             }
 
+            if ($receipt) {
+                $storedReceipt = $receipt->store('payments/receipts', 'public');
+                $providerPayload = $payment->provider_payload ?? [];
+
+                if (!empty($providerPayload['receipt_path'])) {
+                    Storage::disk('public')->delete($providerPayload['receipt_path']);
+                }
+
+                $payment->update([
+                    'provider_payload' => [
+                        ...$providerPayload,
+                        'receipt_path' => $storedReceipt,
+                        'receipt_url' => Storage::disk('public')->url($storedReceipt),
+                        'receipt_original_name' => $receipt->getClientOriginalName(),
+                        'receipt_uploaded_at' => now()->toIso8601String(),
+                    ],
+                ]);
+            }
+
             $this->activityLogService->log($clientId, 'job_payment_marked_sent', [
                 'job_id' => $job->id,
                 'payment_id' => $payment->id,
@@ -534,6 +559,7 @@ class JobService
                 'amount' => $payment->amount,
                 'payment_method' => $payment->payment_method,
                 'paid_at' => optional($job->paid_at)->toIso8601String(),
+                'receipt_uploaded' => $receipt !== null,
             ]);
 
             DB::afterCommit(function () use ($job) {

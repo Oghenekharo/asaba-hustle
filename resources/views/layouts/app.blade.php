@@ -58,12 +58,15 @@
         @include('partials.nav')
     @endif
     <!-- Main Content Area -->
-    <main class="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8">
+    <main
+        class="mx-auto max-w-7xl px-4 py-6 {{ auth()->check() && request()->routeIs('web.app*') ? 'pb-28 md:pb-8' : '' }} md:px-6 md:py-8">
         {{-- <!-- Optional Breadcrumb or Page Header can go here via @yield --> --}}
         <div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
             @yield('content')
         </div>
     </main>
+
+    <x-install-guide-modal />
 </body>
 <script>
     window.asabaAppConfig = {

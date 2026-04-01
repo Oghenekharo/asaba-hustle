@@ -33,18 +33,21 @@ class UserNotificationService
     public function sendNegotiationUpdate($user, $job, $type, $data = [])
     {
         $message = $this->resolveMessage($type, $job);
+        $jobUrl = route('web.app.jobs.show', $job);
         $notification = $this->create(
             $user->id,
             $message['title'],
             $message['body'],
             'negotiation',
+            $jobUrl,
+            'Review Job'
         );
 
 
         $user->notify(new NegotiationUpdateNotification(
             type: $type,
             jobTitle: $job->title,
-            url: route('web.app.jobs.show', $job)
+            url: $jobUrl
         ));
 
         return $notification;

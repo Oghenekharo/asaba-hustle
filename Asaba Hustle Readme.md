@@ -24,6 +24,7 @@ The platform currently includes:
 - workers can have at most 3 total skills
 - clients and workers can both rate each other after successful closeout
 - chat opens only after a worker has been assigned
+- transfer jobs require a receipt upload before payment can be marked sent
 
 ## Current Job Flow
 
@@ -38,8 +39,9 @@ The platform currently includes:
 9. Worker starts the job
 10. Worker marks it completed
 11. Client marks payment sent
-12. Worker confirms payment
-13. Both parties can rate each other
+12. For transfer jobs, the client uploads a payment receipt and the worker reviews it
+13. Worker confirms payment
+14. Both parties can rate each other
 
 Current job statuses:
 
@@ -77,6 +79,7 @@ Notifications now cover:
 - new chat message
 - rating submitted
 - admin rollback and cancellation actions
+- negotiation updates and job-linked push notifications
 
 ## Current Admin Coverage
 
@@ -156,15 +159,19 @@ Backend:
 - `app/Services/JobService.php`
 - `app/Services/NegotiationService.php`
 - `app/Services/ChatService.php`
+- `app/Services/UserNotificationService.php`
 - `app/Services/NigeriaBulkSmsService.php`
 - `app/Policies/ServiceJobPolicy.php`
 - `app/Http/Controllers/Web/JobController.php`
+- `app/Http/Controllers/Api/AuthController.php`
 - `app/Http/Controllers/Api/ServiceJobController.php`
 - `app/Http/Controllers/Api/JobNegotiationController.php`
 
 Frontend:
 
 - `resources/views/web/job-detail.blade.php`
+- `resources/views/web/job-detail/partials/lifecycle.blade.php`
+- `resources/views/web/job-detail/partials/rating.blade.php`
 - `resources/views/web/messages.blade.php`
 - `resources/views/admin/jobs/show.blade.php`
 - `resources/views/admin/users/index.blade.php`

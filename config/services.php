@@ -54,4 +54,8 @@ return [
         'base_url' => env('NIGERIABULKSMS_BASE_URL', 'https://portal.nigeriabulksms.com/api/'),
     ],
 
+    'mapbox' => [
+        'public_token' => env('NEXT_PUBLIC_MAPBOX_TOKEN', env('VITE_MAPBOX_TOKEN')),
+    ],
+
 ];

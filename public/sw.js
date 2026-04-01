@@ -7,9 +7,7 @@ self.addEventListener("push", function (event) {
 
     if (event.data) {
         try {
-            // Try JSON first (Laravel WebPush preferred format)
             const parsed = event.data.json();
-            console.log(parsed);
 
             data = {
                 title: parsed.title || data.title,
@@ -17,7 +15,6 @@ self.addEventListener("push", function (event) {
                 url: parsed.url || parsed.data?.url || data.url,
             };
         } catch (e) {
-            // Fallback to plain text
             try {
                 const text = event.data.text();
                 data.body = text;
@@ -34,15 +31,40 @@ self.addEventListener("push", function (event) {
             data: data.url,
         }),
     );
-
-    console.log("Push received:", event);
 });
 
-const CACHE_NAME = "hustle-v1";
+self.addEventListener("notificationclick", function (event) {
+    event.notification.close();
+
+    const targetUrl =
+        typeof event.notification.data === "string" &&
+        event.notification.data.trim() !== ""
+            ? event.notification.data
+            : "/";
+
+    event.waitUntil(
+        clients.matchAll({ type: "window", includeUncontrolled: true }).then(
+            function (windowClients) {
+                for (const client of windowClients) {
+                    if ("focus" in client) {
+                        client.navigate(targetUrl);
+                        return client.focus();
+                    }
+                }
+
+                if (clients.openWindow) {
+                    return clients.openWindow(targetUrl);
+                }
+            },
+        ),
+    );
+});
+
+const CACHE_NAME = "hustle-v3";
 const STATIC_ASSETS = [
     "/",
     "/offline.html",
-    "/images/icons/asaba-hustle.png", // ✅ add this
+    "/images/icons/asaba-hustle.png",
 ];
 
 self.addEventListener("install", (event) => {
@@ -51,19 +73,44 @@ self.addEventListener("install", (event) => {
             return cache.addAll(STATIC_ASSETS);
         }),
     );
+
+    self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+    event.waitUntil(
+        caches.keys().then((cacheNames) =>
+            Promise.all(
+                cacheNames
+                    .filter((cacheName) => cacheName !== CACHE_NAME)
+                    .map((cacheName) => caches.delete(cacheName)),
+            ),
+        ),
+    );
+
+    self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
+    const requestUrl = new URL(event.request.url);
+
     event.respondWith(
         caches.match(event.request).then((cached) => {
-            // 1. Return cached asset if available
             if (cached) return cached;
 
-            // 2. Otherwise try network
+            if (requestUrl.pathname === "/offline.html") {
+                return caches.match("/offline.html");
+            }
+
             return fetch(event.request).catch(() => {
-                // 3. Only fallback for HTML pages
                 if (event.request.destination === "document") {
-                    return caches.match("/offline.html");
+                    const offlineUrl = new URL(
+                        "/offline.html",
+                        self.location.origin,
+                    );
+                    offlineUrl.searchParams.set("retry", event.request.url);
+
+                    return Response.redirect(offlineUrl.toString(), 302);
                 }
             });
         }),

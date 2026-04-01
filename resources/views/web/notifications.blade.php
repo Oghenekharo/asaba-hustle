@@ -35,9 +35,16 @@
                 @forelse ($notifications as $notification)
                     @php
                         $meta = \App\Support\NotificationType::meta($notification->type);
+                        $readStateClass = match ($meta['color']) {
+                            'blue' => 'border-slate-100 bg-blue-50',
+                            'purple' => 'border-slate-100 bg-purple-50',
+                            'green' => 'border-slate-100 bg-green-50',
+                            'yellow' => 'border-slate-100 bg-yellow-50',
+                            default => 'border-slate-100 bg-gray-50',
+                        };
                     @endphp
                     <article
-                        class="js-notification-page-item rounded-[1.75rem] border px-5 py-5 transition {{ $notification->is_read ? 'border-slate-100 bg-' . $meta['color'] . '-50' : 'border-orange-100 bg-orange-50/50' }}"
+                        class="js-notification-page-item rounded-[1.75rem] border px-5 py-5 transition {{ $notification->is_read ? $readStateClass : 'border-orange-100 bg-orange-50/50' }}"
                         data-notification-id="{{ $notification->id }}">
                         <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                             <div class="min-w-0 flex-1">

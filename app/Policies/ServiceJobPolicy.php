@@ -7,6 +7,20 @@ use App\Models\User;
 
 class ServiceJobPolicy
 {
+    public function view(User $user, ServiceJob $job): bool
+    {
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        if ($user->id === $job->user_id || $user->id === $job->assigned_to) {
+            return true;
+        }
+
+        return $job->status === ServiceJob::STATUS_OPEN
+            && $job->assigned_to === null;
+    }
+
     public function create(User $user): bool
     {
         return $user->hasRole('client')

@@ -43,10 +43,25 @@
     $canRateWorker = $isOwner && in_array($job->status, ['completed', 'rated']) && !$clientRating && $job->worker;
     $canRateClient =
         $isAssignedWorker && in_array($job->status, ['completed', 'rated']) && !$workerRating && $job->client;
+    $canOpenRatingModal = $canRateWorker || $canRateClient;
+    $ratingModalId = $canOpenRatingModal ? 'jobRatingModal' : null;
     $canViewTransferDetails =
         $isOwner && $job->worker && $job->status === 'payment_pending' && $job->payment_method === 'transfer';
     $showCashPaymentNote =
         $isOwner && $job->worker && $job->status === 'payment_pending' && $job->payment_method === 'cash';
+    $paymentPayload = $job->payment?->provider_payload ?? [];
+    $paymentReceiptUrl = data_get($paymentPayload, 'receipt_url');
+    $paymentReceiptOriginalName = data_get($paymentPayload, 'receipt_original_name');
+    $paymentReceiptUploadedAt = data_get($paymentPayload, 'receipt_uploaded_at');
+    $canUploadTransferReceipt =
+        $canMarkPaid && $job->payment_method === 'transfer';
+    $canViewTransferReceipt =
+        $paymentReceiptUrl &&
+        (
+            ($isOwner && in_array($job->status, ['payment_pending', 'completed', 'rated'])) ||
+            ($isAssignedWorker && $job->status === 'payment_pending' && $job->paid_at !== null) ||
+            ($isAssignedWorker && in_array($job->status, ['completed', 'rated']))
+        );
     $acceptedStages = ['worker_accepted', 'in_progress', 'payment_pending', 'completed', 'rated'];
     $inProgressStages = ['in_progress', 'payment_pending', 'completed', 'rated'];
     $paymentPendingStages = ['payment_pending', 'completed', 'rated'];
@@ -67,13 +82,20 @@
         default => $job->payment?->status ?? Payment::STATUS_PENDING,
     };
     $paymentLifecycleLabel = $paymentLifecycleStatus ? str_replace('_', ' ', $paymentLifecycleStatus) : null;
+    $clientLatitude = $job->client?->latitude ?? $job->latitude;
+    $clientLongitude = $job->client?->longitude ?? $job->longitude;
+    $workerRouteSourceLatitude = $viewer->latitude;
+    $workerRouteSourceLongitude = $viewer->longitude;
+    $showWorkerToClientMap = $isWorker && !$isOwner && $job->status === ServiceJob::STATUS_OPEN;
 @endphp
 
 
 
 @section('content')
     <div class="max-w-5xl mx-auto pt-20" id="job-detail-page" data-job-id="{{ $job->id }}"
-        data-job-status="{{ $job->status }}">
+        data-job-status="{{ $job->status }}"
+        data-can-open-rating-modal="{{ $canOpenRatingModal ? 'true' : 'false' }}"
+        data-rating-modal-id="{{ $ratingModalId }}">
         <a href="{{ route('web.app.jobs') }}"
             class="inline-flex items-center gap-2 text-[10px] font-black uppercase opacity-40 hover:opacity-100 hover:text-[var(--brand)] transition-all mb-8">
             <i data-lucide="chevron-left" class="w-4 h-4"></i>
@@ -135,6 +157,12 @@
                 </section>
 
                 @include('web.job-detail.partials.lifecycle')
+
+                @if ($showWorkerToClientMap)
+                    <x-route-map title="Distance To Client" :source-latitude="$workerRouteSourceLatitude" :source-longitude="$workerRouteSourceLongitude"
+                        :destination-latitude="$clientLatitude" :destination-longitude="$clientLongitude" source-label="You"
+                        destination-label="Client" />
+                @endif
             </div>
 
             <aside class="lg:col-span-4 space-y-6">

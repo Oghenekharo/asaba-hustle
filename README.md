@@ -90,11 +90,12 @@ Core flows currently working in the codebase:
 - negotiation create, reject-with-counter, counter again on the same record, and accept
 - worker assignment from accepted negotiation
 - worker accept, reject, start, complete
-- client mark paid
+- client mark paid with transfer receipt upload for `transfer` jobs
 - worker confirm payment
-- client rate worker
+- both client and worker rate each other after closeout
 - admin review of users, jobs, payments, ratings, and activity logs
 - admin cancellation limited to `open`, `assigned`, `worker_accepted`, and `in_progress`
+- PWA install support, service worker offline fallback, and browser push subscription wiring
 
 Recent structural updates:
 
@@ -121,8 +122,9 @@ Recommended live workflow:
 9. If the worker rejects, the job reopens and the accepted offer is marked rejected.
 10. If the worker accepts, work can start and later be completed.
 11. Client marks payment sent.
-12. Worker confirms payment.
-13. Client rates the worker.
+12. For `transfer`, the client uploads a receipt and the worker can review it before confirmation.
+13. Worker confirms payment.
+14. Both participants can rate each other after the job is closed.
 
 Current job statuses:
 
@@ -144,7 +146,9 @@ Current service-job payment methods:
 Manual payment flow:
 
 - client marks the job as paid
+- transfer jobs require a receipt upload before payment can be marked sent
 - a payment record is created with the job payment method
+- receipt metadata is stored on the payment record payload for worker review
 - worker confirms receipt
 - payment becomes successful
 
@@ -164,6 +168,7 @@ Realtime updates are implemented for:
 - messages
 - user notifications
 - job status changes
+- negotiation updates
 
 Channel patterns in use:
 
@@ -206,6 +211,8 @@ Backend:
 Frontend:
 
 - `resources/views/web/job-detail.blade.php`
+- `resources/views/web/job-detail/partials/lifecycle.blade.php`
+- `resources/views/web/job-detail/partials/rating.blade.php`
 - `resources/views/admin/payments/index.blade.php`
 - `resources/views/admin/dashboard.blade.php`
 - `resources/js/main.js`

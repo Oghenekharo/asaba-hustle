@@ -30,21 +30,19 @@ class HomeController extends Controller
 
     public function subscribe(Request $request)
     {
+        $payload = $request->validate([
+            'endpoint' => ['required', 'string'],
+            'keys.p256dh' => ['required', 'string'],
+            'keys.auth' => ['required', 'string'],
+        ]);
+
         /** @var \App\Models\User|null $user 08000000010 */
         $user = $request->user();
 
-        // $user->pushSubscriptions()->updateOrCreate(
-        //     ['endpoint' => $request->endpoint],
-        //     [
-        //         'public_key' => $request->keys['p256dh'],
-        //         'auth_token' => $request->keys['auth'],
-        //     ]
-        // );
-
         $user->updatePushSubscription(
-            $request->endpoint,
-            $request->keys['p256dh'],
-            $request->keys['auth']
+            $payload['endpoint'],
+            $payload['keys']['p256dh'],
+            $payload['keys']['auth']
         );
 
         return response()->json(['success' => true]);

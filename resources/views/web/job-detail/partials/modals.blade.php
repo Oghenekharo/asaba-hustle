@@ -62,6 +62,7 @@
                 $applicant?->skills?->reject(fn($skill) => $skill->id === $applicant->primary_skill_id) ?? collect();
             $workerRating = $applicant?->average_rating ? round((float) $applicant->average_rating, 1) : null;
             $completedJobs = (int) ($applicant?->ratings_received_count ?? 0);
+            $canSeeNegotiationWorkerLocation = $job->assigned_to === null || (int) $job->assigned_to === (int) $applicant?->id;
         @endphp
         <x-modal id="negotiationWorkerModal{{ $negotiation->id }}"
             title="{{ ($applicant?->name ?? 'Worker') . ' Profile' }}" size="max-w-2xl">
@@ -122,6 +123,19 @@
                     </div>
                 </div>
 
+                @if ($canSeeNegotiationWorkerLocation)
+                    <x-route-map title="Distance To Worker" :source-latitude="$viewer->latitude" :source-longitude="$viewer->longitude"
+                        :destination-latitude="$applicant?->latitude" :destination-longitude="$applicant?->longitude"
+                        source-label="You" destination-label="Worker" height-class="h-56" />
+                @else
+                    <div class="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50 px-5 py-5">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Location Privacy</p>
+                        <p class="mt-3 text-sm font-medium text-slate-500">
+                            This worker was not accepted for the job, so their location is no longer visible.
+                        </p>
+                    </div>
+                @endif
+
                 <div class="rounded-[1.5rem] border border-slate-100 bg-white px-5 py-5">
                     <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Additional Skills</p>
                     <div class="mt-4 flex flex-wrap gap-2">
@@ -174,9 +188,13 @@
     @endforeach
 @endif
 @if ($isOwner && $job->worker)
-    <x-user-profile :user="$job->worker" id="assignedWorkerModal" title="Assigned Worker" />
+    <x-user-profile :user="$job->worker" id="assignedWorkerModal" title="Assigned Worker" :source-latitude="$viewer->latitude" :source-longitude="$viewer->longitude"
+        :destination-latitude="$job->worker?->latitude" :destination-longitude="$job->worker?->longitude" source-label="You"
+        destination-label="Worker" map-title="Distance To Worker" />
 @elseif(!$isOwner)
-    <x-user-profile :user="$job->client" id="jobOwnerModal" title="Job Owner" />
+    <x-user-profile :user="$job->client" id="jobOwnerModal" title="Job Owner" :source-latitude="$viewer->latitude" :source-longitude="$viewer->longitude"
+        :destination-latitude="$job->client?->latitude ?? $job->latitude" :destination-longitude="$job->client?->longitude ?? $job->longitude"
+        source-label="You" destination-label="Client" map-title="Distance To Client" />
 @endif
 @if ($canViewTransferDetails)
     <x-modal id="workerTransferDetailsModal" title="Worker Account Details" size="max-w-2xl">

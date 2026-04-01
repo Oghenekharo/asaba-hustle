@@ -82,6 +82,83 @@
                         @endforelse
                     </div>
                 </div>
+
+                <section class="rounded-[2rem] border border-slate-100 bg-white p-4 shadow-sm md:p-8">
+                    <!-- Header: More compact on mobile -->
+                    <div class="mb-6 flex items-start justify-between gap-4">
+                        <div class="max-w-md">
+                            <span
+                                class="inline-block text-[9px] font-black uppercase tracking-[0.2em] text-orange-500 bg-orange-50 px-2 py-0.5 rounded-md mb-2">
+                                Recommended
+                            </span>
+                            <h2 class="text-xl font-black uppercase tracking-tight text-slate-900 md:text-2xl">Top Rated
+                                Workers</h2>
+                            <p
+                                class="mt-1 text-xs font-bold text-slate-400 uppercase tracking-wider md:text-sm md:normal-case">
+                                Skilled professionals verified by the community.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Grid: 1 column on mobile, 2 on tablet+ -->
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
+                        @forelse ($topRatedWorkers as $worker)
+                            <article
+                                class="group relative flex flex-col rounded-3xl border border-slate-50 bg-slate-50/50 p-5 transition-all hover:border-orange-100 hover:bg-white hover:shadow-xl hover:shadow-orange-500/5">
+
+                                <div class="flex items-start gap-4">
+                                    <!-- Avatar with Rating Badge -->
+                                    <div class="relative shrink-0">
+                                        <x-avatar :user="$worker" size="h-16 w-16" rounded="rounded-2xl"
+                                            class="shadow-md ring-2 ring-white" />
+                                        <div
+                                            class="absolute -bottom-2 -right-1 flex items-center gap-1 rounded-full bg-slate-900 px-2 py-1 text-[9px] font-black text-white shadow-lg">
+                                            <i data-lucide="star" class="h-3 w-3 fill-amber-400 text-amber-400"></i>
+                                            {{ number_format((float) ($worker->ratings_received_avg_rating ?? $worker->average_rating), 1) }}
+                                        </div>
+                                    </div>
+
+                                    <div class="min-w-0 flex-1">
+                                        <h3 class="truncate text-sm font-black uppercase tracking-wide text-slate-900">
+                                            {{ $worker->name }}
+                                        </h3>
+                                        <p
+                                            class="mt-0.5 truncate text-[10px] font-bold uppercase tracking-widest text-orange-600">
+                                            {{ $worker->skill->name ?? 'General worker' }}
+                                        </p>
+
+                                        <div class="mt-2 flex items-center gap-2">
+                                            <span class="text-[9px] font-bold uppercase tracking-tighter text-slate-400">
+                                                {{ $worker->ratings_received_count }} Ratings
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Bio: Hidden on very small screens or clamped -->
+                                <p
+                                    class="mt-4 line-clamp-2 text-xs font-medium leading-relaxed text-slate-500 md:text-[13px]">
+                                    {{ $worker->bio ?: 'Verified worker with strong client feedback and completed jobs.' }}
+                                </p>
+
+                                <!-- Action: Full width on mobile for easier tapping -->
+                                <div class="mt-5">
+                                    <button type="button"
+                                        class="js-open-job-modal cursor-pointer flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 py-3 text-[10px] font-black uppercase tracking-[.2em] text-slate-700 transition-all hover:bg-slate-900 hover:text-white hover:border-slate-900 active:scale-95"
+                                        data-skill-id="{{ $worker->primary_skill_id ?? $worker->skill?->id }}"
+                                        data-skill-name="{{ $worker->skill->name ?? 'Worker' }}">
+                                        <i data-lucide="zap" class="h-3.5 w-3.5"></i>
+                                        Hire Now
+                                    </button>
+                                </div>
+                            </article>
+                        @empty
+                            <div class="sm:col-span-2">
+                                <x-empty-state title="No Rated Workers Yet" variant="small" />
+                            </div>
+                        @endforelse
+                    </div>
+                </section>
             @endif
 
 
@@ -254,7 +331,7 @@
 
     @if (auth()->user()->hasRole('client'))
         <button type="button" id="floating-create-job-button"
-            class="js-open-job-modal cursor-pointer fixed bottom-8 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--brand)] text-white shadow-[0_18px_45px_rgba(255,122,0,0.35)] transition-all hover:scale-105 hover:shadow-[0_22px_55px_rgba(255,122,0,0.42)]"
+            class="js-open-job-modal cursor-pointer fixed bottom-24 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--brand)] text-white shadow-[0_18px_45px_rgba(255,122,0,0.35)] transition-all hover:scale-105 hover:shadow-[0_22px_55px_rgba(255,122,0,0.42)] md:bottom-8 md:right-6"
             aria-label="Create new job">
             <i data-lucide="plus" class="h-5 w-5"></i>
         </button>

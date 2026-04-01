@@ -2,6 +2,13 @@
     'user' => null,
     'id' => null,
     'title' => null,
+    'sourceLatitude' => null,
+    'sourceLongitude' => null,
+    'destinationLatitude' => null,
+    'destinationLongitude' => null,
+    'sourceLabel' => 'Point A',
+    'destinationLabel' => 'Point B',
+    'mapTitle' => 'Route Map',
 ])
 <x-modal id="{{ $id }}" title="{{ $title }}" size="max-w-2xl">
     <div class="space-y-6">
@@ -57,6 +64,8 @@
             </div>
         </div>
 
+        <x-route-map :title="$mapTitle" :source-latitude="$sourceLatitude" :source-longitude="$sourceLongitude" :destination-latitude="$destinationLatitude"
+            :destination-longitude="$destinationLongitude" :source-label="$sourceLabel" :destination-label="$destinationLabel" height-class="h-56" />
 
         <div class="rounded-[1.5rem] border border-slate-100 bg-white px-5 py-5">
             <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Additional Skills</p>

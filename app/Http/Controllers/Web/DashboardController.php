@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\ServiceJob;
 use App\Models\Skill;
+use App\Models\User;
 use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +32,7 @@ class DashboardController extends Controller
 
         $jobs = collect();
         $myJobs = collect();
+        $topRatedWorkers = collect();
         $recentNotifications = UserNotification::query()
             ->where('user_id', $user->id)
             ->latest('id')
@@ -56,6 +58,18 @@ class DashboardController extends Controller
             ->get();
 
         if ($user->hasRole('client')) {
+            $topRatedWorkers = User::query()
+                ->role('worker')
+                ->with(['skill:id,name,icon'])
+                ->withAvg('ratingsReceived', 'rating')
+                ->withCount('ratingsReceived')
+                ->where('account_status', 'active')
+                ->where('is_verified', true)
+                ->orderByDesc('ratings_received_avg_rating')
+                ->orderByDesc('ratings_received_count')
+                ->take(4)
+                ->get();
+
             $myJobs = ServiceJob::query()
                 ->where('user_id', $user->id)
                 ->latest()
@@ -98,6 +112,7 @@ class DashboardController extends Controller
             'skills',
             'jobs',
             'myJobs',
+            'topRatedWorkers',
             'recentNotifications',
             'recentChats',
             'searchTerm'

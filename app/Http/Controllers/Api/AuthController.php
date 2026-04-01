@@ -111,7 +111,7 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         return $this->successResponse(
-            new UserResource($request->user()->fresh('skill')),
+            new UserResource($request->user()->fresh(['skill', 'skills'])),
             'Authenticated user retrieved successfully.'
         );
     }
@@ -136,9 +136,25 @@ class AuthController extends Controller
     public function updateProfile(UpdateProfileRequest $request)
     {
         $user = $request->user();
-        $data = $request->validated();
+        $data = $request->safe()->except(['id_document', 'skill_ids']);
+        $skillIds = collect($request->validated('skill_ids', []))
+            ->map(fn($skillId) => (int) $skillId)
+            ->filter()
+            ->values();
+
+        if ($request->hasFile('id_document')) {
+            $data['id_document'] = $request->file('id_document')->store('kyc/documents', 'public');
+        }
 
         $user->update($data);
+
+        if ($user->hasRole('worker')) {
+            $user->skills()->sync(
+                $skillIds
+                    ->reject(fn($skillId) => $skillId === (int) $user->primary_skill_id)
+                    ->all()
+            );
+        }
 
         $this->activityLog()->log(
             $user->id,
@@ -148,9 +164,34 @@ class AuthController extends Controller
         );
 
         return $this->successResponse(
-            new UserResource($user->fresh('skill')),
+            new UserResource($user->fresh(['skill', 'skills'])),
             'Profile updated successfully.'
         );
+    }
+
+    public function uploadPhoto(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'profile_photo' => 'required|file|mimes:jpg,jpeg,png,avif,webp,heic|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse(
+                'The given data was invalid.',
+                422,
+                $validator->errors()->toArray()
+            );
+        }
+
+        $path = $request->file('profile_photo')->store('users/photos', 'public');
+
+        $request->user()->update([
+            'profile_photo' => $path,
+        ]);
+
+        return $this->successResponse([
+            'profile_photo' => Storage::url($path),
+        ], 'Profile photo uploaded successfully.');
     }
 
     /**

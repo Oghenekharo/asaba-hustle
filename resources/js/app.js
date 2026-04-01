@@ -293,14 +293,14 @@ if ($("#negotiation-form").length) {
         },
     );
 }
-if (window.asabaAppConfig.currentUserId) {
-    registerPush();
-}
-
 $(document).ready(function () {
     let deferredPrompt = null;
     const installBanner = $("#installBanner");
     const installBtn = $("#installBtn");
+
+    if (!installBanner.length || !installBtn.length) {
+        return;
+    }
 
     const isStandalone = window.matchMedia(
         "(display-mode: standalone)",
@@ -405,14 +405,17 @@ if (document.getElementById("enableNotifications")) {
             }
 
             try {
-                // 3. Request Permission & Register for Push
-                // We call the function you defined earlier!
-                await registerPush();
+                const subscription = await registerPush();
+
+                if (!subscription) {
+                    alert("Notifications remain disabled on this device.");
+                    return;
+                }
 
                 alert("Success! You'll now receive updates.");
             } catch (err) {
                 console.error("Registration failed:", err);
-                alert("Something went wrong during setup.");
+                alert(err?.message || "Something went wrong during setup.");
             }
         });
 }

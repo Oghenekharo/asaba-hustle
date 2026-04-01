@@ -77,6 +77,8 @@ class ServiceJobController extends Controller
      */
     public function show(ServiceJob $job)
     {
+        $this->authorize('view', $job);
+
         $job->load(['client', 'skill', 'applications.user']);
 
         return $this->successResponse(
@@ -232,10 +234,20 @@ class ServiceJobController extends Controller
     {
         $this->authorize('markPaid', $job);
 
+        $validated = $request->validate([
+            'receipt' => [
+                $job->payment_method === 'transfer' ? 'required' : 'nullable',
+                'file',
+                'mimes:jpg,jpeg,png,pdf',
+                'max:5120',
+            ],
+        ]);
+
         try {
             $job = $this->jobService->markJobPaid(
                 $job,
-                $request->user()->id
+                $request->user()->id,
+                $validated['receipt'] ?? null
             );
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), 400);
