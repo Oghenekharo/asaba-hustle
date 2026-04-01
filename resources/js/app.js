@@ -105,6 +105,19 @@ window.closeModal = function (id) {
     }, 300);
 };
 
+$(document).on("click", ".js-modal", function (event) {
+    const $target = $(event.target);
+
+    if (
+        !$target.hasClass("js-modal-backdrop") &&
+        !$target.closest(".js-modal-backdrop").length
+    ) {
+        return;
+    }
+
+    window.closeModal($(this).attr("id"));
+});
+
 // Password toggle
 if ($(".js-password-toggle")) {
     togglePasswordView();

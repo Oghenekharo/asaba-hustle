@@ -87,6 +87,7 @@
     $workerRouteSourceLatitude = $viewer->latitude;
     $workerRouteSourceLongitude = $viewer->longitude;
     $showWorkerToClientMap = $isWorker && !$isOwner && $job->status === ServiceJob::STATUS_OPEN;
+    $canShowParticipantMap = !in_array($job->status, [ServiceJob::STATUS_COMPLETED, ServiceJob::STATUS_RATED], true);
 @endphp
 
 
