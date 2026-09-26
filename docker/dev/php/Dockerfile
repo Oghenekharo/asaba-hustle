@@ -1,4 +1,4 @@
-FROM php:8.2-fpm-bookworm
+FROM php:8.2-cli-bookworm
 
 WORKDIR /var/www/html
 
@@ -34,18 +34,18 @@ RUN pecl install redis && docker-php-ext-enable redis
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Copy configs
-COPY docker/local/php/php.ini /usr/local/etc/php/conf.d/app.ini
-COPY docker/local/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+COPY docker/dev/php/php.ini /usr/local/etc/php/conf.d/app.ini
+COPY docker/dev/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 # Copy entrypoint
-COPY docker/local/php/entrypoint.sh /usr/local/bin/app-entrypoint
+COPY docker/dev/php/entrypoint.sh /usr/local/bin/app-entrypoint
 RUN chmod +x /usr/local/bin/app-entrypoint
 
 # Create storage directories and set permissions
-RUN mkdir -p storage/framework/{cache,sessions,views} \
+RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views \
     bootstrap/cache \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 storage bootstrap/cache
 
 ENTRYPOINT ["app-entrypoint"]
-CMD ["php-fpm"]
+CMD ["php", "-a"]

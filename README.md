@@ -49,24 +49,18 @@ Main statuses:
 Use the local Docker stack with:
 
 ```bash
-docker compose --env-file .env.docker --profile local up --build
-```
-
-If you also want realtime services:
-
-```bash
-docker compose --env-file .env.docker --profile local --profile realtime up --build
+docker compose --env-file .env.docker up --build
 ```
 
 Main local services:
 
-- app: `http://127.0.0.1:8000`
+- nginx/app: `http://127.0.0.1:8000`
 - vite: `http://127.0.0.1:5173`
 - mailhog UI: `http://127.0.0.1:8025`
 - mysql
 - redis
 - queue
-- optional reverb
+- reverb
 
 ### Non-Docker
 

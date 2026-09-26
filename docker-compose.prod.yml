@@ -2,12 +2,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: docker/php/Dockerfile.prod
-      args:
-        VITE_REVERB_APP_KEY: ${REVERB_APP_KEY}
-        VITE_REVERB_HOST: ${VITE_REVERB_HOST}
-        VITE_REVERB_PORT: ${VITE_REVERB_PORT:-443}
-        VITE_REVERB_SCHEME: ${VITE_REVERB_SCHEME:-https}
+      dockerfile: docker/prod/php/Dockerfile
     image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
     container_name: asaba-hustle-app
     restart: unless-stopped
@@ -25,14 +20,28 @@ services:
         condition: service_started
     volumes:
       - app_storage:/var/www/html/storage
-    ports:
-      - "127.0.0.1:8000:8000"
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8000/up"]
       interval: 30s
       timeout: 5s
       retries: 5
       start_period: 40s
+    networks:
+      - internal
+
+  nginx:
+    image: nginx:alpine
+    container_name: asaba-hustle-nginx
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - ./docker/prod/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/prod/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - internal
+      - nuxus-prod
 
   queue:
     image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
@@ -52,6 +61,8 @@ services:
         condition: service_started
     volumes:
       - app_storage:/var/www/html/storage
+    networks:
+      - internal
 
   reverb:
     image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
@@ -71,8 +82,9 @@ services:
         condition: service_started
     volumes:
       - app_storage:/var/www/html/storage
-    ports:
-      - "127.0.0.1:8080:8080"
+    networks:
+      - internal
+      - nuxus-prod
 
   mysql:
     image: mysql:8.4
@@ -99,8 +111,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
-    ports:
-      - "127.0.0.1:3306:3306"
+    networks:
+      - internal
 
   redis:
     image: redis:7-alpine
@@ -114,9 +126,12 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+    networks:
+      - internal
 
   migrate:
     image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
+    container_name: asaba-hustle-migrate
     profiles: ["maintenance"]
     env_file:
       - .env.production
@@ -130,9 +145,12 @@ services:
         condition: service_healthy
     volumes:
       - app_storage:/var/www/html/storage
+    networks:
+      - internal
 
   seed-production:
     image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
+    container_name: asaba-hustle-seed
     profiles: ["maintenance"]
     env_file:
       - .env.production
@@ -140,14 +158,24 @@ services:
       APP_ENV: production
       APP_DEBUG: "false"
     entrypoint: ["php", "artisan"]
-    command: ["db:seed", "--class=ProductionSeeder", "--force", "--no-interaction"]
+    command:
+      ["db:seed", "--class=ProductionSeeder", "--force", "--no-interaction"]
     depends_on:
       mysql:
         condition: service_healthy
     volumes:
       - app_storage:/var/www/html/storage
+    networks:
+      - internal
 
 volumes:
   app_storage:
   mysql_data:
   redis_data:
+
+networks:
+  internal:
+    driver: bridge
+
+  nuxus-prod:
+    external: true

@@ -1578,10 +1578,22 @@ export const initMessagesPage = function () {
         const jobId = $("#active-job-id").val();
         const conversationUuid = $("#active-conversation-id").val();
         const content = ($input.val() ?? "").trim();
+        const $activeConversation = $(
+            `.js-conversation-trigger[data-conversation-id="${conversationUuid}"]`,
+        ).first();
 
         if (!conversationUuid) {
             showAlert(
                 "Select a conversation before sending a message.",
+                "warning",
+                "#send-message-form",
+            );
+            return;
+        }
+
+        if ($activeConversation.data("is-closed") === true) {
+            showAlert(
+                "This conversation is closed. Only an administrator can reopen it.",
                 "warning",
                 "#send-message-form",
             );
@@ -1639,7 +1651,9 @@ export const initMessagesPage = function () {
                 $input.val(content).focus();
 
                 const message =
-                    xhr.responseJSON?.message || "Unable to send message.";
+                    xhr.responseJSON?.errors?.chat?.[0] ||
+                    xhr.responseJSON?.message ||
+                    "Unable to send message.";
                 showAlert(message, "error", "#send-message-form");
             })
             .always(function () {

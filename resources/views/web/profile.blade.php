@@ -78,37 +78,37 @@
             <!-- Left: Primary Skill & Status (Bento Box) -->
             <div class="md:col-span-7 space-y-6">
                 @if (auth()->user()->hasRole('worker'))
-                    <section class="p-8 rounded-[2.5rem] bg-slate-900 text-white shadow-2xl shadow-slate-900/20">
+                    <section class="p-8 rounded-[2.5rem] border border-[var(--line)] bg-[var(--surface-raised)] text-[var(--ink)] shadow-sm">
                         <div class="flex items-center justify-between mb-8">
                             <h2 class="text-xs font-black uppercase text-[var(--brand)]">Primary Skill</h2>
                             <span
-                                class="flex items-center gap-2 px-3 py-1 rounded-full bg-white text-[10px] font-black uppercase">
+                                class="flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--line)] bg-[var(--surface-sunken)] text-[10px] font-black uppercase text-[var(--ink)]">
                                 <span class="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
                                 {{ $user->availability_status }}
                             </span>
                         </div>
                         <div class="flex items-center gap-6">
-                            <div class="h-16 w-16 rounded-3xl bg-white flex items-center justify-center">
-                                <i data-lucide="{{ $user->skill->icon ?? 'sparkles' }}" class="w-8 h-8 text-white"></i>
+                            <div class="h-16 w-16 rounded-3xl border border-[var(--line)] bg-[var(--surface-sunken)] flex items-center justify-center">
+                                <i data-lucide="{{ $user->skill->icon ?? 'sparkles' }}" class="w-8 h-8 text-[var(--brand)]"></i>
                             </div>
                             <div>
-                                <h3 class="text-2xl font-black italic">{{ $user->skill->name ?? 'Not added' }}</h3>
-                                <p class="text-sm text-white/50 font-medium">{{ $user->skill->description ?? 'N/A' }}</p>
+                                <h3 class="text-2xl font-black italic text-[var(--ink)]">{{ $user->skill->name ?? 'Not added' }}</h3>
+                                <p class="text-sm text-[var(--muted)] font-medium">{{ $user->skill->description ?? 'N/A' }}</p>
                             </div>
                         </div>
 
                         <div class="mt-8 grid gap-4 sm:grid-cols-3">
-                            <div class="rounded-2xl bg-white px-4 py-4">
-                                <p class="text-[9px] font-black uppercase  text-white/40">Assigned</p>
-                                <p class="mt-2 text-2xl font-black">{{ $profileMetrics['assigned_jobs'] ?? 0 }}</p>
+                            <div class="rounded-2xl border border-[var(--line)] bg-[var(--surface-sunken)] px-4 py-4">
+                                <p class="text-[9px] font-black uppercase text-[var(--muted)]">Assigned</p>
+                                <p class="mt-2 text-2xl font-black text-[var(--ink)]">{{ $profileMetrics['assigned_jobs'] ?? 0 }}</p>
                             </div>
-                            <div class="rounded-2xl bg-white px-4 py-4">
-                                <p class="text-[9px] font-black uppercase  text-white/40">Active</p>
-                                <p class="mt-2 text-2xl font-black">{{ $profileMetrics['active_jobs'] ?? 0 }}</p>
+                            <div class="rounded-2xl border border-[var(--line)] bg-[var(--surface-sunken)] px-4 py-4">
+                                <p class="text-[9px] font-black uppercase text-[var(--muted)]">Active</p>
+                                <p class="mt-2 text-2xl font-black text-[var(--ink)]">{{ $profileMetrics['active_jobs'] ?? 0 }}</p>
                             </div>
-                            <div class="rounded-2xl bg-white px-4 py-4">
-                                <p class="text-[9px] font-black uppercase  text-white/40">Skills</p>
-                                <p class="mt-2 text-2xl font-black">{{ $profileMetrics['skills_count'] ?? 1 }}</p>
+                            <div class="rounded-2xl border border-[var(--line)] bg-[var(--surface-sunken)] px-4 py-4">
+                                <p class="text-[9px] font-black uppercase text-[var(--muted)]">Skills</p>
+                                <p class="mt-2 text-2xl font-black text-[var(--ink)]">{{ $profileMetrics['skills_count'] ?? 1 }}</p>
                             </div>
                         </div>
                     </section>

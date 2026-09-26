@@ -2,7 +2,7 @@ services:
   composer_deps:
     build:
       context: .
-      dockerfile: docker/php/Dockerfile
+      dockerfile: docker/dev/php/Dockerfile
     container_name: asaba-hustle-composer-deps
     working_dir: /var/www/html
     volumes:
@@ -40,8 +40,6 @@ services:
   mysql:
     image: mysql:8.4
     container_name: asaba-hustle-mysql
-    profiles:
-      - local
     env_file:
       - .env.docker
     environment:
@@ -71,8 +69,6 @@ services:
   redis:
     image: redis:latest
     container_name: asaba-hustle-redis
-    profiles:
-      - local
     ports:
       - "6379:6379"
     volumes:
@@ -81,8 +77,6 @@ services:
   mailhog:
     image: mailhog/mailhog
     container_name: asaba-hustle-mailhog
-    profiles:
-      - local
     ports:
       - "1025:1025"
       - "8025:8025"
@@ -90,7 +84,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: docker/php/Dockerfile
+      dockerfile: docker/dev/php/Dockerfile
     container_name: asaba-hustle-app
     working_dir: /var/www/html
     restart: unless-stopped
@@ -99,12 +93,14 @@ services:
     depends_on:
       composer_deps:
         condition: service_completed_successfully
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
     volumes:
       - ./:/var/www/html
       - vendor:/var/www/html/vendor
       - app_state:/var/www/state
-    ports:
-      - "8000:8000"
     environment:
       APP_ENV: ${APP_ENV:-local}
       APP_DEBUG: ${APP_DEBUG:-true}
@@ -130,17 +126,29 @@ services:
       if [ \"${DB_CONNECTION:-mysql}\" = \"mysql\" ]; then until mysqladmin ping -h\"${DB_HOST}\" -P\"${DB_PORT}\" -u\"${DB_USERNAME}\" -p\"${DB_PASSWORD}\" --silent; do sleep 2; done; fi &&
       php artisan optimize:clear &&
       if [ ! -f /var/www/state/.db_initialized ]; then
-        php artisan migrate:fresh --seed --force --no-interaction &&
+        php artisan migrate --seed --force --no-interaction &&
         touch /var/www/state/.db_initialized;
       fi &&
-      php artisan storage:link || true &&
       php artisan serve --host=0.0.0.0 --port=8000
       "
+
+  nginx:
+    image: nginx:alpine
+    container_name: asaba-hustle-nginx
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_started
+    ports:
+      - "8000:80"
+    volumes:
+      - ./docker/dev/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/dev/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
 
   queue:
     build:
       context: .
-      dockerfile: docker/php/Dockerfile
+      dockerfile: docker/dev/php/Dockerfile
     container_name: asaba-hustle-queue
     working_dir: /var/www/html
     restart: unless-stopped
@@ -199,11 +207,9 @@ services:
   reverb:
     build:
       context: .
-      dockerfile: docker/php/Dockerfile
+      dockerfile: docker/dev/php/Dockerfile
     container_name: asaba-hustle-reverb
     working_dir: /var/www/html
-    profiles:
-      - realtime
     restart: unless-stopped
     env_file:
       - .env.docker
