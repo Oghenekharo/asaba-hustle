@@ -2,10 +2,10 @@
 
 <div id="js-error-container" data-type="{{ $type }}"
     class="hidden mt-3 rounded-xl border animate-in fade-in slide-in-from-top-1
-     {{ $type === 'success' ? 'border-emerald-100 bg-emerald-50/50 text-emerald-600' : '' }}
-     {{ $type === 'warning' ? 'border-amber-100 bg-amber-50/50 text-amber-600' : '' }}
-     {{ $type === 'info' ? 'border-blue-100 bg-blue-50/50 text-blue-600' : '' }}
-     {{ $type === 'error' ? 'border-red-100 bg-red-50/50 text-red-600' : '' }} p-4 text-sm">
+     {{ $type === 'success' ? 'border-emerald-300 bg-emerald-100 text-emerald-800' : '' }}
+     {{ $type === 'warning' ? 'border-amber-300 bg-amber-100 text-amber-800' : '' }}
+     {{ $type === 'info' ? 'border-blue-300 bg-blue-100 text-blue-800' : '' }}
+     {{ $type === 'error' ? 'border-red-300 bg-red-100 text-red-800' : '' }} p-4 text-sm">
     <div class="flex items-center gap-2">
         <i data-lucide="alert-circle" id="error-icon" class="h-4 w-4"></i>
         <span id="error-message"></span>
@@ -16,10 +16,10 @@
 
 @php
     $typeClasses = match ($type) {
-        'success' => 'border-emerald-100 bg-emerald-50/50 text-emerald-600',
-        'warning' => 'border-amber-100 bg-amber-50/50 text-amber-600',
-        'info' => 'border-blue-100 bg-blue-50/50 text-blue-600',
-        default => 'border-red-100 bg-red-50/50 text-red-600',
+        'success' => 'border-emerald-300 bg-emerald-100 text-emerald-800 dark:border-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
+        'warning' => 'border-amber-300 bg-amber-100 text-amber-800',
+        'info' => 'border-blue-300 bg-blue-100 text-blue-800',
+        default => 'border-red-300 bg-red-100 text-red-800',
     };
 @endphp
 

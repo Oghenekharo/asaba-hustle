@@ -34,21 +34,30 @@ class UserNotificationService
     {
         $message = $this->resolveMessage($type, $job);
         $jobUrl = route('web.app.jobs.show', $job);
-        $notification = $this->create(
-            $user->id,
-            $message['title'],
-            $message['body'],
-            'negotiation',
-            $jobUrl,
-            'Review Job'
-        );
+        $notification = null;
+        try {
+            $notification = $this->create(
+                $user->id,
+                $message['title'],
+                $message['body'],
+                'negotiation',
+                $jobUrl,
+                'Review Job'
+            );
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
 
 
-        $user->notify(new NegotiationUpdateNotification(
-            type: $type,
-            jobTitle: $job->title,
-            url: $jobUrl
-        ));
+        try {
+            $user->notify(new NegotiationUpdateNotification(
+                type: $type,
+                jobTitle: $job->title,
+                url: $jobUrl
+            ));
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
 
         return $notification;
     }

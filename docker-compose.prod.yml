@@ -14,6 +14,8 @@ services:
     env_file:
       - .env.production
     environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
       APP_ROLE: app
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
     depends_on:
@@ -25,6 +27,12 @@ services:
       - app_storage:/var/www/html/storage
     ports:
       - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8000/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   queue:
     image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
@@ -33,11 +41,13 @@ services:
     env_file:
       - .env.production
     environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
       APP_ROLE: queue
       RUN_MIGRATIONS: "false"
     depends_on:
       app:
-        condition: service_started
+        condition: service_healthy
       redis:
         condition: service_started
     volumes:
@@ -50,11 +60,13 @@ services:
     env_file:
       - .env.production
     environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
       APP_ROLE: reverb
       RUN_MIGRATIONS: "false"
     depends_on:
       app:
-        condition: service_started
+        condition: service_healthy
       redis:
         condition: service_started
     volumes:
@@ -97,6 +109,43 @@ services:
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  migrate:
+    image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
+    profiles: ["maintenance"]
+    env_file:
+      - .env.production
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+    entrypoint: ["php", "artisan"]
+    command: ["migrate", "--force", "--no-interaction"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - app_storage:/var/www/html/storage
+
+  seed-production:
+    image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
+    profiles: ["maintenance"]
+    env_file:
+      - .env.production
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+    entrypoint: ["php", "artisan"]
+    command: ["db:seed", "--class=ProductionSeeder", "--force", "--no-interaction"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - app_storage:/var/www/html/storage
 
 volumes:
   app_storage:

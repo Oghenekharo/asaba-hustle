@@ -25,20 +25,20 @@
 <nav class="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-4xl">
     <!-- Floating Glass Container -->
     <div
-        class="relative flex items-center justify-between p-2 pl-6 bg-white/80 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] rounded-3xl">
+        class="public-site-nav-shell relative flex items-center justify-between p-2 pl-6 bg-white dark:bg-slate-900/90 backdrop-blur-2xl border border-slate-200 dark:border-[var(--line)] shadow-[0_8px_32px_0_rgba(15,23,42,0.12)] rounded-3xl">
 
         <!-- Brand -->
         <a href="{{ auth()->check() ? '/app' : '/' }}"
             class="flex items-center gap-3 {{ $showMobileBackButton ? 'ml-7 md:ml-0' : '' }}">
-            <img src="/images/icons/asaba-hustle.svg" class="w-9 h-9" />
-            <div class="text-lg font-black tracking-tight text-slate-900 leading-none">
-                Asaba<span class="block text-[10px] uppercase tracking-[0.2em] text-orange-500">Hustle</span>
+            <img src="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/asaba-hustle.svg') }}" class="w-9 h-9 object-contain" alt="{{ config('app.name') }}" />
+            <div class="text-lg font-black text-[var(--ink)] leading-none">
+                Asaba<span class="block text-[10px] uppercase text-[var(--brand)]">Hustle</span>
             </div>
         </a>
 
         @if ($showMobileBackButton)
             <a href="{{ $mobileBackUrl }}"
-                class="absolute left-4 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center text-slate-500 transition hover:text-orange-600 md:hidden"
+                class="absolute left-4 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center text-slate-500 transition hover:text-[var(--brand)] md:hidden"
                 aria-label="Go back">
                 <i data-lucide="arrow-left" class="h-4 w-4"></i>
             </a>
@@ -46,29 +46,29 @@
         @endif
 
         <!-- Desktop Navigation (Logged In) -->
-        <div class="hidden md:flex items-center bg-slate-100/50 p-1 rounded-2xl border border-white/50">
+        <div class="public-site-nav-links hidden md:flex items-center bg-slate-50 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-[var(--line)]">
             @guest
                 <a href="#services"
-                    class="px-5 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl {{ request()->is('app/jobs*') ? 'bg-white text-orange-600 shadow-sm' : 'text-slate-400 hover:text-slate-600' }}">
+                    class="px-5 py-2 text-[10px] font-black uppercase transition-all rounded-xl {{ request()->is('app/jobs*') ? 'bg-white dark:bg-slate-700 text-[var(--brand)] shadow-sm' : 'text-[var(--muted)] hover:text-[var(--ink)]' }}">
                     Our <span class="hidden lg:inline">Services</span>
                 </a>
                 <a href="#About"
-                    class="px-5 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl {{ request()->is('app/jobs*') ? 'bg-white text-orange-600 shadow-sm' : 'text-slate-400 hover:text-slate-600' }}">
+                    class="px-5 py-2 text-[10px] font-black uppercase transition-all rounded-xl {{ request()->is('app/jobs*') ? 'bg-white dark:bg-slate-700 text-[var(--brand)] shadow-sm' : 'text-[var(--muted)] hover:text-[var(--ink)]' }}">
                     About <span class="hidden lg:inline">us</span>
                 </a>
             @else
                 <a href="{{ route('web.app.jobs') }}"
-                    class="px-5 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl {{ request()->is('app/jobs*') ? 'bg-white text-orange-600 shadow-sm' : 'text-slate-400 hover:text-slate-600' }}">
+                    class="px-5 py-2 text-[10px] font-black uppercase transition-all rounded-xl {{ request()->is('app/jobs*') ? 'bg-white dark:bg-slate-700 text-[var(--brand)] shadow-sm' : 'text-[var(--muted)] hover:text-[var(--ink)]' }}">
                     Explore <span class="hidden lg:inline">Jobs</span>
                 </a>
 
                 <a href="{{ route('web.app.my-jobs') }}"
-                    class="px-5 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl {{ request()->is('app/my-jobs*') ? 'bg-white text-orange-600 shadow-sm' : 'text-slate-400 hover:text-slate-600' }}">
+                    class="px-5 py-2 text-[10px] font-black uppercase transition-all rounded-xl {{ request()->is('app/my-jobs*') ? 'bg-white dark:bg-slate-700 text-[var(--brand)] shadow-sm' : 'text-[var(--muted)] hover:text-[var(--ink)]' }}">
                     {{ $myJobsNavLabel }}
                 </a>
 
                 <a href="{{ route('web.app.conversations') }}"
-                    class="relative px-5 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl {{ request()->is('app/conversations*') ? 'bg-white text-orange-600 shadow-sm' : 'text-slate-400 hover:text-slate-600' }}">
+                    class="relative px-5 py-2 text-[10px] font-black uppercase transition-all rounded-xl {{ request()->is('app/conversations*') ? 'bg-white dark:bg-slate-700 text-[var(--brand)] shadow-sm' : 'text-[var(--muted)] hover:text-[var(--ink)]' }}">
                     Messages
                     @if ($navUnreadMessages > 0)
                         <span
@@ -83,13 +83,17 @@
 
             <!-- Action Area -->
             <div class="flex items-center gap-2">
+                <button type="button" data-theme-toggle class="theme-toggle inline-flex h-10 w-10 items-center justify-center rounded-xl transition" aria-label="Toggle dark mode" title="Toggle dark mode">
+                    <i data-lucide="moon" data-theme-icon-dark class="h-4 w-4"></i>
+                    <i data-lucide="sun" data-theme-icon-light class="hidden h-4 w-4"></i>
+                </button>
                 @if (!Auth::check())
                     <a href="/register"
                         class="hidden sm:block px-4 text-xs font-bold text-slate-600 hover:text-slate-900">Join</a>
                     <a href="/login"
-                        class="flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-900 text-white transition-transform active:scale-95 shadow-xl shadow-slate-900/10 hover:shadow-orange-500/20">
-                        <span class="text-xs font-bold uppercase tracking-wider">Login</span>
-                        <svg xmlns="http://w3.org" class="h-4 w-4 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
+                        class="flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-900 text-white transition-transform active:scale-95 shadow-xl shadow-slate-900/10 hover:shadow-[var(--brand)]/20">
+                        <span class="text-xs font-bold uppercase ">Login</span>
+                        <svg xmlns="http://w3.org" class="h-4 w-4 text-[var(--brand)]" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
                                 d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
                                 clip-rule="evenodd" />
@@ -109,16 +113,16 @@
                         </button>
 
                         <div id="notificationDropdownMenu"
-                            class="hidden fixed inset-y-0 right-0 z-50 flex h-screen w-[22rem] max-w-[85vw] translate-x-[105%] flex-col bg-white backdrop-blur-2xl border-l border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden transition-transform duration-300 md:absolute md:inset-auto md:right-0 md:mt-3 md:h-auto md:w-[22rem] md:max-w-[85vw] md:translate-x-0 md:rounded-3xl md:border md:border-slate-100">
-                            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-50">
+                            class="hidden fixed right-0 top-1/2 z-50 flex h-auto max-h-[min(76dvh,34rem)] w-[22rem] max-w-[85vw] -translate-y-1/2 translate-x-[105%] flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-transform duration-300 md:absolute md:right-0 md:top-full md:mt-3 md:max-h-[min(72vh,36rem)] md:w-[22rem] md:max-w-[85vw] md:translate-x-0 md:translate-y-0">
+                            <div class="flex shrink-0 items-center justify-between border-b border-slate-50 px-5 py-4">
                                 <div>
-                                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                    <p class="text-[10px] font-black uppercase  text-slate-400">
                                         Notifications</p>
                                     <p class="text-xs font-bold text-slate-900">Latest activity in your account</p>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <button type="button" id="markAllNotificationsReadButton"
-                                        class="text-[10px] font-black uppercase tracking-widest text-[var(--brand)] hover:opacity-70 transition">
+                                        class="text-[10px] font-black uppercase  text-[var(--brand)] hover:opacity-70 transition">
                                         Mark all
                                     </button>
                                     <button type="button" id="notificationDrawerClose"
@@ -128,21 +132,21 @@
                                 </div>
                             </div>
 
-                            <div id="navNotificationsList" class="max-h-96 overflow-y-auto p-3 space-y-2 custom-scrollbar">
+                            <div id="navNotificationsList" class="min-h-0 flex-1 overflow-y-auto p-2.5 space-y-1.5 custom-scrollbar">
                                 <div class="rounded-2xl border border-dashed border-slate-200 px-4 py-6 text-center">
-                                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-300">No
+                                    <p class="text-[10px] font-black uppercase  text-slate-300">No
                                         notifications yet</p>
                                 </div>
                             </div>
 
-                            <div class="border-t border-slate-50 p-3 space-y-2">
+                            <div class="shrink-0 space-y-2 border-t border-slate-50 p-3">
                                 <a href="{{ route('web.app.notifications') }}"
-                                    class="flex items-center justify-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-700 transition hover:bg-orange-50 hover:text-orange-600">
+                                    class="flex items-center justify-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-[10px] font-black uppercase text-slate-700 transition hover:bg-[var(--surface-soft)] hover:text-[var(--brand)]">
                                     <i data-lucide="external-link" class="h-4 w-4"></i>
                                     View All Notifications
                                 </a>
                                 <button id="enableNotifications"
-                                    class="px-6 w-full py-3 bg-orange-500 text-white rounded-xl font-bold transition-all active:scale-95">
+                                    class="px-6 w-full py-3 text-white rounded-xl font-bold transition-all active:scale-95" style="background: var(--brand-gradient)">
                                     Enable Notifications
                                 </button>
                             </div>
@@ -163,39 +167,34 @@
 
                         <!-- Dropdown Menu (Hidden by Default) -->
                         {{-- <div id="userDropdownMenu"
-                            class="hidden fixed inset-y-0 left-0 z-50 h-screen w-[21rem] max-w-[88vw] -translate-x-[105%] opacity-0 overflow-hidden border-r border-slate-900/10 bg-[linear-gradient(180deg,#fffaf5_0%,#fff_30%,#f8fafc_100%)] shadow-[0_30px_80px_rgba(15,23,42,0.22)] transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:absolute md:inset-auto md:left-auto md:right-0 md:mt-3 md:h-auto md:w-48 md:max-w-none md:translate-x-0 md:opacity-100 md:rounded-2xl md:border md:border-slate-100 md:bg-white md:shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
+                            class="hidden fixed inset-y-0 left-0 z-50 h-screen w-[21rem] max-w-[88vw] -translate-x-[105%] opacity-0 overflow-hidden border-r border-slate-900/10 bg-[linear-gradient(180deg,#fffaf5_0%,#fff_30%,#f8fafc_100%)] dark:bg-slate-900 shadow-[0_30px_80px_rgba(15,23,42,0.22)] transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:absolute md:inset-auto md:left-auto md:right-0 md:mt-3 md:h-auto md:w-48 md:max-w-none md:translate-x-0 md:opacity-100 md:rounded-2xl md:border md:border-slate-100 md:bg-white md:shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:md:bg-slate-900">
 
                             <div class="flex h-full flex-col md:block">
                                 <div
                                     class="relative overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(255,186,73,0.35),transparent_35%),linear-gradient(155deg,#0f172a_0%,#111827_45%,#ea580c_140%)] px-5 pb-6 pt-5 text-white md:hidden">
-                                    <div class="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-orange-300/30 blur-2xl">
-                                    </div>
-                                    <div class="absolute -left-6 bottom-0 h-20 w-20 rounded-full bg-white/10 blur-2xl">
-                                    </div>
                                     <div
                                         class="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent">
                                     </div>
 
                                     <div class="relative flex items-center justify-between">
-                                        <p class="text-[10px] font-black uppercase tracking-[0.22em] text-white/45">
+                                        <p class="text-[10px] font-black uppercase  text-white/45">
                                             Account
                                         </p>
                                         <button type="button" id="userDrawerClose"
-                                            class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80">
+                                            class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white text-white/80">
                                             <i data-lucide="x" class="h-4 w-4"></i>
                                         </button>
                                     </div>
 
                                     <div class="relative mt-6 flex items-center gap-4">
                                         <div class="relative">
-                                            <div class="absolute inset-0 rounded-[1.4rem] bg-orange-400/30 blur-md"></div>
                                             <x-avatar :user="auth()->user()" size="h-14 w-14" rounded="rounded-2xl"
                                                 text="text-lg" class="relative ring-2 ring-white/10 shadow-lg" />
                                         </div>
                                         <div class="min-w-0">
                                             <p class="truncate text-base font-black">{{ auth()->user()->name }}</p>
                                             <p
-                                                class="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
+                                                class="mt-1 text-xs font-semibold uppercase  text-white/45">
                                                 {{ $mobileUserRoleLabel }}
                                             </p>
                                         </div>
@@ -203,12 +202,12 @@
 
                                     <div class="relative mt-5 flex items-center gap-3">
                                         <a href="{{ route('web.app.me') }}"
-                                            class="inline-flex items-center gap-2 rounded-2xl bg-white/12 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/90 backdrop-blur">
+                                            class="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2 text-[10px] font-black uppercase  text-white/90 backdrop-blur">
                                             <i data-lucide="user-round" class="h-4 w-4"></i>
                                             View profile
                                         </a>
                                         <span
-                                            class="inline-flex items-center rounded-full border border-white/10 bg-white/8 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.22em] text-white/55">
+                                            class="inline-flex items-center rounded-full border border-white/10 bg-white px-3 py-1.5 text-[9px] font-black uppercase  text-white/55">
                                             Asaba Hustle
                                         </span>
                                     </div>
@@ -216,9 +215,9 @@
 
                                 <div class="flex-1 overflow-y-auto px-3 pb-4 pt-3 md:hidden">
                                     <div
-                                        class="rounded-[1.75rem] border border-orange-100 bg-white/90 p-2 shadow-[0_16px_35px_rgba(255,122,0,0.08)]">
+                                        class="rounded-[1.75rem] border border-[var(--brand)]/15 bg-white p-2 shadow-[0_16px_35px_color-mix(in_srgb,var(--brand)_8%,transparent)]">
                                         <a href="{{ route('web.app') }}"
-                                            class="group flex items-center gap-3 rounded-[1.25rem] px-4 py-3 text-xs font-black uppercase tracking-[0.18em] transition-all {{ request()->routeIs('web.app') ? 'bg-[linear-gradient(135deg,rgba(255,122,0,0.16),rgba(255,255,255,0.95))] text-[var(--brand)] shadow-[0_12px_24px_rgba(255,122,0,0.12)]' : 'text-slate-600 hover:bg-orange-50/70' }}">
+                                            class="group flex items-center gap-3 rounded-[1.25rem] px-4 py-3 text-xs font-black uppercase transition-all {{ request()->routeIs('web.app') ? 'bg-[var(--surface-soft)] text-[var(--brand)] shadow-[0_12px_24px_color-mix(in_srgb,var(--brand)_12%,transparent)]' : 'text-slate-600 hover:bg-[var(--surface-soft)]' }}">
                                             <span
                                                 class="flex h-10 w-10 items-center justify-center rounded-2xl {{ request()->routeIs('web.app') ? 'bg-white text-[var(--brand)]' : 'bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-[var(--brand)]' }}">
                                                 <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
@@ -227,7 +226,7 @@
                                         </a>
 
                                         <a href="{{ route('web.app.jobs') }}"
-                                            class="group mt-2 flex items-center gap-3 rounded-[1.25rem] px-4 py-3 text-xs font-black uppercase tracking-[0.18em] transition-all {{ request()->routeIs('web.app.jobs*') ? 'bg-[linear-gradient(135deg,rgba(255,122,0,0.16),rgba(255,255,255,0.95))] text-[var(--brand)] shadow-[0_12px_24px_rgba(255,122,0,0.12)]' : 'text-slate-600 hover:bg-orange-50/70' }}">
+                                            class="group mt-2 flex items-center gap-3 rounded-[1.25rem] px-4 py-3 text-xs font-black uppercase transition-all {{ request()->routeIs('web.app.jobs*') ? 'bg-[var(--surface-soft)] text-[var(--brand)] shadow-[0_12px_24px_color-mix(in_srgb,var(--brand)_12%,transparent)]' : 'text-slate-600 hover:bg-[var(--surface-soft)]' }}">
                                             <span
                                                 class="flex h-10 w-10 items-center justify-center rounded-2xl {{ request()->routeIs('web.app.jobs*') ? 'bg-white text-[var(--brand)]' : 'bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-[var(--brand)]' }}">
                                                 <i data-lucide="briefcase-business" class="h-4 w-4"></i>
@@ -236,7 +235,7 @@
                                         </a>
 
                                         <a href="{{ route('web.app.my-jobs') }}"
-                                            class="group mt-2 flex items-center gap-3 rounded-[1.25rem] px-4 py-3 text-xs font-black uppercase tracking-[0.18em] transition-all {{ request()->routeIs('web.app.my-jobs*') ? 'bg-[linear-gradient(135deg,rgba(255,122,0,0.16),rgba(255,255,255,0.95))] text-[var(--brand)] shadow-[0_12px_24px_rgba(255,122,0,0.12)]' : 'text-slate-600 hover:bg-orange-50/70' }}">
+                                            class="group mt-2 flex items-center gap-3 rounded-[1.25rem] px-4 py-3 text-xs font-black uppercase transition-all {{ request()->routeIs('web.app.my-jobs*') ? 'bg-[var(--surface-soft)] text-[var(--brand)] shadow-[0_12px_24px_color-mix(in_srgb,var(--brand)_12%,transparent)]' : 'text-slate-600 hover:bg-[var(--surface-soft)]' }}">
                                             <span
                                                 class="flex h-10 w-10 items-center justify-center rounded-2xl {{ request()->routeIs('web.app.my-jobs*') ? 'bg-white text-[var(--brand)]' : 'bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-[var(--brand)]' }}">
                                                 <i data-lucide="folders" class="h-4 w-4"></i>
@@ -245,7 +244,7 @@
                                         </a>
 
                                         <a href="{{ route('web.app.conversations') }}"
-                                            class="group mt-2 flex items-center justify-between gap-3 rounded-[1.25rem] px-4 py-3 text-xs font-black uppercase tracking-[0.18em] transition-all {{ request()->routeIs('web.app.conversations*') ? 'bg-[linear-gradient(135deg,rgba(255,122,0,0.16),rgba(255,255,255,0.95))] text-[var(--brand)] shadow-[0_12px_24px_rgba(255,122,0,0.12)]' : 'text-slate-600 hover:bg-orange-50/70' }}">
+                                            class="group mt-2 flex items-center justify-between gap-3 rounded-[1.25rem] px-4 py-3 text-xs font-black uppercase transition-all {{ request()->routeIs('web.app.conversations*') ? 'bg-[var(--surface-soft)] text-[var(--brand)] shadow-[0_12px_24px_color-mix(in_srgb,var(--brand)_12%,transparent)]' : 'text-slate-600 hover:bg-[var(--surface-soft)]' }}">
                                             <span class="flex min-w-0 flex-1 items-center gap-3">
                                                 <span
                                                     class="flex h-10 w-10 items-center justify-center rounded-2xl {{ request()->routeIs('web.app.conversations*') ? 'bg-white text-[var(--brand)]' : 'bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-[var(--brand)]' }}">
@@ -262,7 +261,7 @@
                                         </a>
 
                                         <a href="{{ route('web.app.notifications') }}"
-                                            class="group mt-2 flex items-center justify-between gap-3 rounded-[1.25rem] px-4 py-3 text-xs font-black uppercase tracking-[0.18em] transition-all {{ request()->routeIs('web.app.notifications*') ? 'bg-[linear-gradient(135deg,rgba(255,122,0,0.16),rgba(255,255,255,0.95))] text-[var(--brand)] shadow-[0_12px_24px_rgba(255,122,0,0.12)]' : 'text-slate-600 hover:bg-orange-50/70' }}">
+                                            class="group mt-2 flex items-center justify-between gap-3 rounded-[1.25rem] px-4 py-3 text-xs font-black uppercase transition-all {{ request()->routeIs('web.app.notifications*') ? 'bg-[var(--surface-soft)] text-[var(--brand)] shadow-[0_12px_24px_color-mix(in_srgb,var(--brand)_12%,transparent)]' : 'text-slate-600 hover:bg-[var(--surface-soft)]' }}">
                                             <span class="flex min-w-0 flex-1 items-center gap-3">
                                                 <span
                                                     class="flex h-10 w-10 items-center justify-center rounded-2xl {{ request()->routeIs('web.app.notifications*') ? 'bg-white text-[var(--brand)]' : 'bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-[var(--brand)]' }}">
@@ -282,34 +281,34 @@
 
                                 <div class="hidden px-2 pb-2 md:block">
                                     <div class="px-4 py-3 border-b border-slate-50 mb-1">
-                                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                        <p class="text-[10px] font-black uppercase  text-slate-400">
                                             Account</p>
                                         <p class="text-xs font-bold text-slate-900 truncate">{{ auth()->user()->name }}
                                         </p>
                                     </div>
 
                                     <a href="{{ route('web.app.me') }}"
-                                        class="flex items-center gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-orange-50 hover:text-orange-600 rounded-2xl transition-colors">
+                                        class="flex items-center gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-[var(--surface-soft)] hover:text-[var(--brand)] rounded-2xl transition-colors">
                                         <i data-lucide="user" class="h-4 w-4"></i> Profile
                                     </a>
 
                                     <a href="{{ route('web.app') }}"
-                                        class="flex items-center gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-orange-50 hover:text-orange-600 rounded-2xl transition-colors">
+                                        class="flex items-center gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-[var(--surface-soft)] hover:text-[var(--brand)] rounded-2xl transition-colors">
                                         <i data-lucide="layout-dashboard" class="h-4 w-4"></i> Dashboard
                                     </a>
 
                                     <a href="{{ route('web.app.jobs') }}"
-                                        class="flex items-center gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-orange-50 hover:text-orange-600 rounded-2xl transition-colors">
+                                        class="flex items-center gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-[var(--surface-soft)] hover:text-[var(--brand)] rounded-2xl transition-colors">
                                         <i data-lucide="briefcase-business" class="h-4 w-4"></i> Explore Jobs
                                     </a>
 
                                     <a href="{{ route('web.app.my-jobs') }}"
-                                        class="flex items-center gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-orange-50 hover:text-orange-600 rounded-2xl transition-colors">
+                                        class="flex items-center gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-[var(--surface-soft)] hover:text-[var(--brand)] rounded-2xl transition-colors">
                                         <i data-lucide="folders" class="h-4 w-4"></i> {{ $myJobsNavLabel }}
                                     </a>
 
                                     <a href="{{ route('web.app.conversations') }}"
-                                        class="flex items-center justify-between gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-orange-50 hover:text-orange-600 rounded-2xl transition-colors">
+                                        class="flex items-center justify-between gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-[var(--surface-soft)] hover:text-[var(--brand)] rounded-2xl transition-colors">
                                         <span class="flex items-center gap-3">
                                             <i data-lucide="messages-square" class="h-4 w-4"></i> Messages
                                         </span>
@@ -322,7 +321,7 @@
                                     </a>
 
                                     <a href="{{ route('web.app.notifications') }}"
-                                        class="flex items-center justify-between gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-orange-50 hover:text-orange-600 rounded-2xl transition-colors">
+                                        class="flex items-center justify-between gap-3 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-[var(--surface-soft)] hover:text-[var(--brand)] rounded-2xl transition-colors">
                                         <span class="flex items-center gap-3">
                                             <i data-lucide="bell" class="h-4 w-4"></i> Notifications
                                         </span>
@@ -350,7 +349,7 @@
                                 <div class="border-b border-slate-100 bg-slate-50 p-6 md:hidden">
                                     <div class="flex items-center justify-between mb-4">
                                         <span
-                                            class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Account</span>
+                                            class="text-[10px] font-bold uppercase  text-slate-400">Account</span>
                                         <button id="userDrawerClose" class="text-slate-400"><i data-lucide="x"
                                                 class="h-5 w-5"></i></button>
                                     </div>
@@ -358,7 +357,7 @@
                                         <x-avatar :user="auth()->user()" size="h-12 w-12" />
                                         <div class="min-w-0">
                                             <p class="font-bold text-slate-900 truncate">{{ auth()->user()->name }}</p>
-                                            <p class="text-[10px] text-orange-600 font-bold uppercase">
+                                            <p class="text-[10px] text-[var(--brand)] font-bold uppercase">
                                                 {{ $mobileUserRoleLabel }}</p>
                                         </div>
                                     </div>
@@ -367,43 +366,43 @@
                                 <!-- Menu Links -->
                                 <div class="p-3 bg-white space-y-1">
                                     <a href="{{ route('web.app.me') }}"
-                                        class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold {{ request()->routeIs('web.app.me') ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:bg-slate-50' }}">
+                                        class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold {{ request()->routeIs('web.app.me') ? 'bg-[var(--surface-soft)] text-[var(--brand)]' : 'text-slate-600 hover:bg-slate-50' }}">
                                         <i data-lucide="user" class="h-4 w-4"></i>
                                         Profile
                                     </a>
 
                                     <a href="{{ route('web.app') }}"
-                                        class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold {{ request()->routeIs('web.app') ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:bg-slate-50' }}">
+                                        class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold {{ request()->routeIs('web.app') ? 'bg-[var(--surface-soft)] text-[var(--brand)]' : 'text-slate-600 hover:bg-slate-50' }}">
                                         <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
                                         Dashboard
                                     </a>
 
                                     <a href="{{ route('web.app.jobs') }}"
-                                        class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold {{ request()->routeIs('web.app.jobs*') ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:bg-slate-50' }}">
+                                        class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold {{ request()->routeIs('web.app.jobs*') ? 'bg-[var(--surface-soft)] text-[var(--brand)]' : 'text-slate-600 hover:bg-slate-50' }}">
                                         <i data-lucide="briefcase-business" class="h-4 w-4"></i>
                                         Explore Jobs
                                     </a>
 
                                     <a href="{{ route('web.app.my-jobs') }}"
-                                        class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold {{ request()->routeIs('web.app.my-jobs*') ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:bg-slate-50' }}">
+                                        class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold {{ request()->routeIs('web.app.my-jobs*') ? 'bg-[var(--surface-soft)] text-[var(--brand)]' : 'text-slate-600 hover:bg-slate-50' }}">
                                         <i data-lucide="folders" class="h-4 w-4"></i>
                                         {{ $myJobsNavLabel }}
                                     </a>
 
                                     <a href="{{ route('web.app.conversations') }}"
-                                        class="flex items-center justify-between px-4 py-3 rounded-lg text-sm font-bold {{ request()->routeIs('web.app.conversations*') ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:bg-slate-50' }}">
+                                        class="flex items-center justify-between px-4 py-3 rounded-lg text-sm font-bold {{ request()->routeIs('web.app.conversations*') ? 'bg-[var(--surface-soft)] text-[var(--brand)]' : 'text-slate-600 hover:bg-slate-50' }}">
                                         <span class="flex items-center gap-3">
                                             <i data-lucide="messages-square" class="h-4 w-4"></i>
                                             Messages
                                         </span>
                                         @if ($navUnreadMessages > 0)
                                             <span
-                                                class="bg-orange-500 text-white text-[10px] px-2 py-0.5 rounded-full">{{ $navUnreadMessages }}</span>
+                                                class="bg-[var(--brand)] text-white text-[10px] px-2 py-0.5 rounded-full">{{ $navUnreadMessages }}</span>
                                         @endif
                                     </a>
 
                                     <a href="{{ route('web.app.notifications') }}"
-                                        class="flex items-center justify-between px-4 py-3 rounded-lg text-sm font-bold {{ request()->routeIs('web.app.notifications*') ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:bg-slate-50' }}">
+                                        class="flex items-center justify-between px-4 py-3 rounded-lg text-sm font-bold {{ request()->routeIs('web.app.notifications*') ? 'bg-[var(--surface-soft)] text-[var(--brand)]' : 'text-slate-600 hover:bg-slate-50' }}">
                                         <span class="flex items-center gap-3">
                                             <i data-lucide="bell" class="h-4 w-4"></i>
                                             Notifications
@@ -437,58 +436,58 @@
 
                         <!-- Home -->
                         <a href="{{ route('web.app') }}"
-                            class="group flex flex-col items-center justify-center gap-1 py-2 transition-all {{ request()->routeIs('web.app') ? 'text-orange-500' : 'text-slate-400' }}">
+                            class="group flex flex-col items-center justify-center gap-1 py-2 transition-all {{ request()->routeIs('web.app') ? 'text-[var(--brand)]' : 'text-slate-400' }}">
                             <div class="relative flex items-center justify-center">
                                 <i data-lucide="layout-dashboard"
                                     class="h-5 w-5 transition-transform group-active:scale-75"></i>
                                 @if (request()->routeIs('web.app'))
-                                    <span class="absolute -bottom-1 h-1 w-1 rounded-full bg-orange-500"></span>
+                                    <span class="absolute -bottom-1 h-1 w-1 rounded-full bg-[var(--brand)]"></span>
                                 @endif
                             </div>
-                            <span class="text-[9px] font-bold uppercase tracking-widest">Home</span>
+                            <span class="text-[9px] font-bold uppercase ">Home</span>
                         </a>
 
                         <!-- Jobs -->
                         <a href="{{ route('web.app.jobs') }}"
-                            class="group flex flex-col items-center justify-center gap-1 py-2 transition-all {{ request()->routeIs('web.app.jobs*') ? 'text-orange-500' : 'text-slate-400' }}">
+                            class="group flex flex-col items-center justify-center gap-1 py-2 transition-all {{ request()->routeIs('web.app.jobs*') ? 'text-[var(--brand)]' : 'text-slate-400' }}">
                             <div class="relative flex items-center justify-center">
                                 <i data-lucide="briefcase-business"
                                     class="h-5 w-5 transition-transform group-active:scale-75"></i>
                                 @if (request()->routeIs('web.app.jobs*'))
-                                    <span class="absolute -bottom-1 h-1 w-1 rounded-full bg-orange-500"></span>
+                                    <span class="absolute -bottom-1 h-1 w-1 rounded-full bg-[var(--brand)]"></span>
                                 @endif
                             </div>
-                            <span class="text-[9px] font-bold uppercase tracking-widest">Jobs</span>
+                            <span class="text-[9px] font-bold uppercase ">Jobs</span>
                         </a>
 
                         <!-- Center Highlight: My Jobs/Hustles -->
                         <a href="{{ route('web.app.my-jobs') }}" class="flex flex-col items-center justify-center gap-1">
                             <div
-                                class="flex h-12 w-12 items-center justify-center rounded-2xl {{ request()->routeIs('web.app.my-jobs*') ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/40' : 'bg-slate-800 text-slate-300' }} transition-all active:scale-90">
+                                class="flex h-12 w-12 items-center justify-center rounded-2xl {{ request()->routeIs('web.app.my-jobs*') ? 'bg-[var(--brand)] text-white shadow-lg shadow-[var(--brand)]/40' : 'bg-slate-800 text-slate-300' }} transition-all active:scale-90">
                                 <i data-lucide="folders" class="h-6 w-6"></i>
                             </div>
-                            <span class="text-[8px] font-black uppercase tracking-tighter text-slate-500">Hustles</span>
+                            <span class="text-[8px] font-black uppercase  text-slate-500">Hustles</span>
                         </a>
 
                         <!-- Chats -->
                         <a href="{{ route('web.app.conversations') }}"
-                            class="group relative flex flex-col items-center justify-center gap-1 py-2 transition-all {{ request()->routeIs('web.app.conversations*') ? 'text-orange-500' : 'text-slate-400' }}">
+                            class="group relative flex flex-col items-center justify-center gap-1 py-2 transition-all {{ request()->routeIs('web.app.conversations*') ? 'text-[var(--brand)]' : 'text-slate-400' }}">
                             <div class="relative flex items-center justify-center">
                                 <i data-lucide="messages-square"
                                     class="h-5 w-5 transition-transform group-active:scale-75"></i>
                                 @if ($navUnreadMessages > 0)
                                     <span
-                                        class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-[8px] font-black text-white ring-2 ring-slate-900">
+                                        class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand)] text-[8px] font-black text-white ring-2 ring-slate-900">
                                         {{ $navUnreadMessages > 9 ? '9+' : $navUnreadMessages }}
                                     </span>
                                 @endif
                             </div>
-                            <span class="text-[9px] font-bold uppercase tracking-widest">Chats</span>
+                            <span class="text-[9px] font-bold uppercase ">Chats</span>
                         </a>
 
                         <!-- Alerts -->
                         <a href="{{ route('web.app.notifications') }}"
-                            class="group relative flex flex-col items-center justify-center gap-1 py-2 transition-all {{ request()->routeIs('web.app.notifications*') ? 'text-orange-500' : 'text-slate-400' }}">
+                            class="group relative flex flex-col items-center justify-center gap-1 py-2 transition-all {{ request()->routeIs('web.app.notifications*') ? 'text-[var(--brand)]' : 'text-slate-400' }}">
                             <div class="relative flex items-center justify-center">
                                 <i data-lucide="bell" class="h-5 w-5 transition-transform group-active:scale-75"></i>
                                 @if ($navUnreadNotifications > 0)
@@ -496,7 +495,7 @@
                                         class="absolute -right-1 -top-1 flex h-2 w-2 rounded-full bg-emerald-400 ring-2 ring-slate-900"></span>
                                 @endif
                             </div>
-                            <span class="text-[9px] font-bold uppercase tracking-widest">Alerts</span>
+                            <span class="text-[9px] font-bold uppercase ">Alerts</span>
                         </a>
 
                     </div>

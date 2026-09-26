@@ -20,12 +20,6 @@
 <div {{ $attributes->merge(['class' => "relative overflow-hidden border-dashed border-[var(--brand)]/30 text-center transition-all $containerClasses"]) }}
     style="background: var(--surface-soft)">
 
-    <!-- Abstract Background Element (Hidden on small to save space) -->
-    @if (!$isSmall)
-        <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl opacity-10"
-            style="background: var(--brand)"></div>
-    @endif
-
     <div class="relative z-10 flex flex-col items-center">
         <!-- Icon Container -->
         <div
@@ -49,7 +43,7 @@
         </div> --}}
 
         <!-- Typography -->
-        <h3 class="font-black tracking-tighter text-[var(--ink)] {{ $titleClasses }}">
+        <h3 class="font-black  text-[var(--ink)] {{ $titleClasses }}">
             {{ $title }}
         </h3>
 
@@ -60,7 +54,7 @@
         <!-- Optional Action Button -->
         @if ($actionText)
             <a href="{{ $actionUrl }}"
-                class="rounded-xl font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95 shadow-lg shadow-orange-500/20 {{ $isSmall ? 'mt-4 px-4 py-2 text-[10px]' : 'mt-8 px-8 py-3 text-xs' }}"
+                class="rounded-xl font-black uppercase  text-white transition-all hover:scale-105 active:scale-95 shadow-lg shadow-orange-500/20 {{ $isSmall ? 'mt-4 px-4 py-2 text-[10px]' : 'mt-8 px-8 py-3 text-xs' }}"
                 style="background: var(--brand)">
                 {{ $actionText }}
             </a>

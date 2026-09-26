@@ -10,11 +10,11 @@
                             class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
                     </span>
-                    <span class="text-[10px] font-black uppercase tracking-[0.2em] text-orange-600">Verified
+                    <span class="text-[10px] font-black uppercase  text-orange-600">Verified
                         Marketplace</span>
                 </div>
 
-                <h1 class="text-4xl md:text-6xl font-black leading-[1.1] tracking-tight text-slate-900 mb-6">
+                <h1 class="text-4xl md:text-6xl font-black leading-[1.1]  text-slate-900 mb-6">
                     Find the best <br>
                     <span
                         class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500 italic">Hustlers</span>
@@ -28,7 +28,7 @@
 
                 <div class="flex flex-col sm:flex-row gap-4">
                     <button
-                        class="px-8 py-4 rounded-[2rem] bg-orange-600 text-white font-bold text-sm uppercase shadow-xl shadow-orange-600/20 hover:-translate-y-1 transition-all active:scale-95">
+                        class="px-8 py-4 rounded-[2rem] text-white font-bold text-sm uppercase shadow-xl hover:-translate-y-1 transition-all active:scale-95" style="background: var(--brand-gradient)">
                         Explore Providers
                     </button>
                     <button
@@ -47,13 +47,13 @@
                 </div>
                 <!-- Floating Card -->
                 <div
-                    class="absolute -bottom-8 -left-8 z-20 bg-white/80 backdrop-blur-xl p-6 rounded-[2rem] border border-white shadow-2xl max-w-[240px]">
+                    class="absolute -bottom-8 -left-8 z-20 bg-white backdrop-blur-xl p-6 rounded-[2rem] border border-white shadow-2xl max-w-[240px]">
                     <div class="flex items-center gap-4">
                         <div
                             class="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
                             ✓</div>
                         <div>
-                            <p class="text-xs font-black uppercase tracking-wider">Skill Verified</p>
+                            <p class="text-xs font-black uppercase ">Skill Verified</p>
                             <p class="text-[10px] text-slate-500">100% Trusted Providers</p>
                         </div>
                     </div>
@@ -64,26 +64,20 @@
 
     <!-- COMPACT HERO: MODERN BENTO -->
     <header class="relative pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden">
-        <!-- Background Glow -->
-        <div
-            class="absolute top-0 left-1/2 -translate-x-1/2 -z-10 w-full max-w-4xl h-64 bg-orange-100/40 blur-[100px] rounded-full">
-        </div>
-
         <div class="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-10 items-center">
 
             <!-- Left: Concise Content -->
             <div class="text-center lg:text-left">
                 <div
                     class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 mb-6 transition-all hover:bg-white">
-                    <span class="flex h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse"></span>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Verified
+                    <span class="flex h-1.5 w-1.5 rounded-full bg-[var(--brand)] animate-pulse"></span>
+                    <span class="text-[10px] font-bold uppercase  text-slate-500">Verified
                         Marketplace</span>
                 </div>
 
-                <h1 class="text-4xl md:text-5xl font-black leading-[1.1] tracking-tighter text-slate-900 mb-4">
+                <h1 class="text-4xl md:text-5xl font-black leading-[1.1]  text-slate-900 mb-4">
                     Find the best <br>
-                    <span
-                        class="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500 italic">Hustlers</span>
+                    <span class="italic text-[var(--brand)]">Hustlers</span>
                     in town.
                 </h1>
 
@@ -93,11 +87,11 @@
 
                 <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3">
                     <a href="{{ route('web.register') }}"
-                        class="px-6 py-3.5 rounded-2xl bg-slate-900 text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-slate-900/10 active:scale-95 transition-all">
+                        class="px-6 py-3.5 rounded-2xl bg-slate-900 text-white font-bold text-xs uppercase  shadow-lg shadow-slate-900/10 active:scale-95 transition-all">
                         Get Started
                     </a>
                     <a href="{{ route('login') }}"
-                        class="px-6 py-3.5 rounded-2xl bg-white border border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all">
+                        class="px-6 py-3.5 rounded-2xl bg-white border border-slate-200 text-slate-600 font-bold text-xs uppercase  hover:bg-slate-50 transition-all">
                         Login
                     </a>
                 </div>
@@ -112,13 +106,13 @@
                 </div>
                 <!-- Floating Card -->
                 <div
-                    class="absolute -bottom-8 -left-8 z-20 bg-white/80 backdrop-blur-xl p-6 rounded-[2rem] border border-white shadow-2xl max-w-[240px]">
+                    class="absolute -bottom-8 -left-8 z-20 bg-white backdrop-blur-xl p-6 rounded-[2rem] border border-white shadow-2xl max-w-[240px]">
                     <div class="flex items-center gap-4">
                         <div
                             class="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
                             ✓</div>
                         <div>
-                            <p class="text-xs font-black uppercase tracking-wider">Skill Verified</p>
+                            <p class="text-xs font-black uppercase ">Skill Verified</p>
                             <p class="text-[10px] text-slate-500">100% Trusted Providers</p>
                         </div>
                     </div>

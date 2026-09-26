@@ -5,9 +5,7 @@
     <div class="max-w-4xl mx-auto pt-20 space-y-6">
 
         <header
-            class="relative overflow-hidden rounded-[3rem] bg-white/70 backdrop-blur-xl border border-white p-8 shadow-sm">
-            <!-- Background Glow -->
-            <div class="absolute -top-20 -right-20 w-64 h-64 bg-orange-500/10 blur-[100px] rounded-full"></div>
+            class="relative overflow-hidden rounded-[3rem] bg-white backdrop-blur-xl border border-white p-8 shadow-sm">
 
             <div class="relative flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
                 <!-- Avatar / Initial -->
@@ -28,7 +26,7 @@
 
                 <div class="flex-1">
                     <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-2">
-                        <h1 class="text-3xl font-black tracking-tighter text-slate-900">{{ $user->name }}</h1>
+                        <h1 class="text-3xl font-black  text-slate-900">{{ $user->name }}</h1>
                         <span
                             class="px-3 py-1 rounded-full bg-slate-100 text-[10px] font-black uppercase  text-slate-500 border border-slate-200">
                             {{ strtoupper($user->getRoleNames()[0] ?? 'User') }}
@@ -49,28 +47,28 @@
 
         <section class="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div class="rounded-[2rem] border border-slate-100 bg-white px-5 py-5 shadow-sm">
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Profile</p>
+                <p class="text-[10px] font-black uppercase  text-slate-400">Profile</p>
                 <p class="mt-3 text-3xl font-black text-slate-900">{{ $profileMetrics['profile_completion'] ?? 0 }}%</p>
-                <p class="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-300">Completion</p>
+                <p class="mt-1 text-[10px] font-bold uppercase  text-slate-300">Completion</p>
             </div>
 
             <div class="rounded-[2rem] border border-slate-100 bg-white px-5 py-5 shadow-sm">
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Unread</p>
+                <p class="text-[10px] font-black uppercase  text-slate-400">Unread</p>
                 <p class="mt-3 text-3xl font-black text-slate-900">{{ $profileMetrics['unread_messages'] ?? 0 }}</p>
-                <p class="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-300">Messages</p>
+                <p class="mt-1 text-[10px] font-bold uppercase  text-slate-300">Messages</p>
             </div>
 
             <div class="rounded-[2rem] border border-slate-100 bg-white px-5 py-5 shadow-sm">
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Unread</p>
+                <p class="text-[10px] font-black uppercase  text-slate-400">Unread</p>
                 <p class="mt-3 text-3xl font-black text-slate-900">{{ $profileMetrics['unread_notifications'] ?? 0 }}</p>
-                <p class="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-300">Notifications</p>
+                <p class="mt-1 text-[10px] font-bold uppercase  text-slate-300">Notifications</p>
             </div>
 
             <div class="rounded-[2rem] border border-slate-100 bg-white px-5 py-5 shadow-sm">
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Rating</p>
+                <p class="text-[10px] font-black uppercase  text-slate-400">Rating</p>
                 <p class="mt-3 text-3xl font-black text-slate-900">
                     {{ number_format($profileMetrics['average_rating'] ?? 0, 1) }}</p>
-                <p class="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-300">Average</p>
+                <p class="mt-1 text-[10px] font-bold uppercase  text-slate-300">Average</p>
             </div>
         </section>
 
@@ -82,15 +80,15 @@
                 @if (auth()->user()->hasRole('worker'))
                     <section class="p-8 rounded-[2.5rem] bg-slate-900 text-white shadow-2xl shadow-slate-900/20">
                         <div class="flex items-center justify-between mb-8">
-                            <h2 class="text-xs font-black uppercase tracking-[0.2em] text-orange-400">Primary Skill</h2>
+                            <h2 class="text-xs font-black uppercase text-[var(--brand)]">Primary Skill</h2>
                             <span
-                                class="flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[10px] font-black uppercase">
+                                class="flex items-center gap-2 px-3 py-1 rounded-full bg-white text-[10px] font-black uppercase">
                                 <span class="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
                                 {{ $user->availability_status }}
                             </span>
                         </div>
                         <div class="flex items-center gap-6">
-                            <div class="h-16 w-16 rounded-3xl bg-white/10 flex items-center justify-center">
+                            <div class="h-16 w-16 rounded-3xl bg-white flex items-center justify-center">
                                 <i data-lucide="{{ $user->skill->icon ?? 'sparkles' }}" class="w-8 h-8 text-white"></i>
                             </div>
                             <div>
@@ -100,16 +98,16 @@
                         </div>
 
                         <div class="mt-8 grid gap-4 sm:grid-cols-3">
-                            <div class="rounded-2xl bg-white/5 px-4 py-4">
-                                <p class="text-[9px] font-black uppercase tracking-widest text-white/40">Assigned</p>
+                            <div class="rounded-2xl bg-white px-4 py-4">
+                                <p class="text-[9px] font-black uppercase  text-white/40">Assigned</p>
                                 <p class="mt-2 text-2xl font-black">{{ $profileMetrics['assigned_jobs'] ?? 0 }}</p>
                             </div>
-                            <div class="rounded-2xl bg-white/5 px-4 py-4">
-                                <p class="text-[9px] font-black uppercase tracking-widest text-white/40">Active</p>
+                            <div class="rounded-2xl bg-white px-4 py-4">
+                                <p class="text-[9px] font-black uppercase  text-white/40">Active</p>
                                 <p class="mt-2 text-2xl font-black">{{ $profileMetrics['active_jobs'] ?? 0 }}</p>
                             </div>
-                            <div class="rounded-2xl bg-white/5 px-4 py-4">
-                                <p class="text-[9px] font-black uppercase tracking-widest text-white/40">Skills</p>
+                            <div class="rounded-2xl bg-white px-4 py-4">
+                                <p class="text-[9px] font-black uppercase  text-white/40">Skills</p>
                                 <p class="mt-2 text-2xl font-black">{{ $profileMetrics['skills_count'] ?? 1 }}</p>
                             </div>
                         </div>
@@ -119,52 +117,52 @@
                 <section class="p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm space-y-5">
                     <div class="flex items-start justify-between gap-4">
                         <div>
-                            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Workspace
+                            <p class="text-[10px] font-black uppercase  text-slate-400">Workspace
                                 Details</p>
                             <h2 class="mt-2 text-xl font-black text-slate-900">Skill, location and verification</h2>
                         </div>
                         <button onclick="openModal('editProfileModal')"
-                            class="rounded-2xl border border-slate-200 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700 transition hover:border-[var(--brand)] hover:text-[var(--brand)]">
+                            class="rounded-2xl border border-slate-200 px-4 py-2 text-[10px] font-black uppercase  text-slate-700 transition hover:border-[var(--brand)] hover:text-[var(--brand)]">
                             Manage
                         </button>
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div class="rounded-2xl bg-slate-50 px-4 py-4">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Primary Skill</p>
+                            <p class="text-[10px] font-black uppercase  text-slate-400">Primary Skill</p>
                             <p class="mt-2 text-sm font-bold text-slate-900">{{ $user->skill->name ?? 'Not set' }}</p>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-4">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Availability</p>
+                            <p class="text-[10px] font-black uppercase  text-slate-400">Availability</p>
                             <p class="mt-2 text-sm font-bold text-slate-900">
                                 {{ ucfirst($user->availability_status ?? 'Not set') }}</p>
                         </div>
                         {{-- <div class="rounded-2xl bg-slate-50 px-4 py-4">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Latitude</p>
+                            <p class="text-[10px] font-black uppercase  text-slate-400">Latitude</p>
                             <p class="mt-2 text-sm font-bold text-slate-900">
                                 {{ $user->latitude !== null ? number_format((float) $user->latitude, 6) : 'Not set' }}
                             </p>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-4">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Longitude</p>
+                            <p class="text-[10px] font-black uppercase  text-slate-400">Longitude</p>
                             <p class="mt-2 text-sm font-bold text-slate-900">
                                 {{ $user->longitude !== null ? number_format((float) $user->longitude, 6) : 'Not set' }}
                             </p>
                         </div> --}}
                         <div class="rounded-2xl bg-slate-50 px-4 py-4 sm:col-span-2">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">ID Document</p>
+                            <p class="text-[10px] font-black uppercase  text-slate-400">ID Document</p>
                             <p class="mt-2 text-sm font-bold text-slate-900">
                                 {{ $user->id_document ? 'Uploaded and ready for review' : 'No document uploaded yet' }}
                             </p>
                         </div>
                         @if (auth()->user()->hasRole('worker'))
                             <div class="rounded-2xl bg-slate-50 px-4 py-4 sm:col-span-2">
-                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Additional Skills
+                                <p class="text-[10px] font-black uppercase  text-slate-400">Additional Skills
                                 </p>
                                 <div class="mt-3 flex flex-wrap gap-2">
                                     @forelse ($skills->whereIn('id', $selectedSkillIds ?? [])->reject(fn ($skill) => $skill->id === $user->primary_skill_id) as $skill)
                                         <span
-                                            class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700">
+                                            class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-2 text-[10px] font-black uppercase  text-slate-700">
                                             {{ $skill->name }}
                                         </span>
                                     @empty
@@ -173,22 +171,22 @@
                                 </div>
                             </div>
                             <div class="rounded-2xl bg-slate-50 px-4 py-4 sm:col-span-2">
-                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Account Details
+                                <p class="text-[10px] font-black uppercase  text-slate-400">Account Details
                                 </p>
                                 <div class="mt-3 grid gap-3 sm:grid-cols-3">
                                     <div>
-                                        <p class="text-[9px] font-black uppercase tracking-widest text-slate-300">Bank</p>
+                                        <p class="text-[9px] font-black uppercase  text-slate-300">Bank</p>
                                         <p class="mt-1 text-sm font-bold text-slate-900">
                                             {{ $user->bank_name ?: 'Not set' }}</p>
                                     </div>
                                     <div>
-                                        <p class="text-[9px] font-black uppercase tracking-widest text-slate-300">Account
+                                        <p class="text-[9px] font-black uppercase  text-slate-300">Account
                                             Name</p>
                                         <p class="mt-1 text-sm font-bold text-slate-900">
                                             {{ $user->account_name ?: 'Not set' }}</p>
                                     </div>
                                     <div>
-                                        <p class="text-[9px] font-black uppercase tracking-widest text-slate-300">Account
+                                        <p class="text-[9px] font-black uppercase  text-slate-300">Account
                                             Number</p>
                                         <p class="mt-1 text-sm font-bold text-slate-900">
                                             {{ $user->account_number ?: 'Not set' }}</p>
@@ -212,7 +210,7 @@
                         </div>
                         @unless ($user->phone_verified_at)
                             <a href="{{ route('web.verify.phone.page', ['phone' => $user->phone]) }}"
-                                class="inline-flex items-center justify-center rounded-2xl border border-orange-200 bg-orange-50 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-orange-600 transition hover:border-orange-400 hover:bg-orange-100">
+                                class="inline-flex items-center justify-center rounded-2xl border border-[var(--line)] bg-[var(--surface-soft)] px-4 py-2 text-[10px] font-black uppercase text-[var(--brand)] transition hover:border-[var(--brand)] hover:bg-[var(--brand)] hover:text-white">
                                 Verify Phone
                             </a>
                         @endunless
@@ -255,14 +253,14 @@
                             <p class="text-[10px] font-bold text-slate-400 uppercase">Average Rating</p>
                         </div>
                         <div class="rounded-2xl bg-[var(--surface-soft)] px-4 py-3 text-right">
-                            <p class="text-[9px] font-black uppercase tracking-widest text-[var(--brand)]">Member Since</p>
+                            <p class="text-[9px] font-black uppercase  text-[var(--brand)]">Member Since</p>
                             <p class="mt-2 text-sm font-black text-slate-900">
                                 {{ \Carbon\Carbon::parse($user->created_at)->format('M Y') }}
                             </p>
                         </div>
                     </div>
 
-                    <div class="mt-5 flex justify-center gap-1 text-orange-400">
+                    <div class="mt-5 flex justify-center gap-1 text-[var(--brand)]">
                         @for ($star = 1; $star <= 5; $star++)
                             <i data-lucide="star"
                                 class="w-4 h-4 {{ ($profileMetrics['average_rating'] ?? 0) >= $star ? 'fill-current' : 'text-slate-200' }}"></i>
@@ -271,7 +269,7 @@
 
                     <div class="mt-6 grid gap-3 sm:grid-cols-2">
                         <div class="rounded-2xl bg-slate-50 px-4 py-4">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            <p class="text-[10px] font-black uppercase  text-slate-400">
                                 {{ auth()->user()->hasRole('client') ? 'Jobs Created' : 'Applications Sent' }}
                             </p>
                             <p class="mt-2 text-2xl font-black text-slate-900">
@@ -279,17 +277,17 @@
                             </p>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-4">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Completed</p>
+                            <p class="text-[10px] font-black uppercase  text-slate-400">Completed</p>
                             <p class="mt-2 text-2xl font-black text-slate-900">
                                 {{ $profileMetrics['completed_jobs'] ?? 0 }}</p>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-4">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Active</p>
+                            <p class="text-[10px] font-black uppercase  text-slate-400">Active</p>
                             <p class="mt-2 text-2xl font-black text-slate-900">{{ $profileMetrics['active_jobs'] ?? 0 }}
                             </p>
                         </div>
                         <div class="rounded-2xl bg-slate-50 px-4 py-4">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            <p class="text-[10px] font-black uppercase  text-slate-400">
                                 {{ auth()->user()->hasRole('client') ? 'Applications' : 'Unread Alerts' }}
                             </p>
                             <p class="mt-2 text-2xl font-black text-slate-900">
@@ -300,8 +298,8 @@
                 </section>
 
                 <!-- Contact Card -->
-                <section class="p-8 rounded-[2.5rem] bg-orange-600 text-white shadow-xl shadow-orange-600/20">
-                    <h2 class="text-[10px] font-black uppercase  mb-6 opacity-70">Contact Info</h2>
+                <section class="p-8 rounded-[2.5rem] bg-slate-900 text-white shadow-xl shadow-slate-900/20">
+                    <h2 class="text-[10px] font-black uppercase mb-6 text-slate-300">Contact Info</h2>
                     <div class="space-y-4">
                         <div class="flex items-center gap-3">
                             <i data-lucide="smartphone" class="w-4 h-4"></i>
@@ -319,7 +317,7 @@
                     <div class="space-y-4">
                         <div class="rounded-2xl bg-slate-50 px-4 py-4">
                             <div class="flex items-center justify-between gap-4">
-                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Profile
+                                <p class="text-[10px] font-black uppercase  text-slate-400">Profile
                                     Completion</p>
                                 <span
                                     class="text-sm font-black text-slate-900">{{ $profileMetrics['profile_completion'] ?? 0 }}%</span>
@@ -331,7 +329,7 @@
                         </div>
 
                         <div class="rounded-2xl bg-slate-50 px-4 py-4">
-                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">SMS
+                            <p class="text-[10px] font-black uppercase  text-slate-400">SMS
                                 Verification</p>
                             <p class="mt-2 text-sm font-black text-slate-900">
                                 {{ $user->phone_verified_at ? 'Verified' : 'Pending' }}
@@ -343,7 +341,7 @@
         </div>
 
         <div class="text-center pt-4">
-            <p class="text-[10px] font-bold text-slate-300 uppercase tracking-tighter">
+            <p class="text-[10px] font-bold text-slate-300 uppercase ">
                 Member since {{ \Carbon\Carbon::parse($user->created_at)->format('F Y') }}
             </p>
         </div>
@@ -419,7 +417,7 @@
                         <div class="flex items-end justify-between">
                             <div>
                                 <label
-                                    class="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--ink)] opacity-40">
+                                    class="text-[10px] font-black uppercase  text-[var(--ink)] opacity-40">
                                     Additional Expertise
                                 </label>
                                 <p class="text-[10px] font-medium text-slate-400 italic">Select all other services you can
@@ -445,8 +443,8 @@
 
                                     {{-- Visual Tile --}}
                                     <div
-                                        class="flex items-center gap-3 p-3 rounded-2xl border-2 border-slate-50 bg-slate-50/50 transition-all duration-300
-                        peer-checked:border-[var(--brand)] peer-checked:bg-white peer-checked:shadow-lg peer-checked:shadow-orange-500/10
+                                        class="flex items-center gap-3 p-3 rounded-2xl border-2 border-slate-50 bg-slate-50 transition-all duration-300
+                        peer-checked:border-[var(--brand)] peer-checked:bg-white peer-checked:shadow-lg peer-checked:shadow-slate-900/10
                         group-hover:border-[var(--brand)]/20">
 
                                         <div class="h-8 w-8 rounded-xl flex items-center justify-center text-sm transition-all
@@ -456,7 +454,7 @@
                                         </div>
 
                                         <span
-                                            class="text-[11px] font-black uppercase tracking-tight text-slate-500 peer-checked:text-[var(--ink)]">
+                                            class="text-[11px] font-black uppercase  text-slate-500 peer-checked:text-[var(--ink)]">
                                             {{ $skill->name }}
                                         </span>
 
@@ -495,7 +493,7 @@
                 <div class="rounded-2xl border border-dashed border-[var(--brand)]/25 bg-[var(--surface-soft)] px-4 py-4">
                     <div class="flex flex-col gap-4">
                         <div>
-                            <p class="text-[10px] font-black uppercase tracking-widest text-[var(--brand)]">Location</p>
+                            <p class="text-[10px] font-black uppercase  text-[var(--brand)]">Location</p>
                             <p class="mt-1 text-xs font-medium text-slate-500">
                                 Saved coordinates are prefilled automatically. Use your browser location to refresh them.
                             </p>
@@ -519,7 +517,7 @@
                     </div>
 
                     <p id="profile-location-status"
-                        class="mt-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        class="mt-3 text-[10px] font-black uppercase  text-slate-400">
                         {{ $user->latitude !== null && $user->longitude !== null ? 'Saved map loacation loaded' : 'Waiting for browser location' }}
                     </p>
                 </div>
@@ -534,10 +532,6 @@
                 </x-button>
             </form>
 
-            <!-- Subtle Background Glow -->
-            <div
-                class="absolute -bottom-20 -left-20 w-64 h-64 bg-orange-500/5 blur-[100px] rounded-full pointer-events-none">
-            </div>
         </div>
     </x-modal>
 @endsection

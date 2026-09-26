@@ -6,10 +6,23 @@ use App\Models\Concerns\AppliesAdminTextSearch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Rating extends Model
 {
     use AppliesAdminTextSearch, HasFactory;
+
+    protected static function booted(): void
+    {
+        static::creating(function (Rating $rating): void {
+            $rating->uuid ??= (string) Str::uuid();
+        });
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
 
     protected $fillable = [
         'job_id',

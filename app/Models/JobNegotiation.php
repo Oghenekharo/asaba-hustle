@@ -4,10 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class JobNegotiation extends Model
 {
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::creating(function (JobNegotiation $negotiation): void {
+            $negotiation->uuid ??= (string) Str::uuid();
+        });
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
     protected $fillable = [
         'job_id',
         'client_id',

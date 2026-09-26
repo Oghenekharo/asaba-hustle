@@ -1,7 +1,7 @@
 <x-modal id="installGuideModal" title="Install App">
     <div class="space-y-5">
         <div class="flex items-center gap-3">
-            <img src="/images/icons/asaba-hustle.png" alt="Asaba Hustle" class="h-10 w-10 rounded-xl" />
+            <img src="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/asaba-hustle.png') }}" alt="Asaba Hustle" class="h-10 w-10 rounded-xl object-contain" />
             <div>
                 <h3 class="font-semibold text-gray-900">Install Asaba Hustle</h3>
                 <p class="text-xs text-gray-500">Get faster access and enable notifications from your home screen.</p>
@@ -37,7 +37,7 @@
 
         <div class="pt-2">
             <button onclick="closeModal('installGuideModal')"
-                class="w-full rounded-xl bg-orange-500 py-2.5 font-semibold text-white transition active:scale-95">
+                class="w-full rounded-xl py-2.5 font-semibold text-white transition active:scale-95" style="background: var(--brand-gradient)">
                 Got it
             </button>
         </div>

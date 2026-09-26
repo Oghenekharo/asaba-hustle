@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Models\Concerns\AppliesAdminTextSearch;
+use App\Models\Concerns\HasUniqueSlug;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +17,19 @@ use NotificationChannels\WebPush\HasPushSubscriptions;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use AppliesAdminTextSearch, HasApiTokens, Notifiable, HasRoles, HasFactory, HasPushSubscriptions;
+    use AppliesAdminTextSearch, HasUniqueSlug, HasApiTokens, Notifiable, HasRoles, HasFactory, HasPushSubscriptions;
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user): void {
+            $user->slug ??= $user->assignUniqueSlug($user->name);
+        });
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     protected $fillable = [
         'name',
@@ -188,8 +201,4 @@ class User extends Authenticatable
             });
     }
 
-    public function getRouteKeyName()
-    {
-        return 'id';
-    }
 }

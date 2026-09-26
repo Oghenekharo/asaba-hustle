@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminJobIndexRequest;
 use App\Http\Requests\Admin\AdminJobRollbackRequest;
+use App\Events\ConversationStatusUpdated;
 use App\Models\ServiceJob;
 use App\Services\JobService;
 
@@ -83,5 +84,23 @@ class AdminJobController extends Controller
         return redirect()
             ->back()
             ->with('status', 'Job status rolled back successfully.');
+    }
+
+    public function reopenConversation(ServiceJob $job)
+    {
+        $this->authorize('reopenConversation', $job);
+
+        $conversation = $job->conversation()->firstOrFail();
+        $conversation->reopenBy(request()->user());
+
+        try {
+            event(new ConversationStatusUpdated($conversation->fresh()));
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
+
+        return redirect()
+            ->back()
+            ->with('status', 'Conversation reopened successfully.');
     }
 }

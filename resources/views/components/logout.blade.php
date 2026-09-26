@@ -5,7 +5,7 @@
 
         <!-- The Text: Starts collapsed -->
         <span
-            class="max-w-0 overflow-hidden whitespace-nowrap text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:max-w-[80px] group-hover:opacity-100 group-hover:mr-2 transition-all duration-500 ease-out">
+            class="max-w-0 overflow-hidden whitespace-nowrap text-[10px] font-black uppercase  opacity-0 group-hover:max-w-[80px] group-hover:opacity-100 group-hover:mr-2 transition-all duration-500 ease-out">
             Logout
         </span>
 

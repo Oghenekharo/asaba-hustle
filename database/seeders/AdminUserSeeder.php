@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -19,15 +18,14 @@ class AdminUserSeeder extends Seeder
         $name = (string) env('ADMIN_USER_NAME', 'Tunde Adebayo');
         $password = (string) env('ADMIN_USER_PASSWORD', 'password');
 
-        $admin = User::firstOrCreate(
-            ['phone' => $phone],
-            [
-                'name' => $name,
-                'email' => $email,
-                'password' => Hash::make($password)
-            ]
-        );
+        $admin = User::firstOrNew(['phone' => $phone]);
+        if (!$admin->exists) {
+            $admin->name = $name;
+            $admin->email = $email;
+            $admin->password = Hash::make($password);
+            $admin->save();
+        }
 
-        $admin->assignRole('admin');
+        $admin->syncRoles(['admin']);
     }
 }

@@ -85,6 +85,36 @@ class AuthApiTest extends TestCase
         ])->assertOk()->assertJsonPath('success', true);
     }
 
+    public function test_register_returns_a_json_error_and_rolls_back_when_phone_token_dispatch_fails(): void
+    {
+        Http::fake([
+            'https://portal.nigeriabulksms.com/api/' => Http::response([
+                'status' => 'FAILED',
+                'error' => 'Provider unavailable',
+            ], 500),
+        ]);
+
+        Role::create(['name' => 'client', 'guard_name' => 'web']);
+
+        $response = $this->postJson('/api/auth/register', [
+            'name' => 'Test Client',
+            'phone' => '08012345678',
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+            'role' => 'client',
+            'verification_method' => 'phone',
+        ]);
+
+        $response
+            ->assertStatus(503)
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'Unable to send the phone verification code right now. Please try again.');
+
+        $this->assertDatabaseMissing('users', [
+            'phone' => '08012345678',
+        ]);
+    }
+
     public function test_user_can_request_and_reset_password_by_phone(): void
     {
         Http::fake([

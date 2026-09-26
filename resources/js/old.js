@@ -37,7 +37,7 @@ const renderJobs = (jobs = []) => {
         <article class="rounded-3xl border border-black/6 bg-[var(--surface-soft)] p-5">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--brand)]">${job.skill?.name ?? "General skill"}</p>
+                    <p class="text-xs font-semibold uppercase  text-[var(--brand)]">${job.skill?.name ?? "General skill"}</p>
                     <h3 class="mt-2 text-xl font-bold text-[var(--ink)]">#${job.id} ${job.title}</h3>
                 </div>
                 <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-black/60">${String(job.status).replaceAll("_", " ")}</span>
@@ -365,6 +365,7 @@ const bootAppScreen = () => {
     $("[data-job-action]").on("click", function () {
         const action = $(this).data("job-action");
         const jobId = $('#job-action-form [name="job_id"]').val();
+        const jobKey = config.jobPublicKey || jobId;
         const workerId = $('#job-action-form [name="worker_id"]').val();
         const message = $('#job-action-form [name="message"]').val();
 
@@ -380,27 +381,27 @@ const bootAppScreen = () => {
         const routes = {
             apply: {
                 method: "POST",
-                url: `${config.jobShowBase}/${jobId}/apply`,
+                url: `${config.jobShowBase}/${jobKey}/apply`,
                 data: { message },
             },
             hire: {
                 method: "POST",
-                url: `${config.jobShowBase}/${jobId}/hire`,
+                url: `${config.jobShowBase}/${jobKey}/hire`,
                 data: { worker_id: workerId },
             },
             accept: {
                 method: "POST",
-                url: `${config.jobShowBase}/${jobId}/accept`,
+                url: `${config.jobShowBase}/${jobKey}/accept`,
                 data: {},
             },
             start: {
                 method: "POST",
-                url: `${config.jobShowBase}/${jobId}/start`,
+                url: `${config.jobShowBase}/${jobKey}/start`,
                 data: {},
             },
             complete: {
                 method: "POST",
-                url: `${config.jobShowBase}/${jobId}/complete`,
+                url: `${config.jobShowBase}/${jobKey}/complete`,
                 data: {},
             },
         };
@@ -427,7 +428,7 @@ const bootAppScreen = () => {
         }
 
         request({
-            url: `${config.jobShowBase}/${jobId}/suggested-workers`,
+            url: `${config.jobShowBase}/${config.jobPublicKey || jobId}/suggested-workers`,
             feedback: "#job-action-feedback",
             onSuccess: (response) => {
                 showFeedback(
@@ -445,7 +446,7 @@ const bootAppScreen = () => {
         const jobId = $('#job-rate-form [name="job_id"]').val();
 
         request({
-            url: `${config.jobShowBase}/${jobId}/rate`,
+            url: `${config.jobShowBase}/${config.jobPublicKey || jobId}/rate`,
             method: "POST",
             data: $(this).serialize().replace(`job_id=${jobId}`, ""),
             feedback: "#job-rate-feedback",

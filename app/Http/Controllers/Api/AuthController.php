@@ -18,10 +18,12 @@ use App\Models\User;
 use App\Services\AuthSecurityService;
 use App\Traits\LogActivity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Throwable;
 
 class AuthController extends Controller
 {
@@ -38,20 +40,28 @@ class AuthController extends Controller
     {
         $data = $request->validated();
 
-        $user = User::create([
-            'name' => $data['name'],
-            'phone' => $data['phone'],
-            'email' => $data['email'] ?? null,
-            'password' => Hash::make($data['password']),
-            'primary_skill_id' => $data['primary_skill_id'] ?? null,
-        ]);
+        try {
+            $user = DB::transaction(function () use ($data) {
+                $user = User::create([
+                    'name' => $data['name'],
+                    'phone' => $data['phone'],
+                    'email' => $data['email'] ?? null,
+                    'password' => Hash::make($data['password']),
+                    'primary_skill_id' => $data['primary_skill_id'] ?? null,
+                ]);
 
-        $user->assignRole($data['role']);
+                $user->assignRole($data['role']);
 
-        if ($data['verification_method'] === 'email') {
-            $this->authSecurityService->sendEmailVerificationLink($user);
-        } else {
-            $this->authSecurityService->issueVerificationToken($user, 'phone');
+                if ($data['verification_method'] === 'email') {
+                    $this->authSecurityService->sendEmailVerificationLink($user);
+                } else {
+                    $this->authSecurityService->issueVerificationToken($user, 'phone');
+                }
+
+                return $user;
+            });
+        } catch (RuntimeException $exception) {
+            return $this->errorResponse($exception->getMessage(), 503);
         }
 
         return $this->successResponse(
@@ -70,14 +80,25 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         $data = $request->validated();
+        $channel = $data['channel'] ?? (isset($data['email']) ? 'email' : 'phone');
 
-        $user = User::where('phone', $data['phone'])->first();
+        $user = User::where($channel, $data[$channel] ?? null)->first();
 
         if (
             !$user ||
             !Hash::check($data['password'], $user->password)
         ) {
             return $this->errorResponse('Invalid credentials', 401);
+        }
+
+        if ($channel === 'email' && !$user->email_verified_at) {
+            try {
+                $this->authSecurityService->sendEmailVerificationLink($user);
+            } catch (Throwable $exception) {
+                return $this->errorResponse('Unable to send a verification email right now. Please try again.', 503);
+            }
+
+            return $this->errorResponse('Your email is not verified. We sent a new verification link.', 403);
         }
 
         $token = $user->createToken('api_token')->plainTextToken;

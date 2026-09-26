@@ -24,7 +24,7 @@ class ServiceJobPolicy
     public function create(User $user): bool
     {
         return $user->hasRole('client')
-            && $user->phone_verified_at !== null;
+            && ($user->phone_verified_at !== null || $user->email_verified_at !== null);
     }
 
     public function apply(User $user, ServiceJob $job): bool
@@ -103,15 +103,18 @@ class ServiceJobPolicy
             return false;
         }
 
-        if ($user->id === $job->user_id) {
-            return $job->assigned_to !== null;
+        $isParticipant = (int) $user->id === (int) $job->user_id
+            || ($user->hasRole('worker') && (int) $job->assigned_to === (int) $user->id);
+
+        if (!$isParticipant) {
+            return false;
         }
 
-        if ($user->hasRole('worker')) {
-            return $job->assigned_to === $user->id;
+        if (in_array($job->status, [ServiceJob::STATUS_COMPLETED, ServiceJob::STATUS_RATED], true)) {
+            return $job->conversation()->where('is_closed', false)->exists();
         }
 
-        return false;
+        return true;
     }
 
     public function suggestedWorkers(User $user, ServiceJob $job): bool
@@ -129,5 +132,11 @@ class ServiceJobPolicy
     {
         return $user->hasRole('admin')
             && !empty(ServiceJob::adminRollbackTargets($job->status));
+    }
+
+    public function reopenConversation(User $user, ServiceJob $job): bool
+    {
+        return $user->hasRole('admin')
+            && $job->conversation()->where('is_closed', true)->exists();
     }
 }

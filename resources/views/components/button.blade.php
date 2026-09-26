@@ -8,14 +8,14 @@
 
 @php
     $solidColors = [
-        'orange' => 'bg-orange-500 text-white hover:shadow-orange-500/20',
+        'orange' => 'bg-[var(--brand)] text-white',
         'blue' => 'bg-blue-600 text-white hover:shadow-blue-600/20',
         'green' => 'bg-green-600 text-white hover:shadow-green-600/20',
         'black' => 'bg-slate-900 text-white hover:shadow-slate-900/20',
     ];
 
     $outlineColors = [
-        'orange' => 'border border-orange-500 text-orange-500 hover:bg-orange-50',
+        'orange' => 'border border-[var(--brand)] text-[var(--brand)] hover:bg-[var(--surface-soft)]',
         'blue' => 'border border-blue-600 text-blue-600 hover:bg-blue-50',
         'green' => 'border border-green-600 text-green-600 hover:bg-green-50',
         'black' => 'border border-slate-900 text-slate-900 hover:bg-slate-100',
@@ -42,7 +42,7 @@
 
 <button type="{{ $type }}" data-loading="false"
     {{ $attributes->merge([
-        'class' => "ajax-button relative flex items-center justify-center gap-2 overflow-hidden rounded-xl font-black uppercase tracking-widest transition-all $sizeClass $colorClass $disabledClass",
+        'class' => "ajax-button relative flex items-center justify-center gap-2 overflow-hidden rounded-xl font-black uppercase  transition-all $sizeClass $colorClass $disabledClass",
     ]) }}
     @disabled($disabled)>
 

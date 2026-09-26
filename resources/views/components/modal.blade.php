@@ -12,7 +12,7 @@
 
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-black tracking-tight text-slate-900 js-modal-title">{{ $title }}</h3>
+            <h3 class="text-xl font-black  text-slate-900 js-modal-title">{{ $title }}</h3>
             <button onclick="closeModal('{{ $id }}')"
                 class="rounded-xl cursor-pointer p-2 bg-red-500 text-white hover:bg-red-400 hover:text-white/85 transition-colors">
                 <i data-lucide="x" class="h-6 w-6"></i>

@@ -14,7 +14,17 @@ class Conversation extends Model
         'uuid',
         'job_id',
         'client_id',
-        'worker_id'
+        'worker_id',
+        'is_closed',
+        'closed_at',
+        'reopened_at',
+        'reopened_by',
+    ];
+
+    protected $casts = [
+        'is_closed' => 'boolean',
+        'closed_at' => 'datetime',
+        'reopened_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -49,5 +59,22 @@ class Conversation extends Model
     public function messages()
     {
         return $this->hasMany(ChatMessage::class);
+    }
+
+    public function close(): void
+    {
+        $this->forceFill([
+            'is_closed' => true,
+            'closed_at' => now(),
+        ])->save();
+    }
+
+    public function reopenBy(User $admin): void
+    {
+        $this->forceFill([
+            'is_closed' => false,
+            'reopened_at' => now(),
+            'reopened_by' => $admin->id,
+        ])->save();
     }
 }

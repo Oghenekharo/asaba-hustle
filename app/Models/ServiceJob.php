@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Models\Concerns\AppliesAdminTextSearch;
+use App\Models\Concerns\HasUniqueSlug;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ServiceJob extends Model
 {
-    use AppliesAdminTextSearch, HasFactory;
+    use AppliesAdminTextSearch, HasFactory, HasUniqueSlug;
 
     const STATUS_OPEN = 'open'; // job posted
     const STATUS_ASSIGNED = 'assigned'; // worker hired
@@ -20,6 +21,18 @@ class ServiceJob extends Model
     const STATUS_RATED = 'rated'; // client rated worker
     const STATUS_CANCELLED = 'cancelled'; // cancelled by admin
     protected $table = 'service_jobs';
+
+    protected static function booted(): void
+    {
+        static::creating(function (ServiceJob $job): void {
+            $job->slug ??= $job->assignUniqueSlug($job->title);
+        });
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     protected $fillable = [
         'user_id',

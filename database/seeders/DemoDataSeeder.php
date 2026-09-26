@@ -160,7 +160,7 @@ class DemoDataSeeder extends Seeder
             'user_id' => $client->id,
             'skill_id' => $skills['Cleaning'] ?? null,
             'title' => 'Deep Cleaning for Three-Bedroom Apartment',
-            'description' => 'Client needs a careful cleaner for a full apartment reset before new tenants move in.',
+            'description' => 'I need a thorough move-in clean for a three-bedroom flat, including the kitchen, bathrooms, windows, and inside the cupboards. Please bring your own cleaning supplies and let me know how long the work will take.',
             'budget' => 18000,
             'agreed_amount' => null,
             'location' => 'Okpanam Road, Asaba',
@@ -175,7 +175,7 @@ class DemoDataSeeder extends Seeder
             'user_id' => $client->id,
             'skill_id' => $skills['Plumbing'] ?? null,
             'title' => 'Kitchen Sink Leak Repair',
-            'description' => 'Client needs a plumber to replace a faulty connector and stop recurring leakage under the sink.',
+            'description' => 'Water is leaking from the pipe connection beneath my kitchen sink whenever the tap is running. Please inspect the trap and fittings, replace any worn parts, and test the repair before leaving.',
             'budget' => 25000,
             'agreed_amount' => null,
             'location' => 'Summit Road, Asaba',
@@ -190,7 +190,7 @@ class DemoDataSeeder extends Seeder
             'user_id' => $client->id,
             'skill_id' => $skills['Electrical'] ?? null,
             'title' => 'Living Room Socket Rewiring',
-            'description' => 'Assigned electrical job awaiting worker confirmation and site access scheduling.',
+            'description' => 'Two wall sockets in the living room spark intermittently and need a safe inspection and repair. Please check the wiring, replace damaged sockets if needed, and confirm the circuit is working safely.',
             'budget' => 32000,
             'agreed_amount' => 30000,
             'location' => 'DBS Road, Asaba',
@@ -205,7 +205,7 @@ class DemoDataSeeder extends Seeder
             'user_id' => $client->id,
             'skill_id' => $skills['Painting'] ?? null,
             'title' => 'Interior Wall Repaint for Upstairs Flat',
-            'description' => 'Painting job already started, used for seeded chat and progress tracking.',
+            'description' => 'Repaint the upstairs flat living room and hallway in a light neutral colour. The walls need minor filling and sanding before two coats of paint; furniture will be moved away from the walls before work begins.',
             'budget' => 40000,
             'agreed_amount' => 42000,
             'location' => 'Anwai Road, Asaba',
@@ -220,7 +220,7 @@ class DemoDataSeeder extends Seeder
             'user_id' => $client->id,
             'skill_id' => $skills['Moving Help'] ?? null,
             'title' => 'Two-Bedroom Apartment Relocation',
-            'description' => 'Completed moving assistance job with settled payment and client review.',
+            'description' => 'Move boxed household items, a bed, wardrobes, and a refrigerator from a two-bedroom flat to a nearby home. Bring a suitable vehicle and helpers, and take care to protect fragile items during loading and unloading.',
             'budget' => 55000,
             'agreed_amount' => 58000,
             'location' => 'Nnebisi Road, Asaba',
@@ -472,10 +472,16 @@ class DemoDataSeeder extends Seeder
 
     protected function seedJob(array $attributes): ServiceJob
     {
-        return ServiceJob::query()->updateOrCreate(
-            ['title' => $attributes['title']],
-            $attributes
-        );
+        $job = ServiceJob::query()->firstOrNew(['title' => $attributes['title']]);
+        $job->fill($attributes);
+
+        if (blank($job->slug)) {
+            $job->slug = $job->assignUniqueSlug($job->title);
+        }
+
+        $job->save();
+
+        return $job;
     }
 
     protected function seedMessage(Conversation $conversation, User $sender, string $message, bool $isRead): void

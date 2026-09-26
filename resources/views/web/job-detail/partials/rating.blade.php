@@ -11,10 +11,13 @@
                 Your feedback helps both sides build trust on the platform.
             </p>
             <button type="button" onclick="openModal('jobRatingModal')"
-                class="mt-4 inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition hover:opacity-90">
+                class="mt-4 inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-[10px] font-black uppercase  text-white transition hover:opacity-90">
                 <i data-lucide="star" class="h-4 w-4"></i>
                 Open Rating Form
             </button>
+        </div>
+        <div id="job-rating-feedback" role="status" aria-live="polite"
+            class="mt-4 hidden rounded-xl border border-emerald-300 bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-800">
         </div>
     </section>
 @elseif($isOwner && $clientRating)
@@ -69,8 +72,8 @@
     <x-modal id="jobRatingModal" title="{{ $canRateWorker ? 'Rate Worker' : 'Rate Client' }}" size="max-w-xl">
         <form id="job-rate-form" action="{{ route('web.app.jobs.rate', $job) }}" method="POST" class="space-y-4">
             @csrf
-            <div class="rounded-[1.75rem] border border-violet-100 bg-violet-50/70 px-5 py-4">
-                <p class="text-[10px] font-black uppercase tracking-widest text-violet-700">
+            <div class="rounded-[1.75rem] border border-violet-100 bg-violet-50 px-5 py-4">
+                <p class="text-[10px] font-black uppercase  text-violet-700">
                     {{ $canRateWorker ? 'Worker Review' : 'Client Review' }}
                 </p>
                 <p class="mt-2 text-sm font-medium text-violet-900">
@@ -78,8 +81,9 @@
                 </p>
             </div>
 
-            <x-input type="number" step="0.1" name="rating" id="job_worker_rating" icon="star" label="Star Rating"
-                placeholder="Give a score from 1.0 to 5.0" required />
+            <x-select name="rating" id="job_worker_rating" icon="star" label="Star Rating"
+                :options="['5.0' => '5 stars — Excellent', '4.0' => '4 stars — Very good', '3.0' => '3 stars — Good', '2.0' => '2 stars — Fair', '1.0' => '1 star — Poor']"
+                placeholder="Choose a rating" required />
 
             <x-input type="textarea" name="review" id="job_worker_review" rows="4" icon="message-square-quote"
                 label="Review"

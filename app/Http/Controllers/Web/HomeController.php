@@ -47,4 +47,16 @@ class HomeController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function updateLocation(Request $request)
+    {
+        $coordinates = $request->validate([
+            'latitude' => ['required', 'numeric', 'between:-90,90'],
+            'longitude' => ['required', 'numeric', 'between:-180,180'],
+        ]);
+
+        $request->user()->update($coordinates);
+
+        return response()->json(['success' => true]);
+    }
 }

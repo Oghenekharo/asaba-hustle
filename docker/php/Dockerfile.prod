@@ -37,11 +37,8 @@ RUN npm run build
 
 FROM php:8.2-cli-bookworm AS app_runtime
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    git \
-    unzip \
-    sqlite3 \
     default-mysql-client \
     libsqlite3-dev \
     libpq-dev \
@@ -69,6 +66,11 @@ RUN apt-get update && apt-get install -y \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
+
+ENV APP_ENV=production \
+    APP_DEBUG=false
+
+COPY docker/php/production.ini /usr/local/etc/php/conf.d/zz-production.ini
 
 COPY . .
 COPY --from=composer_deps /app/vendor /var/www/html/vendor

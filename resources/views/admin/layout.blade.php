@@ -5,12 +5,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="{{ $siteTheme['primary'] }}">
+    <link rel="icon" href="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/icon-192.png') }}">
+    <script>
+        (() => {
+            const saved = localStorage.getItem('asaba-theme');
+            document.documentElement.classList.toggle('dark', saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches);
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <title>{{ $title ?? trim($__env->yieldContent('title')) ?: 'Admin Dashboard' }} |
         {{ config('app.name', 'Asaba Hustle') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="min-h-screen bg-[var(--surface)] text-[var(--ink)] antialiased">
+<body class="site-typography min-h-screen text-[var(--ink)] antialiased" style="--brand: {{ $siteTheme['primary'] }}; --brand-strong: {{ $siteTheme['strong'] }}; --brand-gradient: {{ $siteTheme['gradient'] }}; --surface-soft: {{ $siteTheme['soft'] }}; background-color: var(--surface); color: var(--ink)">
     @php
         $adminUser = auth()->user();
         $navItems = [
@@ -21,11 +32,12 @@
             ['route' => 'admin.payments.index', 'label' => 'Payments', 'icon' => 'wallet'],
             ['route' => 'admin.ratings.index', 'label' => 'Ratings', 'icon' => 'star'],
             ['route' => 'admin.activity.index', 'label' => 'Activity', 'icon' => 'history'],
+            ['route' => 'admin.appearance.edit', 'label' => 'Appearance', 'icon' => 'palette'],
         ];
     @endphp
 
     <div
-        class="admin-ui relative isolate min-h-screen bg-[#F8FAFC] font-sans selection:bg-[var(--brand)] selection:text-white
+        class="admin-ui relative isolate min-h-screen font-sans selection:bg-[var(--brand)] selection:text-white
         [&_.text-5xl]:!text-3xl md:[&_.text-5xl]:!text-4xl
         [&_.text-4xl]:!text-2xl md:[&_.text-4xl]:!text-3xl
         [&_.text-3xl]:!text-xl md:[&_.text-3xl]:!text-2xl
@@ -47,7 +59,7 @@
         [&_.h-14]:!h-12">
         <!-- Brand Gradient Background -->
         <div
-            class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[40rem] bg-[radial-gradient(circle_at_top_left,_rgba(255,122,0,0.08),_transparent_70%)]">
+            class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[40rem] bg-[radial-gradient(circle_at_top_left,color-mix(in_srgb,var(--brand)_8%,transparent),_transparent_70%)]">
         </div>
 
         <!-- Mobile Sidebar Overlay (Glass) -->
@@ -57,23 +69,23 @@
 
         <!-- Sidebar: Floating Bento Navigation -->
         <aside id="admin-sidebar"
-            class="fixed inset-y-4 left-4 z-50 flex w-72 -translate-x-[calc(100%+2rem)] flex-col rounded-[2.5rem] border border-white/20 bg-[var(--ink)] text-white shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] lg:translate-x-0">
+            class="fixed inset-y-4 left-4 z-50 flex w-72 -translate-x-[calc(100%+2rem)] flex-col rounded-[2.5rem] border border-[#263449] bg-[#1f2b3d] text-white shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] lg:translate-x-0">
 
 
             <div class="p-8">
                 <div class="flex items-center justify-between">
                     <a href="{{ route('admin.dashboard') }}" class="group flex items-center gap-3">
                         <div
-                            class="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--brand)] text-sm font-black italic tracking-tighter text-white shadow-[0_8px_16px_rgba(255,122,0,0.3)] group-hover:scale-110 transition-transform duration-300">
+                            class="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--brand)] text-sm font-black italic text-white shadow-[0_8px_16px_color-mix(in_srgb,var(--brand)_30%,transparent)] group-hover:scale-110 transition-transform duration-300">
                             AH</div>
                         <div>
                             <span
-                                class="block text-[10px] font-black uppercase tracking-[0.3em] text-orange-400/60">Control</span>
-                            <span class="block text-sm font-black tracking-tight text-white italic">Asaba Hustle</span>
+                                class="block text-[10px] font-black uppercase text-slate-300">Control</span>
+                            <span class="block text-sm font-black  text-white italic">Asaba Hustle</span>
                         </div>
                     </a>
                     <button type="button" id="admin-sidebar-close"
-                        class="lg:hidden p-2 rounded-xl hover:bg-white/10 text-white/40">
+                        class="lg:hidden p-2 rounded-xl hover:bg-[#253a59] text-white">
                         <i data-lucide="x-circle" class="h-5 w-5"></i>
                     </button>
                 </div>
@@ -82,16 +94,16 @@
             <!-- Admin Profile Pill -->
             <div class="px-5 mb-6">
                 <div
-                    class="flex items-center gap-3 rounded-[2rem] bg-white/5 p-2 pr-4 border border-white/5 backdrop-blur-sm">
+                    class="flex items-center gap-3 rounded-[2rem] bg-[#1b2a40] p-2 pr-4 border border-[#3d5678]">
                     <div
-                        class="h-10 w-10 rounded-[1.25rem] bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center font-black text-xs border border-white/10 shadow-inner">
+                        class="h-10 w-10 rounded-[1.25rem] bg-[#293f5f] flex items-center justify-center font-black text-xs border border-[#6784aa] text-white">
                         {{ substr($adminUser?->name ?? 'A', 0, 1) }}
                     </div>
                     <div class="min-w-0">
-                        <p class="truncate text-[11px] font-black text-white uppercase tracking-wider">
+                        <p class="truncate text-[11px] font-black text-white uppercase ">
                             {{ $adminUser?->name }}</p>
                         <div
-                            class="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-emerald-400/80">
+                            class="flex items-center gap-1.5 text-[9px] font-bold uppercase text-emerald-300">
                             <span class="h-1 w-1 rounded-full bg-emerald-400 animate-pulse"></span>
                             Verified Admin
                         </div>
@@ -104,11 +116,11 @@
                 @foreach ($navItems as $item)
                     @php $active = request()->routeIs($item['route']); @endphp
                     <a href="{{ route($item['route']) }}"
-                        class="group flex items-center gap-3 rounded-2xl px-4 py-3.5 text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 {{ $active ? 'bg-[var(--brand)] text-white shadow-[0_12px_24px_-8px_rgba(255,122,0,0.5)]' : 'text-white/40 hover:bg-white/5 hover:text-white' }}">
+                        class="group flex items-center gap-3 rounded-2xl border-b px-4 py-3.5 text-[10px] font-black uppercase transition-all duration-300 {{ $active ? 'border-b-transparent bg-[var(--brand)] text-white shadow-lg' : 'border-b-[#35445a] bg-[#29384d] text-white hover:border-b-[#35445a] hover:bg-[#34465f] hover:text-white' }}">
                         <div
-                            class="flex h-8 w-8 items-center justify-center rounded-xl transition-colors {{ $active ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }}">
+                            class="flex h-8 w-8 items-center justify-center rounded-xl transition-colors {{ $active ? 'bg-white text-[var(--brand)]' : 'bg-[#1b2a40] text-white group-hover:bg-[#293f5f]' }}">
                             <i data-lucide="{{ $item['icon'] }}"
-                                class="h-4 w-4 {{ $active ? 'text-white' : 'group-hover:text-orange-400' }}"></i>
+                                class="h-4 w-4"></i>
                         </div>
                         <span class="flex-1">{{ $item['label'] }}</span>
                         @if ($active)
@@ -119,19 +131,19 @@
             </nav>
 
             <!-- Sidebar Footer Actions -->
-            <div class="p-5 mt-auto">
-                <div class="rounded-[2rem] bg-white/5 p-4 border border-white/5 backdrop-blur-md">
-                    <div class="grid grid-cols-2 gap-3">
+            <div class="mt-auto p-4">
+                <div class="rounded-2xl border border-[#293e5e] bg-[#14223a] p-3">
+                    <div class="grid grid-cols-1 gap-2">
                         <a href="{{ route('web.app') }}"
-                            class="flex flex-col items-center gap-2 rounded-2xl bg-white/5 py-3 text-[9px] font-black uppercase tracking-widest text-white/50 hover:bg-white/10 hover:text-white transition-all">
-                            <i data-lucide="external-link" class="h-4 w-4 text-orange-400"></i>
+                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#263b5c] px-3 py-2 text-[9px] font-black uppercase text-white transition-all hover:bg-[#334f77]">
+                            <i data-lucide="external-link" class="h-3.5 w-3.5 text-[var(--brand)]"></i>
                             <span>User Site</span>
                         </a>
                         <form method="POST" action="{{ route('web.logout') }}">
                             @csrf
                             <button type="submit"
-                                class="w-full cursor-pointer flex flex-col items-center gap-2 rounded-2xl bg-rose-500/10 py-3 text-[9px] font-black uppercase tracking-widest text-rose-400 hover:bg-rose-500 hover:text-white transition-all">
-                                <i data-lucide="log-out" class="h-4 w-4"></i>
+                                class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-rose-600 px-3 py-2 text-[9px] font-black uppercase text-white transition-all hover:bg-rose-500">
+                                <i data-lucide="log-out" class="h-3.5 w-3.5"></i>
                                 <span>Logout</span>
                             </button>
                         </form>
@@ -145,7 +157,7 @@
             <!-- Floating Glass Header -->
             <header class="sticky top-0 z-30 px-4 py-4 md:px-8">
                 <div
-                    class="flex items-center justify-between rounded-[2rem] border border-white bg-white/70 px-6 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.04)] backdrop-blur-xl">
+                    class="flex items-center justify-between rounded-[2rem] border border-[var(--line)] bg-[var(--surface-raised)] px-6 py-4 shadow-sm">
                     <div class="flex items-center gap-4">
                         <button type="button" id="admin-sidebar-open"
                             class="lg:hidden h-11 w-11 flex items-center justify-center rounded-2xl bg-[var(--ink)] text-white shadow-lg shadow-slate-900/20 active:scale-90 transition-transform">
@@ -153,23 +165,29 @@
                         </button>
                         <div>
                             <div class="flex items-center gap-2">
-                                <p class="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--brand)]">
+                                <p class="text-[9px] font-black uppercase  text-[var(--brand)]">
                                     Operations</p>
                                 <span class="h-1 w-1 rounded-full bg-slate-300"></span>
-                                <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">
+                                <p class="text-[9px] font-black uppercase  text-slate-400">
                                     {{ now()->format('H:i') }}</p>
                             </div>
-                            <h1 class="text-lg font-black tracking-tighter text-[var(--ink)] md:text-xl">
+                            <h1 class="text-lg font-black  text-[var(--ink)] md:text-xl">
                                 @yield('admin-page-title', 'Dashboard')</h1>
                         </div>
                     </div>
 
-                    <div class="hidden items-center gap-4 md:flex">
+                    <div class="flex items-center gap-3">
+                        <button type="button" data-theme-toggle class="theme-toggle inline-flex h-10 w-10 items-center justify-center rounded-xl transition" aria-label="Toggle dark mode" title="Toggle dark mode">
+                            <i data-lucide="moon" data-theme-icon-dark class="h-4 w-4"></i>
+                            <i data-lucide="sun" data-theme-icon-light class="hidden h-4 w-4"></i>
+                        </button>
+                        <div class="hidden items-center gap-4 md:flex">
                         <div
                             class="flex items-center gap-3 rounded-2xl bg-[var(--surface-soft)] px-4 py-2.5 border border-[var(--brand)]/10 shadow-sm">
                             <i data-lucide="calendar" class="h-4 w-4 text-[var(--brand)]"></i>
                             <span
-                                class="text-[10px] font-black uppercase tracking-widest text-[var(--ink)] opacity-70">{{ now()->format('D, d M Y') }}</span>
+                                class="text-[10px] font-black uppercase  text-[var(--ink)] opacity-70">{{ now()->format('D, d M Y') }}</span>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -185,7 +203,7 @@
                             <i data-lucide="check" class="h-5 w-5"></i>
                         </div>
                         <div>
-                            <p class="text-[9px] font-black uppercase tracking-widest text-emerald-500">System Success
+                            <p class="text-[9px] font-black uppercase  text-emerald-500">System Success
                             </p>
                             <p class="text-xs font-bold">{{ session('status') }}</p>
                         </div>

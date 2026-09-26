@@ -3,7 +3,7 @@
 @section('content')
     <section class="mx-auto max-w-md">
         <div
-            class="rounded-[3rem] border border-[var(--brand)]/5 bg-[var(--surface)] p-8 md:p-10 shadow-[0_40px_100px_-20px_rgba(255,122,0,0.12)]">
+            class="rounded-[3rem] border border-[var(--brand)]/5 bg-[var(--surface)] p-8 md:p-10 shadow-[0_40px_100px_-20px_color-mix(in_srgb,var(--brand)_12%,transparent)]">
 
             <!-- Compact Header -->
             <div class="relative mb-8 text-center">
@@ -13,11 +13,11 @@
                 </div>
 
                 <div class="inline-flex items-center justify-center mb-4">
-                    <img src="/images/icons/asaba-hustle.svg" class="w-12 h-12 drop-shadow-sm" alt="Asaba Hustle" />
+                    <img src="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/asaba-hustle.svg') }}" class="w-12 h-12 drop-shadow-sm object-contain" alt="Asaba Hustle" />
                 </div>
 
-                <h1 class="text-2xl font-black tracking-tight text-slate-900 leading-tight">Verify Phone</h1>
-                <p class="mt-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Fill the fields below to
+                <h1 class="text-2xl font-black  text-slate-900 leading-tight">Verify Phone</h1>
+                <p class="mt-1 text-[10px] font-black uppercase  text-slate-400">Fill the fields below to
                     verify your phone number.</p>
             </div>
 

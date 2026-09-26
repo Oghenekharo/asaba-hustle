@@ -40,7 +40,7 @@
                     'class' =>
                         'w-full ' .
                         $pl .
-                        ' rounded-xl resize-none border border-slate-100 bg-slate-50 px-4 py-3 text-[16px] md:text-sm font-bold outline-none transition-all focus:border-[var(--brand)] focus:bg-white focus:ring-4 focus:ring-orange-500/5',
+                        ' rounded-xl resize-none border border-slate-100 bg-slate-50 px-4 py-3 text-[16px] md:text-sm font-bold outline-none transition-all focus:border-[var(--brand)] focus:bg-white focus:ring-4 focus:ring-[var(--brand)]/10',
                 ]) }}>{{ old($name, $value) }}</textarea>
         @else
             <input type="{{ $type }}" name="{{ $name }}" id="{{ $id }}"
@@ -49,7 +49,7 @@
                     'class' =>
                         'w-full ' .
                         $pl .
-                        ' rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-[16px] md:text-sm font-bold outline-none transition-all focus:border-[var(--brand)] focus:bg-white focus:ring-4 focus:ring-orange-500/5' .
+                        ' rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-[16px] md:text-sm font-bold outline-none transition-all focus:border-[var(--brand)] focus:bg-white focus:ring-4 focus:ring-[var(--brand)]/10' .
                         ($isPassword ? ' pr-11' : ''),
                 ]) }} />
 

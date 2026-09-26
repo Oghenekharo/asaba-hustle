@@ -4,11 +4,11 @@
     <div class="max-w-6xl pt-20 mx-auto lg:h-[calc(100vh-180px)] relative">
         <div class="mb-4 flex items-center justify-between lg:hidden">
             <div>
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Messaging</p>
-                <h1 class="text-2xl font-black tracking-tight text-[var(--ink)]">Inbox</h1>
+                <p class="text-[10px] font-black uppercase  text-slate-400">Messaging</p>
+                <h1 class="text-2xl font-black  text-[var(--ink)]">Inbox</h1>
             </div>
             <button type="button" id="mobile-conversations-toggle"
-                class="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-[10px] font-black uppercase tracking-widest text-[var(--ink)] shadow-sm border border-slate-100">
+                class="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-[10px] font-black uppercase  text-[var(--ink)] shadow-sm border border-slate-100">
                 <i data-lucide="panel-left-open" class="h-4 w-4 text-[var(--brand)]"></i>
                 Conversations
             </button>
@@ -21,11 +21,11 @@
 
             <!-- Left Sidebar: Conversations List -->
             <aside id="mobile-conversations-panel"
-                class="fixed md:h-117.5 inset-y-0 left-0 z-40 flex w-[88vw] max-w-sm -translate-x-[105%] flex-col bg-white/95 backdrop-blur-xl border-r border-white shadow-2xl transition-transform duration-300 lg:static lg:z-auto lg:w-80 lg:max-w-none lg:translate-x-0 lg:rounded-[2.5rem] lg:border lg:border-white lg:shadow-sm overflow-auto">
+                class="fixed md:h-117.5 inset-y-0 left-0 z-40 flex w-[88vw] max-w-sm -translate-x-[105%] flex-col bg-white backdrop-blur-xl border-r border-white shadow-2xl transition-transform duration-300 lg:static lg:z-auto lg:w-80 lg:max-w-none lg:translate-x-0 lg:rounded-[2.5rem] lg:border lg:border-white lg:shadow-sm overflow-auto">
                 <div class="flex items-center justify-between pt-24 md:py-6 px-6 border-b border-slate-50">
                     <div>
-                        <h1 class="text-xl font-black tracking-tighter text-[var(--ink)]">Inbox</h1>
-                        <p class="text-[10px] font-black uppercase tracking-widest opacity-30 mt-1">Active Hustles</p>
+                        <h1 class="text-xl font-black  text-[var(--ink)]">Inbox</h1>
+                        <p class="text-[10px] font-black uppercase  opacity-30 mt-1">Active Hustles</p>
                     </div>
                     <button type="button" id="mobile-conversations-close"
                         class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 lg:hidden">
@@ -42,6 +42,7 @@
                         <button type="button"
                             class="js-conversation-trigger w-full flex items-center gap-4 p-4 rounded-3xl transition-all hover:bg-white hover:shadow-lg border border-gray-200 cursor-pointer hover:border-(--brand)/10 group"
                             data-conversation-id="{{ $convo->uuid }}" data-job-id="{{ $convo->job_id }}"
+                            data-is-closed="{{ $convo->is_closed ? 'true' : 'false' }}"
                             data-job-url="{{ route('web.app.jobs.show', ['job' => $convo->job]) }}"
                             data-other-user-name="{{ $otherUser->name ?? 'Deleted User' }}"
                             data-other-user-avatar="{{ substr($otherUser->name ?? 'U', 0, 1) }}"
@@ -58,6 +59,7 @@
                                     <h3 class="text-xs font-black text-[var(--ink)] truncate js-conversation-name">
                                         {{ $otherUser->name ?? 'Deleted User' }}</h3>
                                     <div class="flex items-center gap-2 shrink-0">
+                                        <span class="js-conversation-closed {{ $convo->is_closed ? '' : 'hidden' }} rounded-full bg-slate-200 px-2 py-1 text-[8px] font-black uppercase text-slate-600 dark:bg-slate-700 dark:text-slate-200">Closed</span>
                                         <span
                                             class="js-unread-message-badge {{ ($convo->unread_messages_count ?? 0) > 0 ? '' : 'hidden' }} min-w-5 h-5 px-1 rounded-full bg-[var(--brand)] text-white text-[9px] font-black flex items-center justify-center">
                                             {{ ($convo->unread_messages_count ?? 0) > 9 ? '9+' : $convo->unread_messages_count ?? 0 }}
@@ -99,7 +101,7 @@
                         <div class="min-w-0">
                             <h2 id="active-user-name" class="text-sm font-black text-[var(--ink)] truncate">Loading...</h2>
                             <a id="active-job-title" href="#"
-                                class="inline-flex max-w-full text-[9px] font-black uppercase tracking-widest text-[var(--brand)] truncate hover:underline">
+                                class="inline-flex max-w-full text-[9px] font-black uppercase  text-[var(--brand)] truncate hover:underline">
                                 Loading Hustle...
                             </a>
                         </div>
@@ -108,14 +110,18 @@
 
                 <!-- Messages Area -->
                 <div id="messages-container"
-                    class="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar bg-[var(--surface-soft)]/30"
+                    class="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar bg-[var(--surface-soft)]"
                     data-current-user-id="{{ auth()->id() }}" data-current-user-name="{{ auth()->user()?->name }}"
                     data-current-user-avatar-url="{{ auth()->user()?->profile_photo ? asset('storage/' . auth()->user()->profile_photo) : '' }}">
                     <!-- Messages injected via AJAX -->
                 </div>
 
                 <!-- Message Input -->
-                <div class="p-6 bg-white border-t border-slate-50">
+                <div class="border-t border-slate-50 bg-white p-6">
+                    <div id="conversation-closed-banner" class="hidden rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-center text-xs font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200" role="status">
+                        This chat is closed because the job is complete. Only an administrator can reopen it.
+                    </div>
+                    <div id="message-composer">
                     <form id="send-message-form" class="relative flex items-end gap-3"
                         data-send-url="{{ route('web.app.messages.send') }}">
                         <input type="hidden" id="active-conversation-id" name="conversation_uuid">
@@ -123,11 +129,12 @@
                         <x-input type="text" id="message-input" name="message" class="w-full flex-1" icon="mail"
                             placeholder="Type your message..." />
                         <button type="submit" id="send-message-submit"
-                            class="h-12 w-12 shrink-0 cursor-pointer rounded-xl bg-[var(--brand)] text-white flex items-center justify-center shadow-lg shadow-orange-500/20 hover:scale-105 active:scale-95 transition-all">
+                            class="h-12 w-12 shrink-0 cursor-pointer rounded-xl bg-[var(--brand)] text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
                             <i data-lucide="send" class="w-4 h-4"></i>
                         </button>
                     </form>
                     <x-error class="mt-4" />
+                    </div>
                 </div>
             </main>
         </div>

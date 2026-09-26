@@ -8,19 +8,26 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" content="#ff7a00">
-    <link rel="icon" href="/images/icons/icon-192.png">
+    <meta name="theme-color" content="{{ $siteTheme['primary'] }}">
+    <script>
+        (() => {
+            const saved = localStorage.getItem('asaba-theme');
+            document.documentElement.classList.toggle('dark', saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches);
+        })();
+    </script>
+    <link rel="icon" href="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/icon-192.png') }}">
     <title>{{ $title ?? config('app.name', 'Asaba Hustle') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body
-    class="web-ui min-h-screen bg-white font-sans antialiased text-[var(--ink)]
+<body style="--brand: {{ $siteTheme['primary'] }}; --brand-strong: {{ $siteTheme['strong'] }}; --brand-gradient: {{ $siteTheme['gradient'] }}; --surface-soft: {{ $siteTheme['soft'] }}; background-color: var(--surface); color: var(--ink)"
+    class="web-ui site-typography min-h-screen font-sans antialiased text-[var(--ink)]
     [&_.text-5xl]:!text-3xl md:[&_.text-5xl]:!text-4xl
     [&_.text-4xl]:!text-2xl md:[&_.text-4xl]:!text-3xl
     [&_.text-3xl]:!text-xl md:[&_.text-3xl]:!text-2xl
@@ -77,7 +84,8 @@
         notificationReadUrl: "{{ route('web.app.notifications.read') }}",
         notificationReadAllUrl: "{{ route('web.app.notifications.read-all') }}",
         currentUserId: {{ auth()->id() ?? 'null' }},
-        jobShowBase: "/app/jobs"
+        jobShowBase: "/app/jobs",
+        jobPublicKey: @json($jobPublicKey ?? null)
     };
     window.asabaLogoutUrl = "{{ route('web.logout') }}";
 </script>

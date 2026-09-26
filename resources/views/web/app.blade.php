@@ -1,14 +1,35 @@
 @extends('layouts.app', ['title' => 'Dashboard | Asaba Hustle'])
 
 @section('content')
-    <div class="grid grid-cols-1 gap-10 pt-20 lg:grid-cols-12 max-w-7xl mx-auto">
+    <div class="mx-auto max-w-7xl pt-20">
+        <section id="dashboard-permission-prompts"
+            data-location-url="{{ route('web.location.update') }}"
+            data-has-location="{{ auth()->user()->latitude !== null && auth()->user()->longitude !== null ? 'true' : 'false' }}"
+            class="mb-8 flex flex-col gap-5 rounded-3xl border border-[var(--line)] bg-[var(--surface-raised)] p-5 shadow-sm md:flex-row md:items-center md:justify-between md:p-6">
+            <div>
+                <p class="text-sm font-bold text-[var(--ink)]">Stay up to date and discover nearby work</p>
+                <p class="mt-1 text-xs text-slate-500">Enable push alerts and share your location to improve nearby job matches.</p>
+                <p id="dashboard-permission-status" class="mt-2 hidden text-xs font-semibold text-slate-500" role="status" aria-live="polite"></p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <button type="button" id="dashboard-enable-push" class="rounded-xl bg-[var(--brand)] px-4 py-3 text-xs font-bold text-white transition hover:opacity-90">
+                    Enable push notifications
+                </button>
+                <button type="button" id="dashboard-enable-location" class="rounded-xl border border-[var(--line)] bg-[var(--surface-sunken)] px-4 py-3 text-xs font-bold text-[var(--ink)] transition hover:border-[var(--brand)]">
+                    Share my location
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 lg:grid-cols-12">
         <!-- Left Column: Job Feed -->
         <div class="lg:col-span-8 space-y-8">
             <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                 <div>
-                    <h1 class="text-3xl font-black tracking-tight text-slate-900">
+                    <h1 class="text-3xl font-black  text-slate-900">
                         {{ auth()->user()->hasRole('worker') ? 'Available Jobs' : 'Post a Job' }}</h1>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
+                    <p class="text-xs font-bold text-slate-400 uppercase  mt-1">
                         {{ auth()->user()->hasRole('worker') ? 'Jobs matching your skill' : 'Select a category to post' }}
                     </p>
                 </div>
@@ -41,29 +62,28 @@
 
                         @forelse ($skills as $skill)
                             <button type="button"
-                                class="js-open-job-modal group cursor-pointer relative flex w-full items-center gap-4 p-4 rounded-[1.5rem] bg-white/70 backdrop-blur-xl border border-gray-100 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:bg-white hover:border-[var(--brand)]/20 hover:shadow-lg overflow-hidden text-left"
+                                class="js-open-job-modal group cursor-pointer relative flex w-full items-center gap-4 p-4 rounded-[1.5rem] bg-white backdrop-blur-xl border border-gray-100 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:bg-white hover:border-[var(--brand)]/20 hover:shadow-lg overflow-hidden text-left"
                                 data-skill-id="{{ $skill->id }}" data-skill-name="{{ $skill->name }}">
 
                                 <!-- Slim ID Badge -->
                                 <span
-                                    class="absolute top-2 right-4 text-[9px] font-black opacity-20 group-hover:text-[var(--brand)] group-hover:opacity-100 transition-all">
+                                    class="absolute top-2 right-4 text-[9px] font-black text-slate-400 group-hover:text-[var(--brand)] transition-all">
                                     #{{ $skill->id }}
                                 </span>
 
                                 <!-- Smaller, Sleeker Icon Container -->
-                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all duration-500 group-hover:rotate-6 group-hover:shadow-lg group-hover:shadow-orange-500/20"
-                                    style="background: var(--ink); color: white;" class="group-hover:!bg-[var(--brand)]">
+                                <div class="dashboard-skill-icon flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all duration-500 group-hover:rotate-6 group-hover:shadow-lg group-hover:shadow-orange-500/20">
                                     <i data-lucide="{{ $skill->icon ?? 'palette' }}" class="h-5 w-5"></i>
                                 </div>
 
                                 <!-- Text Content: Left Aligned -->
                                 <div class="flex-1 min-w-0">
-                                    <h3 class="text-xs font-black uppercase tracking-widest transition-colors group-hover:text-[var(--brand)] truncate"
+                                    <h3 class="text-xs font-black uppercase  transition-colors group-hover:text-[var(--brand)] truncate"
                                         style="color: var(--ink)">
                                         {{ $skill->name }}
                                     </h3>
 
-                                    <p class="text-[10px] font-medium opacity-40 leading-tight line-clamp-1 italic mt-0.5">
+                                    <p class="text-[10px] font-medium text-slate-500 leading-tight line-clamp-1 italic mt-0.5">
                                         {{ $skill->description }}
                                     </p>
                                 </div>
@@ -88,13 +108,13 @@
                     <div class="mb-6 flex items-start justify-between gap-4">
                         <div class="max-w-md">
                             <span
-                                class="inline-block text-[9px] font-black uppercase tracking-[0.2em] text-orange-500 bg-orange-50 px-2 py-0.5 rounded-md mb-2">
+                                class="dashboard-recommended inline-block text-[9px] font-black uppercase px-2 py-0.5 rounded-md mb-2">
                                 Recommended
                             </span>
-                            <h2 class="text-xl font-black uppercase tracking-tight text-slate-900 md:text-2xl">Top Rated
+                            <h2 class="text-xl font-black uppercase  text-slate-900 md:text-2xl">Top Rated
                                 Workers</h2>
                             <p
-                                class="mt-1 text-xs font-bold text-slate-400 uppercase tracking-wider md:text-sm md:normal-case">
+                                class="mt-1 text-xs font-bold text-slate-400 uppercase  md:text-sm md:normal-case">
                                 Skilled professionals verified by the community.
                             </p>
                         </div>
@@ -104,13 +124,13 @@
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
                         @forelse ($topRatedWorkers as $worker)
                             <article
-                                class="group relative flex flex-col rounded-3xl border border-slate-50 bg-slate-50/50 p-5 transition-all hover:border-orange-100 hover:bg-white hover:shadow-xl hover:shadow-orange-500/5">
+                                class="group relative flex flex-col rounded-3xl border border-slate-50 bg-slate-50 p-5 transition-all hover:border-orange-100 hover:bg-white hover:shadow-xl hover:shadow-orange-500/5">
 
                                 <div class="flex items-start gap-4">
                                     <!-- Avatar with Rating Badge -->
                                     <div class="relative shrink-0">
                                         <x-avatar :user="$worker" size="h-16 w-16" rounded="rounded-2xl"
-                                            class="shadow-md ring-2 ring-white" />
+                                            class="shadow-md" />
                                         <div
                                             class="absolute -bottom-2 -right-1 flex items-center gap-1 rounded-full bg-slate-900 px-2 py-1 text-[9px] font-black text-white shadow-lg">
                                             <i data-lucide="star" class="h-3 w-3 fill-amber-400 text-amber-400"></i>
@@ -119,16 +139,16 @@
                                     </div>
 
                                     <div class="min-w-0 flex-1">
-                                        <h3 class="truncate text-sm font-black uppercase tracking-wide text-slate-900">
+                                        <h3 class="truncate text-sm font-black uppercase  text-slate-900">
                                             {{ $worker->name }}
                                         </h3>
                                         <p
-                                            class="mt-0.5 truncate text-[10px] font-bold uppercase tracking-widest text-orange-600">
+                                            class="dashboard-skill-category mt-0.5 truncate text-[10px] font-bold uppercase">
                                             {{ $worker->skill->name ?? 'General worker' }}
                                         </p>
 
                                         <div class="mt-2 flex items-center gap-2">
-                                            <span class="text-[9px] font-bold uppercase tracking-tighter text-slate-400">
+                                            <span class="text-[9px] font-bold uppercase  text-slate-400">
                                                 {{ $worker->ratings_received_count }} Ratings
                                             </span>
                                         </div>
@@ -144,7 +164,7 @@
                                 <!-- Action: Full width on mobile for easier tapping -->
                                 <div class="mt-5">
                                     <button type="button"
-                                        class="js-open-job-modal cursor-pointer flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 py-3 text-[10px] font-black uppercase tracking-[.2em] text-slate-700 transition-all hover:bg-slate-900 hover:text-white hover:border-slate-900 active:scale-95"
+                                        class="js-open-job-modal cursor-pointer flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 py-3 text-[10px] font-black uppercase  text-slate-700 transition-all hover:bg-slate-900 hover:text-white hover:border-slate-900 active:scale-95"
                                         data-skill-id="{{ $worker->primary_skill_id ?? $worker->skill?->id }}"
                                         data-skill-name="{{ $worker->skill->name ?? 'Worker' }}">
                                         <i data-lucide="zap" class="h-3.5 w-3.5"></i>
@@ -195,13 +215,11 @@
 
             <!-- Profile Summary Card (Glassmorphic) -->
             <section
-                class="rounded-[2.5rem] bg-white/90 backdrop-blur-xl border-2 border-dashed border-(--brand)/30 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.04)] relative overflow-hidden group">
+                class="rounded-[2.5rem] bg-white backdrop-blur-xl border-2 border-dashed border-(--brand)/30 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.04)] relative overflow-hidden group">
                 <!-- Brand Accent Blur -->
-                <div class="absolute -top-10 -right-10 w-32 h-32 blur-3xl rounded-full opacity-10"
-                    style="background: var(--brand)"></div>
 
                 <div class="flex items-center justify-between mb-6 relative">
-                    <h2 class="text-xs font-black uppercase tracking-widest opacity-50" style="color: var(--ink)">Recent
+                    <h2 class="text-xs font-black uppercase  opacity-50" style="color: var(--ink)">Recent
                         Chats</h2>
                     <button id="refresh-chats" class="p-2 rounded-xl transition-all hover:scale-110"
                         style="background: var(--surface-soft); color: var(--brand)">
@@ -238,7 +256,7 @@
                                 <div class="flex justify-between items-start gap-3">
                                     <p class="text-sm font-black truncate" style="color: var(--ink)">{{ $displayName }}
                                     </p>
-                                    <span class="shrink-0 text-[10px] font-bold opacity-30 uppercase tracking-tighter">
+                                    <span class="shrink-0 text-[10px] font-bold opacity-30 uppercase ">
                                         {{ $lastMessage?->created_at?->diffForHumans() ?? $chat->created_at?->diffForHumans() }}
                                     </span>
                                 </div>
@@ -253,7 +271,7 @@
                         </a>
                     @empty
                         <div class="py-4 text-center">
-                            <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-30">No active messages</p>
+                            <p class="text-[10px] font-black uppercase  opacity-30">No active messages</p>
                         </div>
                     @endforelse
                 </div>
@@ -264,7 +282,7 @@
             <section class="rounded-[2.5rem] bg-white p-8 border border-slate-100 shadow-sm">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <h2 class="text-sm font-black uppercase tracking-widest text-slate-900">Live Work</h2>
+                    <h2 class="text-sm font-black uppercase  text-slate-900">Live Work</h2>
                 </div>
                 <div id="my-jobs-list" class="space-y-4">
                     @if (auth()->user()->hasRole('worker'))
@@ -285,44 +303,43 @@
             </section> --}}
 
             <!-- Notifications Slide-over/List -->
-            <section class="rounded-[2.5rem] bg-slate-900 text-white p-8 shadow-2xl shadow-slate-900/20">
+            <section class="dashboard-notifications rounded-[2.5rem] border p-8 shadow-sm">
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center gap-3">
-                        <i data-lucide="bell" class="w-4 h-4 text-orange-400"></i>
-                        <h2 class="text-sm font-black uppercase tracking-widest">Notifications</h2>
+                        <i data-lucide="bell" class="w-4 h-4 text-[var(--brand)]"></i>
+                        <h2 class="text-sm font-black uppercase ">Notifications</h2>
                     </div>
                     <a href="{{ route('web.app.notifications') }}"
-                        class="text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-orange-400 transition-colors">
+                        class="dashboard-notifications__link text-[10px] font-black uppercase hover:opacity-75 transition-colors">
                         View all
                     </a>
                 </div>
                 <div id="notifications-list" class="max-h-64 overflow-y-auto space-y-4 custom-scrollbar">
                     @forelse ($recentNotifications as $notification)
                         <article
-                            class="rounded-[1.5rem] border px-4 py-4 {{ $notification->is_read ? 'border-white/10 bg-white/5' : 'border-orange-400/20 bg-orange-500/10' }}">
+                            class="dashboard-notification rounded-[1.5rem] border px-4 py-4 {{ $notification->is_read ? '' : 'dashboard-notification--unread' }}">
                             <div class="flex items-start gap-3">
-                                <div
-                                    class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
-                                    <i data-lucide="bell" class="h-4 w-4 text-orange-300"></i>
+                                <div class="dashboard-notification__icon mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl">
+                                    <i data-lucide="bell" class="h-4 w-4"></i>
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-start justify-between gap-3">
-                                        <p class="text-xs font-black text-white truncate">{{ $notification->title }}</p>
+                                        <p class="dashboard-notification__title text-xs font-black truncate">{{ $notification->title }}</p>
                                         @if (!$notification->is_read)
-                                            <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-orange-400"></span>
+                                            <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--brand)]"></span>
                                         @endif
                                     </div>
-                                    <p class="mt-1 text-[11px] font-medium leading-relaxed text-white/60 line-clamp-2">
+                                    <p class="dashboard-notification__message mt-1 text-[11px] font-medium leading-relaxed line-clamp-2">
                                         {{ $notification->message }}
                                     </p>
-                                    <p class="mt-3 text-[9px] font-black uppercase tracking-widest text-white/30">
+                                    <p class="dashboard-notification__time mt-3 text-[9px] font-black uppercase">
                                         {{ $notification->created_at?->diffForHumans() }}
                                     </p>
                                 </div>
                             </div>
                         </article>
                     @empty
-                        <p class="text-xs font-medium text-white/30 text-center py-4">All caught up!</p>
+                        <p class="text-xs font-medium text-slate-500 text-center py-4">All caught up!</p>
                     @endforelse
                 </div>
             </section>
@@ -339,7 +356,7 @@
         <x-modal id="createJobModal" title="Post a New Hustle" size="max-w-2xl">
             <div class="space-y-6">
                 <div>
-                    <p class="text-xs font-black uppercase tracking-[0.22em] text-[var(--brand)]">Client Workspace</p>
+                    <p class="text-xs font-black uppercase  text-[var(--brand)]">Client Workspace</p>
                     <p class="mt-2 text-sm text-slate-500">
                         Choose a skill, add the job details, and publish straight from your dashboard.
                     </p>
@@ -377,7 +394,7 @@
                         class="rounded-2xl border border-dashed border-[var(--brand)]/25 bg-[var(--surface-soft)] px-4 py-4">
                         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <p class="text-[10px] font-black uppercase tracking-widest text-[var(--brand)]">Job
+                                <p class="text-[10px] font-black uppercase  text-[var(--brand)]">Job
                                     Location</p>
                                 <p class="mt-1 text-xs font-medium text-slate-500">
                                     Existing account map are used automatically. Refresh from your browser if
@@ -403,7 +420,7 @@
                         </div>
 
                         <p id="job-location-status"
-                            class="mt-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            class="mt-3 text-[10px] font-black uppercase  text-slate-400">
                             {{ auth()->user()->latitude !== null && auth()->user()->longitude !== null ? 'Saved map location loaded' : 'Waiting for browser location' }}
                         </p>
                     </div>

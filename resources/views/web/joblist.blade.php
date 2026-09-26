@@ -15,7 +15,6 @@
         <div
             class="relative overflow-hidden rounded-[2rem] md:rounded-[3rem] border border-slate-100 bg-white px-5 py-8 shadow-sm sm:px-8 lg:px-10">
             <!-- Brand Glow -->
-            <div class="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[var(--brand)]/10 blur-3xl opacity-50"></div>
             <div class="absolute left-0 top-0 h-full w-1.5 rounded-r-full bg-[var(--brand)]"></div>
 
             <div class="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
@@ -26,9 +25,9 @@
                                 class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--brand)] opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-[var(--brand)]"></span>
                         </span>
-                        <p class="text-[10px] font-black uppercase tracking-[0.28em] text-[var(--brand)]">Marketplace</p>
+                        <p class="text-[10px] font-black uppercase  text-[var(--brand)]">Marketplace</p>
                     </div>
-                    <h1 class="text-3xl font-black tracking-tight text-slate-900 md:text-5xl">
+                    <h1 class="text-3xl font-black  text-slate-900 md:text-5xl">
                         Explore <span class="italic text-[var(--brand)]">Available Hustles</span>
                     </h1>
                     <p class="mt-3 text-xs md:text-sm font-medium leading-relaxed text-slate-500 max-w-md">
@@ -44,12 +43,12 @@
                 <div class="rounded-[2.5rem] border border-slate-100 bg-white p-6 shadow-sm">
                     <div class="mb-6 flex items-center justify-between gap-3">
                         <div>
-                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Refine Feed</p>
+                            <p class="text-[10px] font-black uppercase  text-slate-400">Refine Feed</p>
                             <h2 class="mt-2 text-lg font-black text-slate-900">Search and Filters</h2>
                         </div>
                         @if ($hasFilters)
                             <a href="{{ route('web.app.jobs') }}"
-                                class="text-[10px] font-black uppercase tracking-widest text-[var(--brand)] transition hover:opacity-70">
+                                class="text-[10px] font-black uppercase  text-[var(--brand)] transition hover:opacity-70">
                                 Reset
                             </a>
                         @endif
@@ -58,7 +57,7 @@
                     <form method="GET" action="{{ route('web.app.jobs') }}" class="space-y-5">
                         <div>
                             <label for="jobs_search"
-                                class="ml-1 block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                class="ml-1 block text-[10px] font-black uppercase  text-slate-400">
                                 Search
                             </label>
                             <div class="relative mt-1">
@@ -87,11 +86,11 @@
                     </form>
 
                     <div class="mt-8 border-t border-slate-100 pt-6">
-                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Popular Skills</p>
+                        <p class="text-[10px] font-black uppercase  text-slate-400">Popular Skills</p>
                         <div class="mt-4 flex flex-wrap gap-2">
                             @foreach ($skills->take(8) as $skill)
                                 <a href="{{ route('web.app.jobs', ['skill_id' => $skill->id]) }}"
-                                    class="inline-flex items-center rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-widest transition {{ $selectedSkillId === $skill->id ? 'border-[var(--brand)] bg-[var(--brand)] text-white' : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-[var(--brand)] hover:text-[var(--brand)]' }}">
+                                    class="inline-flex items-center rounded-full border px-3 py-2 text-[10px] font-black uppercase  transition {{ $selectedSkillId === $skill->id ? 'border-[var(--brand)] bg-[var(--brand)] text-white' : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-[var(--brand)] hover:text-[var(--brand)]' }}">
                                     {{ $skill->name }}
                                 </a>
                             @endforeach
@@ -104,7 +103,7 @@
                 <div class="mb-6 rounded-2xl border border-slate-100 bg-white px-5 py-5 shadow-sm">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div>
-                            <p class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
+                            <p class="text-[10px] font-black uppercase  text-slate-400">
                                 {{ $jobs->total() }} {{ \Illuminate\Support\Str::plural('result', $jobs->total()) }}
                             </p>
                             <p class="mt-2 text-sm font-medium text-slate-500">
@@ -116,19 +115,19 @@
                             <div class="flex flex-wrap gap-2">
                                 @if ($searchTerm !== '')
                                     <span
-                                        class="inline-flex items-center rounded-full bg-slate-100 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-700">
+                                        class="inline-flex items-center rounded-full bg-slate-100 px-3 py-2 text-[10px] font-black uppercase  text-slate-700">
                                         Search: {{ $searchTerm }}
                                     </span>
                                 @endif
                                 @if ($selectedSkill)
                                     <span
-                                        class="inline-flex items-center rounded-full bg-orange-50 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-orange-700">
+                                        class="inline-flex items-center rounded-full bg-orange-50 px-3 py-2 text-[10px] font-black uppercase  text-orange-700">
                                         Skill: {{ $selectedSkill->name }}
                                     </span>
                                 @endif
                                 @if ($statusFilter !== '')
                                     <span
-                                        class="inline-flex items-center rounded-full bg-blue-50 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-blue-700">
+                                        class="inline-flex items-center rounded-full bg-blue-50 px-3 py-2 text-[10px] font-black uppercase  text-blue-700">
                                         Status: {{ str_replace('_', ' ', $statusFilter) }}
                                     </span>
                                 @endif

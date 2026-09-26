@@ -14,7 +14,7 @@ use RuntimeException;
 class AuthSecurityService
 {
     public function __construct(
-        protected NigeriaBulkSmsService $nigeriaBulkSmsService,
+        protected SendchampSmsService $sendchampSmsService,
     ) {}
 
     public function issuePasswordResetToken(User $user, string $channel): string
@@ -105,9 +105,10 @@ class AuthSecurityService
         Mail::send('emails.simple', [
             'subject' => 'Asaba Hustle Email Verification',
             'heading' => 'Verify your email address',
+            'subtitle' => 'Verify Your Email',
             'lines' => [
-                'Use the button below to verify your email address and continue your registration.',
-                'This link expires soon for your security.',
+                'Use the button below to verify your email address and finish setting up your account.',
+                'This verification link expires in ' . (int) config('auth_security.contact_verification_token_ttl_minutes', 10) . ' minutes.',
             ],
             'actionUrl' => $link,
             'actionText' => 'Verify Email',
@@ -172,14 +173,24 @@ class AuthSecurityService
     {
         if ($channel === 'email') {
             $subject = 'Asaba Hustle ' . ucfirst(str_replace('_', ' ', $purpose));
+            $purposeLabel = ucfirst(str_replace('_', ' ', $purpose));
+            $isPasswordReset = $purpose === 'password_reset';
+            $tokenTtl = (int) config(
+                $isPasswordReset ? 'auth_security.password_reset_token_ttl_minutes' : 'auth_security.contact_verification_token_ttl_minutes',
+                $isPasswordReset ? 30 : 10
+            );
 
             Mail::send('emails.simple', [
                 'subject' => $subject,
-                'heading' => ucfirst(str_replace('_', ' ', $purpose)),
+                'heading' => $isPasswordReset ? 'Password reset request' : 'Security verification',
+                'subtitle' => $isPasswordReset ? 'Reset Your Password' : $purposeLabel,
+                'code' => $token,
                 'lines' => [
-                    "Your code is {$token}.",
-                    'Enter this code in the app to continue.',
-                    'Do not share this code with anyone.',
+                    $isPasswordReset
+                        ? 'Use the one-time password below to continue resetting your account password.'
+                        : 'Use the one-time password below to complete your ' . strtolower($purposeLabel) . '.',
+                    "This code expires in {$tokenTtl} minutes and should never be shared with anyone.",
+                    'If you did not request this code, secure your account immediately and contact support.',
                 ],
                 'actionUrl' => null,
                 'actionText' => null,
@@ -191,7 +202,7 @@ class AuthSecurityService
         }
 
         try {
-            $this->nigeriaBulkSmsService->send(
+            $this->sendchampSmsService->send(
                 (string) $user->phone,
                 $this->buildPhoneTokenMessage($token, $purpose)
             );
@@ -205,7 +216,6 @@ class AuthSecurityService
 
             throw new RuntimeException('Unable to send the phone verification code right now. Please try again.');
         }
-
     }
 
     protected function buildPhoneTokenMessage(string $token, string $purpose): string

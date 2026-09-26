@@ -110,7 +110,7 @@ export function handleAjaxForm(formId, btnId, onSuccess = null, options = {}) {
                 } else {
                     // Default redirect logic
                     $btnText.text("Redirecting...");
-                    if (response.data.redirect) {
+                    if (response.data?.redirect) {
                         setTimeout(
                             () =>
                                 (window.location.href = response.data.redirect),
@@ -229,7 +229,7 @@ export const showAlert = function (message, type = "error", parent = null) {
 
     // 1. Theme and Icon Maps
     const themes = {
-        success: "border-emerald-100 bg-emerald-50/50 text-emerald-600",
+        success: "border-emerald-100 bg-emerald-50/50 text-emerald-600 dark:border-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
         error: "border-red-100 bg-red-50/50 text-red-600",
         warning: "border-amber-100 bg-amber-50/50 text-amber-600",
         info: "border-blue-100 bg-blue-50/50 text-blue-600",
@@ -244,8 +244,16 @@ export const showAlert = function (message, type = "error", parent = null) {
         default: "check",
     };
 
-    // 2. Clear the container and remove old theme classes
-    $container.empty().removeClass(Object.values(themes).join(" "));
+    // Clear both the dynamic classes and the component's initial Blade variant.
+    // Otherwise its default red error classes can remain on a success alert.
+    const alertThemeClasses = [
+        ...Object.values(themes),
+        "border-emerald-300 bg-emerald-100 text-emerald-800",
+        "border-amber-300 bg-amber-100 text-amber-800",
+        "border-blue-300 bg-blue-100 text-blue-800",
+        "border-red-300 bg-red-100 text-red-800",
+    ].join(" ");
+    $container.empty().removeClass(alertThemeClasses);
 
     // 3. Build the inner HTML
     const innerHtml = `
@@ -461,6 +469,9 @@ export const initUserDropdown = function () {
     const isMobile = () => window.innerWidth < 768;
 
     function open() {
+        document.dispatchEvent(
+            new CustomEvent("asaba:navigation-dropdown-open", { detail: "user" }),
+        );
         $menu.removeClass("hidden");
         if (isMobile()) {
             $overlay.removeClass("hidden");
@@ -470,6 +481,12 @@ export const initUserDropdown = function () {
     }
 
     function close() {
+        if (!$menu.length || $menu.hasClass("hidden")) {
+            $overlay.addClass("hidden");
+            $arrow.removeClass("rotate-180");
+            return;
+        }
+
         if (isMobile()) {
             $menu.addClass("-translate-x-full");
             $overlay.addClass("hidden");
@@ -479,6 +496,10 @@ export const initUserDropdown = function () {
         }
         $arrow.removeClass("rotate-180");
     }
+
+    document.addEventListener("asaba:navigation-dropdown-open", function (event) {
+        if (event.detail !== "user") close();
+    });
 
     $trigger.on("click", function (e) {
         e.stopPropagation();
@@ -660,7 +681,17 @@ export const initLocationFields = function () {
 
     bindings.forEach(function (binding) {
         if ($(binding.latTarget).length && $(binding.longTarget).length) {
-            hydrateLocationFields(binding);
+            const hasCoordinates =
+                String($(binding.latTarget).val() ?? "").trim() !== "" &&
+                String($(binding.longTarget).val() ?? "").trim() !== "";
+
+            updateLocationStatus(
+                binding.statusTarget,
+                hasCoordinates
+                    ? "Saved coordinates loaded"
+                    : "Use the location button to share your browser location",
+                hasCoordinates ? "success" : "default",
+            );
         }
     });
 
@@ -671,6 +702,55 @@ export const initLocationFields = function () {
             statusTarget: $(this).data("status-target"),
             force: true,
         });
+    });
+};
+
+export const initDashboardLocationPrompt = function () {
+    const section = document.getElementById("dashboard-permission-prompts");
+    const button = document.getElementById("dashboard-enable-location");
+    const status = document.getElementById("dashboard-permission-status");
+
+    if (!section || !button) return;
+
+    const showStatus = (message, isError = false) => {
+        if (!status) return;
+        status.textContent = message;
+        status.classList.remove("hidden", "text-red-500", "text-emerald-600", "text-slate-500");
+        status.classList.add(isError ? "text-red-500" : "text-emerald-600");
+    };
+
+    if (section.dataset.hasLocation === "true") {
+        button.textContent = "Refresh my location";
+    }
+
+    button.addEventListener("click", async () => {
+        button.disabled = true;
+        button.textContent = "Requesting location…";
+
+        try {
+            const coordinates = await getBrowserLocation();
+            const response = await fetch(section.dataset.locationUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document
+                        .querySelector('meta[name="csrf-token"]')
+                        ?.getAttribute("content"),
+                },
+                body: JSON.stringify(coordinates),
+            });
+
+            if (!response.ok) throw new Error("Unable to save your location.");
+
+            section.dataset.hasLocation = "true";
+            button.textContent = "Refresh my location";
+            showStatus("Your location has been saved.");
+        } catch (error) {
+            button.textContent = "Share my location";
+            showStatus(error.message || "Location access was denied or unavailable.", true);
+        } finally {
+            button.disabled = false;
+        }
     });
 };
 
@@ -758,14 +838,14 @@ function buildMessageMarkup(message, currentUserId, options = {}) {
                     rounded: "rounded-2xl",
                     text: "text-xs",
                     className: isOwnMessage
-                        ? "shadow-lg shadow-orange-500/15"
+                        ? "shadow-lg shadow-slate-950/10"
                         : "border border-slate-100 shadow-sm",
                 })}
                 <div class="flex min-w-0 flex-col space-y-1.5 ${isOwnMessage ? "items-end" : "items-start"}">
                     <div class="msg-bubble ${bubbleTone} relative w-fit max-w-full rounded-[1.5rem] break-words [overflow-wrap:anywhere] transition-all
                         ${
                             isOwnMessage
-                                ? "bg-[var(--brand)] text-white shadow-xl shadow-orange-500/20 border-b-r-none rounded-br-none"
+                                ? "bg-[var(--brand)] text-white shadow-xl border-b-r-none rounded-br-none"
                                 : "bg-white text-[var(--ink)] border border-slate-100 shadow-sm rounded-bl-none"
                         }
                         ${
@@ -777,11 +857,11 @@ function buildMessageMarkup(message, currentUserId, options = {}) {
                     </div>
 
                     <div class="flex items-center gap-2 px-1">
-                        <span class="text-[9px] font-black uppercase tracking-widest opacity-30">
+                        <span class="text-[9px] font-black uppercase  opacity-30">
                             ${isOwnMessage ? "You" : senderName}
                         </span>
                         <span class="h-1 w-1 rounded-full bg-slate-300 opacity-40"></span>
-                        <span class="text-[9px] font-black uppercase tracking-widest opacity-30 italic">
+                        <span class="text-[9px] font-black uppercase  opacity-30 italic">
                             ${timeLabel}
                         </span>
                     </div>
@@ -799,7 +879,7 @@ function renderMessages(messages) {
 
     if (!messages.length) {
         $container.html(`
-            <div class="flex h-full items-center justify-center opacity-30 font-black uppercase text-xs tracking-widest">
+            <div class="flex h-full items-center justify-center opacity-30 font-black uppercase text-xs ">
                 No messages yet
             </div>
         `);
@@ -818,6 +898,12 @@ function renderMessages(messages) {
     );
 
     scrollMessagesToBottom();
+}
+
+function setConversationClosed(value) {
+    const isClosed = value === true || value === 1 || value === "1" || value === "true";
+    $("#message-composer").toggleClass("hidden", isClosed);
+    $("#conversation-closed-banner").toggleClass("hidden", !isClosed);
 }
 
 function setActiveConversation($trigger) {
@@ -849,6 +935,7 @@ function setActiveConversation($trigger) {
     $("#active-job-title")
         .text($trigger.data("job-title"))
         .attr("href", $trigger.data("job-url") || "#");
+    setConversationClosed($trigger.data("is-closed"));
 }
 
 function updateConversationPreview(conversationUuid, payload) {
@@ -934,7 +1021,7 @@ function appendRealtimeMessage(payload) {
     const currentUserAvatarUrl = $container.data("current-user-avatar-url");
 
     if (
-        $container.find(".font-black.uppercase.tracking-widest").length === 1 &&
+        $container.find(".font-black.uppercase").length === 1 &&
         $container.text().trim() === "No messages yet"
     ) {
         $container.empty();
@@ -1017,21 +1104,21 @@ function getCurrentNavNotificationCount() {
 function buildNotificationItem(notification) {
     return `
         <button type="button"
-            class="js-nav-notification-item w-full rounded-2xl border border-slate-100 px-4 py-4 text-left transition hover:bg-slate-50 ${notification.is_read ? "bg-white" : "bg-orange-50/50"}"
+            class="js-nav-notification-item w-full rounded-2xl border border-slate-100 px-3 py-3 text-left transition hover:bg-slate-50 ${notification.is_read ? "bg-white" : "bg-orange-50/50"}"
             data-notification-id="${notification.id}"
             data-action-url="${escapeHtml(notification.action_url ?? "")}">
-            <div class="flex items-start gap-3">
-                <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white">
-                    <i data-lucide="${notificationTypeIcon(notification.type)}" class="h-4 w-4"></i>
+            <div class="flex items-start gap-2.5">
+                <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white">
+                    <i data-lucide="${notificationTypeIcon(notification.type)}" class="h-3.5 w-3.5"></i>
                 </div>
                 <div class="min-w-0 flex-1">
                     <div class="flex items-start justify-between gap-3">
                         <p class="text-xs font-black text-slate-900">${escapeHtml(notification.title ?? "Notification")}</p>
                         ${notification.is_read ? "" : '<span class="js-notification-unread-dot mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--brand)]"></span>'}
                     </div>
-                    <p class="mt-1 text-[11px] font-medium leading-relaxed text-slate-500">${escapeHtml(notification.message ?? "")}</p>
-                    <p class="mt-2 text-[9px] font-black uppercase tracking-widest text-slate-300">${escapeHtml(formatNotificationTime(notification.created_at))}</p>
-                    ${notification.action_url ? `<p class="mt-2 text-[9px] font-black uppercase tracking-widest text-[var(--brand)]">${escapeHtml(notification.action_label ?? "Open")}</p>` : ""}
+                    <p class="mt-0.5 text-[10px] font-medium leading-snug text-slate-500">${escapeHtml(notification.message ?? "")}</p>
+                    <p class="mt-1.5 text-[8px] font-black uppercase text-slate-400">${escapeHtml(formatNotificationTime(notification.created_at))}</p>
+                    ${notification.action_url ? `<p class="mt-1.5 text-[9px] font-black uppercase text-[var(--brand)]">${escapeHtml(notification.action_label ?? "Open")}</p>` : ""}
                 </div>
             </div>
         </button>
@@ -1046,7 +1133,7 @@ function renderNavbarNotifications(notifications = []) {
     if (!notifications.length) {
         $list.html(`
             <div class="rounded-2xl border border-dashed border-slate-200 px-4 py-6 text-center">
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-300">No notifications yet</p>
+                <p class="text-[10px] font-black uppercase  text-slate-300">No notifications yet</p>
             </div>
         `);
         return;
@@ -1081,6 +1168,9 @@ export const initNavbarNotifications = function () {
     const isMobileDrawer = () => window.innerWidth < 768;
 
     function openMenu() {
+        document.dispatchEvent(
+            new CustomEvent("asaba:navigation-dropdown-open", { detail: "notifications" }),
+        );
         if (isMobileDrawer()) {
             $menu.removeClass("hidden translate-x-[105%]");
             $overlay.removeClass("hidden");
@@ -1091,6 +1181,11 @@ export const initNavbarNotifications = function () {
     }
 
     function closeMenu() {
+        if (!$menu.length || $menu.hasClass("hidden")) {
+            $overlay.addClass("hidden");
+            return;
+        }
+
         if (isMobileDrawer()) {
             $menu.addClass("translate-x-[105%]");
             $overlay.addClass("hidden");
@@ -1107,10 +1202,14 @@ export const initNavbarNotifications = function () {
         $menu.addClass("hidden");
     }
 
+    document.addEventListener("asaba:navigation-dropdown-open", function (event) {
+        if (event.detail !== "notifications") closeMenu();
+    });
+
     function fetchNotifications() {
         $list.html(`
             <div class="rounded-2xl border border-dashed border-slate-200 px-4 py-6 text-center">
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-300 animate-pulse">Loading notifications</p>
+                <p class="text-[10px] font-black uppercase  text-slate-300 animate-pulse">Loading notifications</p>
             </div>
         `);
 
@@ -1135,7 +1234,11 @@ export const initNavbarNotifications = function () {
                 closeMenu();
             }
         } else {
-            $menu.toggleClass("hidden");
+            if ($menu.hasClass("hidden")) {
+                openMenu();
+            } else {
+                closeMenu();
+            }
         }
 
         if (!$menu.hasClass("hidden") && !hasLoaded) {
@@ -1360,7 +1463,24 @@ function subscribeToConversation(conversationUuid) {
         function (payload) {
             appendRealtimeMessage(payload);
         },
-    );
+    ).listen(".conversation.status.updated", function (payload) {
+        const $trigger = $(
+            `.js-conversation-trigger[data-conversation-id="${conversationUuid}"]`,
+        ).first();
+        const isClosed = Boolean(payload?.is_closed);
+
+        $trigger
+            .attr("data-is-closed", isClosed ? "true" : "false")
+            .data("is-closed", isClosed)
+            .find(".js-conversation-closed")
+            .toggleClass("hidden", !isClosed);
+
+        if (
+            $("#active-conversation-id").val() === conversationUuid
+        ) {
+            setConversationClosed(isClosed);
+        }
+    });
 }
 
 function loadChat(conversationUuid) {
@@ -1377,7 +1497,7 @@ function loadChat(conversationUuid) {
     subscribeToConversation(conversationUuid);
 
     $("#messages-container").html(`
-        <div class="flex h-full items-center justify-center opacity-30 font-black uppercase text-xs tracking-widest animate-pulse">
+        <div class="flex h-full items-center justify-center opacity-30 font-black uppercase text-xs  animate-pulse">
             Fetching Messages...
         </div>
     `);
@@ -1392,7 +1512,7 @@ function loadChat(conversationUuid) {
                 xhr.responseJSON?.message || "Unable to load messages.";
 
             $("#messages-container").html(`
-                <div class="flex h-full items-center justify-center text-center text-xs font-black uppercase tracking-widest text-red-500/80">
+                <div class="flex h-full items-center justify-center text-center text-xs font-black uppercase  text-red-500/80">
                     ${escapeHtml(message)}
                 </div>
             `);
@@ -1485,7 +1605,7 @@ export const initMessagesPage = function () {
         updateConversationPreview(conversationUuid, optimisticMessage);
 
         if (
-            $container.find(".font-black.uppercase.tracking-widest").length ===
+            $container.find(".font-black.uppercase").length ===
                 1 &&
             $container.text().trim() === "No messages yet"
         ) {
@@ -1702,13 +1822,19 @@ export const initJobDetailPage = function () {
     }
 
     if ($("#job-rate-form").length) {
-        handleAjaxForm("#job-rate-form", "#job-rate-submit", function () {
+        handleAjaxForm("#job-rate-form", "#job-rate-submit", function (response) {
+            const $feedback = $("#job-rating-feedback");
+
+            $feedback
+                .text(response.message || "Rating submitted successfully.")
+                .removeClass("hidden");
+
             setTimeout(() => {
                 if (ratingModalId) {
                     closeModal(ratingModalId);
                 }
                 window.location.reload();
-            }, 1200);
+            }, 2200);
         });
     }
 

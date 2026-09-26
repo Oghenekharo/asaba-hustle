@@ -58,7 +58,7 @@ class SkillSeeder extends Seeder
         ];
 
         foreach ($skills as $skill) {
-            Skill::firstOrCreate($skill);
+            Skill::firstOrCreate(['name' => $skill['name']], $skill);
         }
     }
 }

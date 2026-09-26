@@ -17,8 +17,8 @@
             </div>
         @endif
     </div>
-    <h3 class="text-xl font-black tracking-tight text-[var(--ink)]">{{ $user->name }}</h3>
-    <div class="flex items-center justify-center gap-1 text-orange-400">
+    <h3 class="text-xl font-black  text-[var(--ink)]">{{ $user->name }}</h3>
+    <div class="flex items-center justify-center gap-1 text-[var(--brand)]">
         <i data-lucide="star" class="w-3 h-3 fill-current"></i>
         <span class="text-[10px] font-bold">{{ $user->rating }}</span>
     </div>

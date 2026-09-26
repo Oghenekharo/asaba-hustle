@@ -18,6 +18,7 @@ class ChatService
 
     public function startConversation(ServiceJob $job, $user)
     {
+        $existingConversation = $job->conversation()->first();
         $workerId = null;
 
         if ($user->hasRole('worker')) {
@@ -36,6 +37,22 @@ class ChatService
             throw new \RuntimeException('Conversation cannot be started for this job yet.');
         }
 
+        if ($existingConversation) {
+            if ($existingConversation->is_closed) {
+                throw ValidationException::withMessages([
+                    'chat' => ['This conversation is closed. Only an administrator can reopen it.'],
+                ]);
+            }
+
+            return $existingConversation;
+        }
+
+        if (in_array($job->status, [ServiceJob::STATUS_COMPLETED, ServiceJob::STATUS_RATED], true)) {
+            throw ValidationException::withMessages([
+                'chat' => ['A conversation cannot be started after the job is completed.'],
+            ]);
+        }
+
         return Conversation::firstOrCreate([
             'job_id' => $job->id,
             'client_id' => $job->user_id,
@@ -48,9 +65,14 @@ class ChatService
         $conversation = $conversation ?: $this->startConversation($job, $user);
         $conversation->loadMissing('job');
 
-        if (!in_array($conversation->job->status, ServiceJob::chatEligibleStatuses(), true)) {
+        if (
+            $conversation->is_closed
+            || !in_array($conversation->job->status, ServiceJob::chatEligibleStatuses(), true)
+        ) {
             throw ValidationException::withMessages([
-                'chat' => ['This conversation is not active yet.']
+                'chat' => [$conversation->is_closed
+                    ? 'This conversation is closed. Only an administrator can reopen it.'
+                    : 'This conversation is not active yet.']
             ]);
         }
 

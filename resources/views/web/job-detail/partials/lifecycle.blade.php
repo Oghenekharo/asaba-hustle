@@ -2,97 +2,97 @@
     <section class="rounded-[2rem] h-[350px] overflow-y-auto bg-white border border-slate-100 shadow-sm p-6">
         <div class="flex items-start justify-between gap-4">
             <div>
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Job Lifecycle</p>
+                <p class="text-[10px] font-black uppercase  text-slate-400">Job Lifecycle</p>
                 <h3 class="mt-2 text-lg font-black text-slate-900">Job Progress</h3>
                 <p class="mt-2 text-sm font-medium text-slate-500">
                     Follow this job from acceptance to completion.
                 </p>
             </div>
             <span
-                class="inline-flex items-center rounded-full bg-[var(--surface-soft)] px-3 py-1 text-[10px] font-black uppercase tracking-widest text-[var(--brand)]">
+                class="inline-flex items-center rounded-full bg-[var(--surface-soft)] px-3 py-1 text-[10px] font-black uppercase  text-[var(--brand)]">
                 {{ str_replace('_', ' ', $job->status) }}
             </span>
         </div>
 
         <div class="mt-6 space-y-3">
             <div
-                class="rounded-2xl border px-4 py-4 {{ $job->status === 'assigned' || in_array($job->status, $acceptedStages) ? 'border-orange-200 bg-orange-50/70' : 'border-slate-200 bg-slate-50' }}">
+                class="job-stage rounded-2xl border px-4 py-4 {{ $job->status === 'assigned' || in_array($job->status, $acceptedStages) ? 'job-stage--accepted' : 'job-stage--waiting' }}">
                 <div class="flex items-start justify-between gap-3">
                     <p
-                        class="text-[10px] font-black uppercase tracking-widest {{ $job->status === 'assigned' || in_array($job->status, $acceptedStages) ? 'text-orange-700' : 'text-slate-400' }}">
+                        class="text-[10px] font-black uppercase {{ $job->status === 'assigned' || in_array($job->status, $acceptedStages) ? 'job-stage__label' : 'job-stage__muted' }}">
                         1. Job Accepted
                     </p>
                     @if (in_array($job->status, $acceptedStages))
-                        <i data-lucide="circle-check-big" class="h-4 w-4 text-orange-600"></i>
+                        <i data-lucide="circle-check-big" class="h-4 w-4 job-stage__icon"></i>
                     @endif
                 </div>
                 <p
-                    class="mt-2 text-sm font-medium {{ $job->status === 'assigned' || in_array($job->status, $acceptedStages) ? 'text-orange-900' : 'text-slate-500' }}">
+                    class="mt-2 text-sm font-medium {{ $job->status === 'assigned' || in_array($job->status, $acceptedStages) ? 'job-stage__description' : 'job-stage__muted' }}">
                     The assigned worker confirms they are ready to take on the job.
                 </p>
             </div>
 
             <div
-                class="rounded-2xl border px-4 py-4 {{ in_array($job->status, ['worker_accepted']) || in_array($job->status, $inProgressStages) ? 'border-blue-200 bg-blue-50/70' : 'border-slate-200 bg-slate-50' }}">
+                class="job-stage rounded-2xl border px-4 py-4 {{ in_array($job->status, ['worker_accepted']) || in_array($job->status, $inProgressStages) ? 'job-stage--progress' : 'job-stage--waiting' }}">
                 <div class="flex items-start justify-between gap-3">
                     <p
-                        class="text-[10px] font-black uppercase tracking-widest {{ in_array($job->status, ['worker_accepted']) || in_array($job->status, $inProgressStages) ? 'text-blue-700' : 'text-slate-400' }}">
+                        class="text-[10px] font-black uppercase {{ in_array($job->status, ['worker_accepted']) || in_array($job->status, $inProgressStages) ? 'job-stage__label' : 'job-stage__muted' }}">
                         2. Work In Progress
                     </p>
                     @if (in_array($job->status, $inProgressStages))
-                        <i data-lucide="circle-check-big" class="h-4 w-4 text-blue-600"></i>
+                        <i data-lucide="circle-check-big" class="h-4 w-4 job-stage__icon"></i>
                     @endif
                 </div>
                 <p
-                    class="mt-2 text-sm font-medium {{ in_array($job->status, ['worker_accepted']) || in_array($job->status, $inProgressStages) ? 'text-blue-900' : 'text-slate-500' }}">
+                    class="mt-2 text-sm font-medium {{ in_array($job->status, ['worker_accepted']) || in_array($job->status, $inProgressStages) ? 'job-stage__description' : 'job-stage__muted' }}">
                     The worker marks the job as started once work begins.
                 </p>
             </div>
 
             <div
-                class="rounded-2xl border px-4 py-4 {{ in_array($job->status, $paymentPendingStages) ? 'border-amber-200 bg-amber-50/70' : 'border-slate-200 bg-slate-50' }}">
+                class="job-stage rounded-2xl border px-4 py-4 {{ in_array($job->status, $paymentPendingStages) ? 'job-stage--payment' : 'job-stage--waiting' }}">
                 <div class="flex items-start justify-between gap-3">
                     <p
-                        class="text-[10px] font-black uppercase tracking-widest {{ in_array($job->status, $paymentPendingStages) ? 'text-amber-700' : 'text-slate-400' }}">
+                        class="text-[10px] font-black uppercase {{ in_array($job->status, $paymentPendingStages) ? 'job-stage__label' : 'job-stage__muted' }}">
                         3. Payment Pending
                     </p>
                     @if (in_array($job->status, $paymentPendingStages))
-                        <i data-lucide="circle-check-big" class="h-4 w-4 text-amber-600"></i>
+                        <i data-lucide="circle-check-big" class="h-4 w-4 job-stage__icon"></i>
                     @endif
                 </div>
                 <p
-                    class="mt-2 text-sm font-medium {{ in_array($job->status, $paymentPendingStages) ? 'text-amber-900' : 'text-slate-500' }}">
+                    class="mt-2 text-sm font-medium {{ in_array($job->status, $paymentPendingStages) ? 'job-stage__description' : 'job-stage__muted' }}">
                     Once the work is done, the client marks it as paid and the worker confirms payment receipt.
                 </p>
                 @if ($paymentLifecycleLabel)
                     <div
-                        class="mt-4 inline-flex items-center rounded-full border border-amber-200 bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">
+                        class="mt-4 inline-flex items-center rounded-full border border-amber-200 bg-white px-3 py-1 text-[10px] font-black uppercase  text-amber-700">
                         {{ $paymentLifecycleLabel }}
                     </div>
                 @endif
                 @if ($paymentReceiptUrl)
-                    <div class="mt-4 rounded-2xl border border-amber-200 bg-white/80 px-4 py-4">
-                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">
+                    <div class="mt-4 rounded-2xl border border-amber-200 bg-white px-4 py-4">
+                        <p class="text-[10px] font-black uppercase  text-amber-700">
                             Transfer Receipt Uploaded
                         </p>
                         <p class="mt-2 text-sm font-medium text-amber-900">
                             {{ $paymentReceiptOriginalName ?: 'Transfer receipt' }}
                         </p>
                         @if ($paymentReceiptUploadedAt)
-                            <p class="mt-1 text-[10px] font-black uppercase tracking-widest text-amber-500">
+                            <p class="mt-1 text-[10px] font-black uppercase  text-amber-500">
                                 {{ \Illuminate\Support\Carbon::parse($paymentReceiptUploadedAt)->diffForHumans() }}
                             </p>
                         @endif
                         <button type="button" onclick="openModal('paymentReceiptModal')"
-                            class="mt-4 inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-white px-4 py-3 text-[10px] font-black uppercase tracking-widest text-amber-700 transition hover:border-amber-300 hover:text-amber-800">
+                            class="mt-4 inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-white px-4 py-3 text-[10px] font-black uppercase  text-amber-700 transition hover:border-amber-300 hover:text-amber-800">
                             <i data-lucide="receipt-text" class="h-4 w-4"></i>
                             View Receipt
                         </button>
                     </div>
                 @endif
                 @if ($showCashPaymentNote)
-                    <div class="mt-4 rounded-2xl border border-amber-200 bg-white/70 px-4 py-3">
-                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">
+                    <div class="mt-4 rounded-2xl border border-amber-200 bg-white px-4 py-3">
+                        <p class="text-[10px] font-black uppercase  text-amber-700">
                             Cash Payment
                         </p>
                         <p class="mt-2 text-sm font-medium text-amber-900">
@@ -103,35 +103,35 @@
             </div>
 
             <div
-                class="rounded-2xl border px-4 py-4 {{ in_array($job->status, $closedStages) ? 'border-emerald-200 bg-emerald-50/70' : 'border-slate-200 bg-slate-50' }}">
+                class="job-stage rounded-2xl border px-4 py-4 {{ in_array($job->status, $closedStages) ? 'job-stage--closed' : 'job-stage--waiting' }}">
                 <div class="flex items-start justify-between gap-3">
                     <p
-                        class="text-[10px] font-black uppercase tracking-widest {{ in_array($job->status, $closedStages) ? 'text-emerald-700' : 'text-slate-400' }}">
+                        class="text-[10px] font-black uppercase {{ in_array($job->status, $closedStages) ? 'job-stage__label' : 'job-stage__muted' }}">
                         4. Job Closed
                     </p>
                     @if (in_array($job->status, $closedStages))
-                        <i data-lucide="circle-check-big" class="h-4 w-4 text-emerald-600"></i>
+                        <i data-lucide="circle-check-big" class="h-4 w-4 job-stage__icon"></i>
                     @endif
                 </div>
                 <p
-                    class="mt-2 text-sm font-medium {{ in_array($job->status, $closedStages) ? 'text-emerald-900' : 'text-slate-500' }}">
+                    class="mt-2 text-sm font-medium {{ in_array($job->status, $closedStages) ? 'job-stage__description' : 'job-stage__muted' }}">
                     The job is closed after the worker confirms payment has been received.
                 </p>
             </div>
 
             <div
-                class="rounded-2xl border px-4 py-4 {{ $clientRating || $workerRating ? 'border-violet-200 bg-violet-50/70' : 'border-slate-200 bg-slate-50' }}">
+                class="job-stage rounded-2xl border px-4 py-4 {{ $clientRating || $workerRating ? 'job-stage--rated' : 'job-stage--waiting' }}">
                 <div class="flex items-start justify-between gap-3">
                     <p
-                        class="text-[10px] font-black uppercase tracking-widest {{ $clientRating || $workerRating ? 'text-violet-700' : 'text-slate-400' }}">
+                        class="text-[10px] font-black uppercase {{ $clientRating || $workerRating ? 'job-stage__label' : 'job-stage__muted' }}">
                         5. Leave Rating
                     </p>
                     @if ($clientRating || $workerRating)
-                        <i data-lucide="circle-check-big" class="h-4 w-4 text-violet-600"></i>
+                        <i data-lucide="circle-check-big" class="h-4 w-4 job-stage__icon"></i>
                     @endif
                 </div>
                 <p
-                    class="mt-2 text-sm font-medium {{ $clientRating || $workerRating ? 'text-violet-900' : 'text-slate-500' }}">
+                    class="mt-2 text-sm font-medium {{ $clientRating || $workerRating ? 'job-stage__description' : 'job-stage__muted' }}">
                     Leave a rating after payment is confirmed so both sides can build trust on the platform.
                 </p>
             </div>
@@ -190,14 +190,14 @@
                 <div class="grid gap-3 sm:grid-cols-2">
                     @if ($canViewTransferDetails)
                         <button type="button" onclick="openModal('workerTransferDetailsModal')"
-                            class="flex cursor-pointer h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 transition-all hover:border-[var(--brand)] hover:text-[var(--brand)] active:scale-95">
+                            class="flex cursor-pointer h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 text-[10px] font-black uppercase  text-slate-600 transition-all hover:border-[var(--brand)] hover:text-[var(--brand)] active:scale-95">
                             <i data-lucide="copy" class="h-4 w-4"></i>
                             View Account Details
                         </button>
                     @elseif ($showCashPaymentNote)
                         <div
-                            class="flex min-h-14 items-center rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-left">
-                            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">
+                            class="flex min-h-14 items-center rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left">
+                            <p class="text-[10px] font-black uppercase  text-amber-700">
                                 Cash Payment
                             </p>
                         </div>
@@ -209,11 +209,11 @@
                         @if ($canUploadTransferReceipt)
                             <div class="mb-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
                                 <label for="payment_receipt"
-                                    class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                    class="text-[10px] font-black uppercase  text-slate-500">
                                     Transfer Receipt
                                 </label>
                                 <input type="file" name="receipt" id="payment_receipt" accept=".jpg,.jpeg,.png,.pdf"
-                                    class="mt-3 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-orange-50 file:px-3 file:py-2 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:text-orange-600" />
+                                    class="mt-3 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-orange-50 file:px-3 file:py-2 file:text-[10px] file:font-black file:uppercase file:text-orange-600" />
                                 <p class="mt-2 text-xs font-medium text-slate-500">
                                     Upload a JPG, PNG, or PDF transfer receipt before marking this job as paid.
                                 </p>
@@ -241,7 +241,7 @@
                 </form>
             @elseif($isOwner && $job->status === 'in_progress')
                 <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Work in Progress</p>
+                    <p class="text-[10px] font-black uppercase  text-slate-400">Work in Progress</p>
                     <p class="mt-2 text-sm font-medium text-slate-600">
                         The worker is still handling this job. You can mark it as paid once they say the work is
                         complete.
@@ -249,7 +249,7 @@
                 </div>
             @elseif($isOwner && $job->status === 'assigned')
                 <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Waiting for Acceptance
+                    <p class="text-[10px] font-black uppercase  text-slate-400">Waiting for Acceptance
                     </p>
                     <p class="mt-2 text-sm font-medium text-slate-600">
                         The assigned worker still needs to accept this job before work can begin.
@@ -257,14 +257,14 @@
                 </div>
             @elseif($isOwner && $job->status === 'worker_accepted')
                 <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Ready to Start</p>
+                    <p class="text-[10px] font-black uppercase  text-slate-400">Ready to Start</p>
                     <p class="mt-2 text-sm font-medium text-slate-600">
                         The worker has accepted this job and can now mark it as in progress when work begins.
                     </p>
                 </div>
             @elseif($isAssignedWorker && $job->status === 'payment_pending' && $job->paid_at === null)
                 <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <p class="text-[10px] font-black uppercase  text-slate-400">
                         Awaiting Client Confirmation
                     </p>
                     <p class="mt-2 text-sm font-medium text-slate-600">
@@ -274,15 +274,15 @@
                 </div>
             @elseif($isOwner && $job->status === 'payment_pending' && $job->paid_at !== null)
                 <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Payment Sent</p>
+                    <p class="text-[10px] font-black uppercase  text-slate-400">Payment Sent</p>
                     <p class="mt-2 text-sm font-medium text-slate-600">
                         You marked this job as paid. The worker still needs to confirm payment receipt.
                     </p>
                 </div>
             @elseif(in_array($job->status, ['completed', 'rated']))
-                <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-emerald-700">Job Closed</p>
-                    <p class="mt-2 text-sm font-medium text-emerald-800">
+                <div class="job-callout job-callout--success rounded-2xl border px-4 py-4">
+                    <p class="text-[10px] font-black uppercase">Job Closed</p>
+                    <p class="mt-2 text-sm font-medium">
                         Payment has been confirmed and this job is now closed.
                     </p>
                 </div>
@@ -296,15 +296,15 @@
 @if ($canViewTransferReceipt)
     <x-modal id="paymentReceiptModal" title="Transfer Receipt" size="max-w-2xl">
         <div class="space-y-5">
-            <div class="rounded-[1.75rem] border border-amber-100 bg-amber-50/80 px-5 py-4">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">Receipt Evidence</p>
+            <div class="rounded-[1.75rem] border border-amber-100 bg-amber-50 px-5 py-4">
+                <p class="text-[10px] font-black uppercase  text-amber-700">Receipt Evidence</p>
                 <p class="mt-2 text-sm font-medium text-amber-900">
                     Review the uploaded transfer receipt before confirming payment.
                 </p>
             </div>
 
             <div class="rounded-[1.75rem] border border-slate-100 bg-white px-5 py-5">
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">File</p>
+                <p class="text-[10px] font-black uppercase  text-slate-400">File</p>
                 <p class="mt-2 text-sm font-bold text-slate-900">
                     {{ $paymentReceiptOriginalName ?: 'Transfer receipt' }}
                 </p>
@@ -314,7 +314,7 @@
                     </p>
                 @endif
                 <a href="{{ $paymentReceiptUrl }}" target="_blank" rel="noopener noreferrer"
-                    class="mt-4 inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white transition hover:opacity-90">
+                    class="mt-4 inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-[10px] font-black uppercase  text-white transition hover:opacity-90">
                     <i data-lucide="external-link" class="h-4 w-4"></i>
                     Open Receipt
                 </a>

@@ -1,5 +1,6 @@
 <div id="app-splash"
-    {{ $attributes->merge(['class' => 'fixed inset-0 z-[2147483647] bg-white flex flex-col items-center justify-center pointer-events-auto']) }}>
+    {{ $attributes->merge(['class' => 'fixed inset-0 z-[2147483647] flex flex-col items-center justify-center pointer-events-auto']) }}
+    style="background-color: var(--surface)">
     <style>
         @keyframes soft-pulse {
 
@@ -39,7 +40,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, #ff7a00, transparent);
+            background: linear-gradient(90deg, transparent, var(--brand), transparent);
             animation: loading-slide 1.5s infinite;
         }
 
@@ -53,13 +54,13 @@
     <div class="flex flex-col items-center gap-6">
         <!-- Logo with soft pulse -->
         <div class="relative">
-            <div class="absolute inset-0 bg-orange-100 rounded-full blur-2xl opacity-40 animate-soft-pulse"></div>
-            <img src="{{ asset('images/icons/asaba-hustle.svg') }}" class="w-20 h-20 relative z-10 animate-soft-pulse"
+            <div class="absolute inset-0 rounded-full blur-2xl opacity-20 animate-soft-pulse" style="background: var(--brand)"></div>
+            <img src="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/asaba-hustle.svg') }}" class="w-20 h-20 relative z-10 animate-soft-pulse object-contain"
                 alt="Logo" />
         </div>
 
         <div class="flex flex-col items-center gap-3">
-            <p class="uppercase tracking-[0.2em] text-[10px] font-bold text-orange-600 opacity-80">
+            <p class="uppercase text-[10px] font-bold text-[var(--brand)] opacity-80">
                 Asaba Hustle
             </p>
             <!-- Modern loading indicator -->

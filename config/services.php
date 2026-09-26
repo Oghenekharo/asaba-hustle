@@ -47,11 +47,11 @@ return [
         'webhook_secret_hash' => env('FLUTTERWAVE_WEBHOOK_SECRET_HASH'),
     ],
 
-    'nigeriabulksms' => [
-        'username' => env('NIGERIABULKSMS_USERNAME'),
-        'password' => env('NIGERIABULKSMS_PASSWORD'),
-        'sender' => env('NIGERIABULKSMS_SENDER'),
-        'base_url' => env('NIGERIABULKSMS_BASE_URL', 'https://portal.nigeriabulksms.com/api/'),
+    'sendchamp' => [
+        'token' => env('SENDCHAMP_API_KEY'),
+        'sender_name' => env('SENDCHAMP_SENDER_NAME', 'Sendchamp'),
+        'route' => env('SENDCHAMP_ROUTE', 'dnd'),
+        'base_url' => env('SENDCHAMP_BASE_URL', 'https://api.sendchamp.com/api/v1'),
     ],
 
     'mapbox' => [

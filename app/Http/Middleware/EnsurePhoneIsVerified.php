@@ -12,7 +12,7 @@ class EnsurePhoneIsVerified
     {
         $user = $request->user();
 
-        if (!$user || $user->hasRole('admin') || $user->phone_verified_at) {
+        if (!$user || $user->hasRole('admin') || $user->phone_verified_at || $user->email_verified_at) {
             return $next($request);
         }
 

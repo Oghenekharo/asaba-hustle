@@ -23,12 +23,12 @@ Route::prefix('auth')->group(function () {
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
     Route::post('verify-phone', [AuthController::class, 'verifyPhone']);
-    Route::get('verify-email/{user}/{hash}', [AuthController::class, 'verifyEmail'])
+    Route::get('verify-email/{user:id}/{hash}', [AuthController::class, 'verifyEmail'])
         ->name('api.auth.verify-email');
 });
 
 Route::get('/skills', [SkillController::class, 'index']);
-Route::get('/skills/{skill}', [SkillController::class, 'show']);
+Route::get('/skills/{skill:id}', [SkillController::class, 'show']);
 Route::post('/payments/webhook/paystack', [PaymentController::class, 'webhook']);
 Route::post('/payments/webhook/flutterwave', [FlutterwavePaymentController::class, 'webhook']);
 
@@ -64,37 +64,37 @@ Route::middleware(['token.active', 'auth:sanctum', 'account.active', 'throttle:a
 
         Route::post('/', [ServiceJobController::class, 'store'])->middleware('throttle:10,1');
 
-        Route::get('/{job}', [ServiceJobController::class, 'show']);
+        Route::get('/{job:id}', [ServiceJobController::class, 'show']);
 
-        Route::post('/{job}/apply', [ServiceJobController::class, 'apply']);
+        Route::post('/{job:id}/apply', [ServiceJobController::class, 'apply']);
 
-        Route::post('/{job}/negotiate', [JobNegotiationController::class, 'store']);
+        Route::post('/{job:id}/negotiate', [JobNegotiationController::class, 'store']);
 
-        Route::post('/{job}/negotiate/{negotiation}/accept', [JobNegotiationController::class, 'accept']);
+        Route::post('/{job:id}/negotiate/{negotiation:id}/accept', [JobNegotiationController::class, 'accept']);
 
-        Route::post('/{job}/negotiate/{negotiation}/counter', [JobNegotiationController::class, 'counter']);
+        Route::post('/{job:id}/negotiate/{negotiation:id}/counter', [JobNegotiationController::class, 'counter']);
 
-        Route::post('/{job}/negotiate/{negotiation}/reject', [JobNegotiationController::class, 'reject']);
+        Route::post('/{job:id}/negotiate/{negotiation:id}/reject', [JobNegotiationController::class, 'reject']);
 
-        Route::post('/{job}/hire', [ServiceJobController::class, 'hire']);
+        Route::post('/{job:id}/hire', [ServiceJobController::class, 'hire']);
 
-        Route::post('/{job}/accept', [ServiceJobController::class, 'accept']);
-        Route::post('/{job}/reject', [ServiceJobController::class, 'reject']);
+        Route::post('/{job:id}/accept', [ServiceJobController::class, 'accept']);
+        Route::post('/{job:id}/reject', [ServiceJobController::class, 'reject']);
 
-        Route::post('/{job}/start', [ServiceJobController::class, 'start']);
+        Route::post('/{job:id}/start', [ServiceJobController::class, 'start']);
 
-        Route::post('/{job}/complete', [ServiceJobController::class, 'complete']);
+        Route::post('/{job:id}/complete', [ServiceJobController::class, 'complete']);
 
-        Route::post('/{job}/mark-paid', [ServiceJobController::class, 'markPaid']);
+        Route::post('/{job:id}/mark-paid', [ServiceJobController::class, 'markPaid']);
 
-        Route::post('/{job}/confirm-payment', [ServiceJobController::class, 'confirmPayment']);
+        Route::post('/{job:id}/confirm-payment', [ServiceJobController::class, 'confirmPayment']);
 
-        Route::post('/{job}/rate', [ServiceJobController::class, 'rate']);
-        Route::patch('/{job}/cancel', [ServiceJobController::class, 'cancel'])->middleware('admin');
-        Route::patch('/{job}/rollback', [ServiceJobController::class, 'rollback'])->middleware('admin');
+        Route::post('/{job:id}/rate', [ServiceJobController::class, 'rate']);
+        Route::patch('/{job:id}/cancel', [ServiceJobController::class, 'cancel'])->middleware('admin');
+        Route::patch('/{job:id}/rollback', [ServiceJobController::class, 'rollback'])->middleware('admin');
 
         Route::get(
-            '/{job}/suggested-workers',
+            '/{job:id}/suggested-workers',
             [ServiceJobController::class, 'suggestedWorkers']
         );
 

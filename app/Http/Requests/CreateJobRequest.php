@@ -16,8 +16,8 @@ class CreateJobRequest extends FormRequest
                     return;
                 }
 
-                if ($user->phone_verified_at === null) {
-                    $validator->errors()->add('verification', 'Verify your phone number before posting jobs.');
+                if ($user->phone_verified_at === null && $user->email_verified_at === null) {
+                    $validator->errors()->add('verification', 'Verify your phone number or email before posting jobs.');
                 }
             },
         ];

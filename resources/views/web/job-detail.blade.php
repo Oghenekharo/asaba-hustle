@@ -93,7 +93,8 @@
 
 
 @section('content')
-    <div class="max-w-5xl mx-auto pt-20" id="job-detail-page" data-job-id="{{ $job->id }}"
+    @php($jobPublicKey = $job->slug)
+    <div class="max-w-5xl mx-auto pt-20" id="job-detail-page" data-job-id="{{ $job->id }}" data-job-key="{{ $job->slug }}"
         data-job-status="{{ $job->status }}"
         data-can-open-rating-modal="{{ $canOpenRatingModal ? 'true' : 'false' }}"
         data-rating-modal-id="{{ $ratingModalId }}">
@@ -107,7 +108,6 @@
             <div class="lg:col-span-8 space-y-6">
                 <section
                     class="p-8 md:p-12 rounded-[3rem] bg-white border border-[var(--brand)]/5 shadow-sm relative overflow-hidden">
-                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-[var(--brand)]/5 blur-3xl rounded-full"></div>
 
                     <div class="relative">
                         <div class="flex items-center gap-3 mb-6">
@@ -115,11 +115,11 @@
                                 class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase border border-emerald-100">
                                 {{ Str::replace('_', ' ', $job->status) }}
                             </span>
-                            <span class="text-[10px] font-bold opacity-30 uppercase tracking-tighter italic">Ref:
-                                #AH-{{ $job->id }}</span>
+                            <span class="text-[10px] font-bold opacity-30 uppercase  italic">Ref:
+                                {{ $job->slug }}</span>
                         </div>
 
-                        <h1 class="text-4xl md:text-5xl font-black tracking-tighter text-[var(--ink)] leading-[1.1] mb-6">
+                        <h1 class="text-4xl md:text-5xl font-black  text-[var(--ink)] leading-[1.1] mb-6">
                             {{ $job->title }}
                         </h1>
 
@@ -243,9 +243,9 @@
                     <section class="rounded-[2rem] bg-white border border-slate-100 shadow-sm p-6">
                         <p class="text-[10px] font-black uppercase text-slate-400 mb-3">Application Status
                         </p>
-                        <div class="rounded-2xl bg-blue-50 border border-blue-100 px-4 py-4">
-                            <p class="text-xs font-black uppercase text-blue-700">You were selected</p>
-                            <p class="mt-2 text-sm font-medium text-blue-800">
+                        <div class="job-callout job-callout--info rounded-2xl border px-4 py-4">
+                            <p class="text-xs font-black uppercase">You were selected</p>
+                            <p class="mt-2 text-sm font-medium">
                                 You are the assigned worker on this job. Use the job progress section to move it forward.
                             </p>
                         </div>
@@ -254,9 +254,9 @@
                     <section class="rounded-[2rem] bg-white border border-slate-100 shadow-sm p-6">
                         <p class="text-[10px] font-black uppercase text-slate-400 mb-3">Application Status
                         </p>
-                        <div class="rounded-2xl bg-emerald-50 border border-emerald-100 px-4 py-4">
-                            <p class="text-xs font-black uppercase text-emerald-700">Applied</p>
-                            <p class="mt-2 text-sm font-medium text-emerald-800">
+                        <div class="job-callout job-callout--success rounded-2xl border px-4 py-4">
+                            <p class="text-xs font-black uppercase">Applied</p>
+                            <p class="mt-2 text-sm font-medium">
                                 Your application has been sent. You can now continue the conversation with the client.
                             </p>
                         </div>

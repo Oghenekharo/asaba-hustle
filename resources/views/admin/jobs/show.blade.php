@@ -104,16 +104,16 @@
                 'border' => 'border-amber-100',
             ],
             'payment_pending' => [
-                'color' => 'bg-orange-600',
-                'bg' => 'bg-orange-50',
-                'text' => 'text-orange-700',
-                'border' => 'border-orange-100',
+                'color' => 'bg-cyan-600',
+                'bg' => 'bg-cyan-50',
+                'text' => 'text-cyan-700',
+                'border' => 'border-cyan-100',
             ],
             'completed' => [
-                'color' => 'bg-slate-600',
-                'bg' => 'bg-slate-50',
-                'text' => 'text-slate-700',
-                'border' => 'border-slate-200',
+                'color' => 'bg-emerald-600',
+                'bg' => 'bg-emerald-50',
+                'text' => 'text-emerald-700',
+                'border' => 'border-emerald-100',
             ],
             'rated' => [
                 'color' => 'bg-violet-600',
@@ -131,9 +131,9 @@
         $config = $statusConfig[$job->status] ?? $statusConfig['open'];
     @endphp
 
-    <section class="rounded-[2.3rem] border border-slate-200/80 bg-white/85 p-6 shadow-sm backdrop-blur-xl sm:p-8">
-        <div class="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-            <div class="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between p-2">
+    <section class="rounded-[2.3rem] border border-[var(--line)] bg-[var(--surface-raised)] p-6 shadow-sm backdrop-blur-xl sm:p-8">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div class="relative p-2">
                 <div class="flex items-start gap-5">
                     <!-- Visual Category Icon -->
                     <div
@@ -144,14 +144,14 @@
 
                     <div class="min-w-0">
                         <div class="flex items-center gap-3 mb-2">
-                            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--brand)]">Operations Audit
+                            <p class="text-[10px] font-black uppercase  text-[var(--brand)]">Operations Audit
                             </p>
-                            <span class="h-1 w-1 rounded-full bg-slate-300"></span>
-                            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">ID:
-                                #{{ $job->id }}</p>
+                    <span class="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                            <p class="text-[10px] font-black uppercase text-[var(--muted)]">Public Key:
+                                {{ $job->slug }}</p>
                         </div>
 
-                        <h2 class="text-3xl font-black tracking-tighter text-[var(--ink)] sm:text-4xl leading-tight">
+                        <h2 class="text-3xl font-black  text-[var(--ink)] sm:text-4xl leading-tight">
                             {{ $job->title }}
                         </h2>
 
@@ -163,17 +163,17 @@
                                         class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $config['color'] }} opacity-75"></span>
                                     <span class="relative inline-flex rounded-full h-2 w-2 {{ $config['color'] }}"></span>
                                 </span>
-                                <span class="text-[10px] font-black uppercase tracking-widest {{ $config['text'] }}">
+                                <span class="text-[10px] font-black uppercase  {{ $config['text'] }}">
                                     {{ str_replace('_', ' ', $job->status) }}
                                 </span>
                             </div>
 
                             @if ($job->location)
                                 <div
-                                    class="flex items-center gap-1.5 rounded-xl border border-slate-100 bg-white px-3 py-1.5 shadow-sm text-slate-500">
+                                    class="flex items-center gap-1.5 rounded-xl border border-[var(--line)] bg-[var(--surface-soft)] px-3 py-1.5 shadow-sm text-[var(--muted)]">
                                     <i data-lucide="map-pin" class="h-3 w-3"></i>
                                     <span
-                                        class="text-[10px] font-bold uppercase tracking-wider italic">{{ $job->location }}</span>
+                                        class="text-[10px] font-bold uppercase  italic">{{ $job->location }}</span>
                                 </div>
                             @endif
                         </div>
@@ -182,19 +182,33 @@
             </div>
 
 
-            <div class="flex flex-wrap gap-3">
-                <a href="{{ route('admin.jobs.index') }}"
-                    class="inline-flex items-center gap-2 rounded-[1.35rem] border border-slate-200 bg-white px-4 py-3 text-xs font-black uppercase text-slate-500 transition hover:border-slate-300 hover:text-slate-900">
+            <a href="{{ route('admin.jobs.index') }}"
+                class="inline-flex shrink-0 items-center gap-2 self-start rounded-[1.35rem] border border-[var(--line)] bg-[var(--surface-soft)] px-4 py-3 text-xs font-black uppercase text-[var(--muted)] transition hover:border-[var(--brand)] hover:text-[var(--ink)]">
                     <i data-lucide="arrow-left" class="h-4 w-4"></i>
                     Go back
-                </a>
+            </a>
+        </div>
+
+        @if ($rollbackTargets || $canCancelJob)
+            <div class="mt-6 border-t border-[var(--line)] pt-5">
+                <p class="text-[10px] font-black uppercase text-[var(--muted)]">Job status actions</p>
+                <div class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 @foreach ($rollbackTargets as $targetStatus)
+                    @php
+                        $rollbackButtonStyle = match ($targetStatus) {
+                            \App\Models\ServiceJob::STATUS_WORKER_ACCEPTED => 'border-indigo-700 bg-indigo-600 text-white hover:bg-indigo-500',
+                            \App\Models\ServiceJob::STATUS_IN_PROGRESS => 'border-amber-500 bg-amber-400 text-amber-950 hover:bg-amber-300',
+                            \App\Models\ServiceJob::STATUS_PAYMENT_PENDING => 'border-cyan-700 bg-cyan-600 text-white hover:bg-cyan-500',
+                            \App\Models\ServiceJob::STATUS_COMPLETED => 'border-emerald-700 bg-emerald-600 text-white hover:bg-emerald-500',
+                            default => 'border-[var(--line)] bg-[var(--surface-soft)] text-[var(--ink)] hover:border-[var(--brand)]',
+                        };
+                    @endphp
                     <form method="POST" action="{{ route('admin.jobs.rollback', $job) }}">
                         @csrf
                         @method('PATCH')
                         <input type="hidden" name="target_status" value="{{ $targetStatus }}">
                         <button
-                            class="rounded-[1.35rem] border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-black uppercase text-amber-700 transition hover:border-amber-300 hover:bg-amber-100">
+                            class="w-full rounded-[1.15rem] border px-4 py-3 text-[10px] font-black uppercase transition {{ $rollbackButtonStyle }}">
                             Roll Back To {{ $rollbackLabels[$targetStatus] ?? str_replace('_', ' ', $targetStatus) }}
                         </button>
                     </form>
@@ -203,13 +217,34 @@
                     <form method="POST" action="{{ route('admin.jobs.cancel', $job) }}">
                         @csrf
                         @method('PATCH')
-                        <button class="rounded-[1.35rem] bg-rose-600 px-4 py-3 text-xs font-black uppercase text-white">
+                        <button class="w-full rounded-[1.15rem] border border-rose-700 bg-rose-600 px-4 py-3 text-[10px] font-black uppercase text-white transition hover:bg-rose-500">
                             Cancel
                         </button>
                     </form>
                 @endif
+                </div>
             </div>
-        </div>
+        @endif
+
+        @if ($job->conversation)
+            <div class="mt-5 flex flex-col gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-[10px] font-black uppercase text-[var(--muted)]">Conversation</p>
+                    <p class="mt-1 text-sm font-semibold text-[var(--ink)]">
+                        {{ $job->conversation->is_closed ? 'Closed after job completion' : 'Open' }}
+                    </p>
+                </div>
+                @if ($job->conversation->is_closed)
+                    <form method="POST" action="{{ route('admin.jobs.conversation.reopen', $job) }}">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="w-full rounded-xl bg-[var(--brand)] px-4 py-3 text-[10px] font-black uppercase text-white transition hover:opacity-90 sm:w-auto">
+                            Reopen conversation
+                        </button>
+                    </form>
+                @endif
+            </div>
+        @endif
 
         <div class="mt-6 grid gap-4 md:grid-cols-2">
             @include('admin.components.card', [
@@ -239,13 +274,13 @@
         </div>
 
         @if (!empty($rollbackTargets))
-            <div class="mt-6 rounded-[2rem] border border-amber-100 bg-amber-50/80 p-5">
-                <p class="text-[10px] font-black uppercase tracking-[0.3em] text-amber-600">Admin Recovery</p>
-                <p class="mt-2 text-sm font-semibold text-amber-900">
-                    If a worker moved this job forward by mistake, you can roll it back to an earlier valid stage.
+            <div class="mt-6 rounded-[1.5rem] border border-[var(--line)] border-l-4 border-l-[var(--brand)] bg-[var(--surface-soft)] p-5">
+                <p class="text-[10px] font-black uppercase text-[var(--brand)]">Admin Recovery</p>
+                <p class="mt-2 text-sm font-semibold text-[var(--ink)]">
+                    Roll back the job if it advanced by mistake.
                 </p>
-                <p class="mt-2 text-xs font-medium text-amber-800">
-                    Available rollback targets for this job:
+                <p class="mt-2 text-xs font-medium text-[var(--muted)]">
+                    Available targets:
                     {{ collect($rollbackTargets)->map(fn ($status) => $rollbackLabels[$status] ?? str_replace('_', ' ', $status))->implode(', ') }}.
                 </p>
             </div>
@@ -253,12 +288,12 @@
     </section>
 
     {{-- <div class="space-y-6">
-        <div class="rounded-[2rem] border border-slate-200/80 bg-white/85 p-6 shadow-sm backdrop-blur-xl">
+        <div class="rounded-[2rem] border border-[var(--line)] bg-[var(--surface-raised)] p-6 shadow-sm backdrop-blur-xl">
             <h3 class="text-lg font-black text-slate-950">Job Timeline</h3>
             <div class="mt-5 space-y-4">
                 @foreach ($timelineStages as $stage)
                     <div
-                        class="flex gap-3 rounded-[1.5rem] border px-4 py-4 {{ $stage['complete'] ? 'border-emerald-100 bg-emerald-50/70' : ($stage['active'] ? 'border-orange-100 bg-orange-50/70' : 'border-slate-100 bg-slate-50') }}">
+                        class="flex gap-3 rounded-[1.5rem] border px-4 py-4 {{ $stage['complete'] ? 'border-emerald-100 bg-emerald-50' : ($stage['active'] ? 'border-orange-100 bg-orange-50' : 'border-slate-100 bg-slate-50') }}">
                         <span
                             class="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl {{ $stage['complete'] ? 'bg-emerald-600 text-white' : ($stage['active'] ? 'bg-orange-500 text-white' : 'bg-white text-slate-400') }}">
                             <i data-lucide="{{ $stage['complete'] ? 'check' : ($stage['active'] ? 'clock-3' : 'circle') }}"
@@ -274,7 +309,7 @@
             </div>
         </div>
 
-        <div class="rounded-[2rem] border border-slate-200/80 bg-white/85 p-6 shadow-sm backdrop-blur-xl">
+        <div class="rounded-[2rem] border border-[var(--line)] bg-[var(--surface-raised)] p-6 shadow-sm backdrop-blur-xl">
             <h3 class="text-lg font-black text-slate-950">Payment</h3>
             @if ($job->payment)
                 <div class="mt-5 space-y-3">
@@ -309,7 +344,7 @@
     </div> --}}
 
     <section
-        class="relative overflow-hidden mt-3 rounded-[2.5rem] border border-white bg-white/70 p-8 shadow-sm backdrop-blur-xl">
+        class="relative overflow-hidden mt-3 rounded-[2.5rem] border border-[var(--line)] bg-[var(--surface-raised)] p-8 shadow-sm backdrop-blur-xl">
         <!-- Section Header -->
         <div class="flex items-center gap-4 mb-10">
             <div
@@ -334,14 +369,14 @@
                     $isPending = !$isComplete && !$isActive;
                 @endphp
 
-                <div class="group relative flex gap-6 pl-2 pr-4 py-4 rounded-[2rem] transition-all hover:bg-white/50">
+                <div class="group relative flex gap-6 pl-2 pr-4 py-4 rounded-[2rem] transition-all hover:bg-[var(--surface-soft)]">
                     <!-- Status Node (The Circle) -->
                     <div
                         class="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-all duration-500
-                    {{ $isComplete
-                        ? 'bg-emerald-500 text-white shadow-emerald-500/20'
-                        : ($isActive
-                            ? 'bg-[var(--brand)] text-white shadow-orange-500/20 scale-110'
+                    {{ $isActive
+                        ? $config['color'] . ' text-white shadow-lg scale-110'
+                        : ($isComplete
+                            ? 'bg-emerald-500 text-white shadow-emerald-500/20'
                             : 'bg-white text-slate-300 border border-slate-100') }}">
 
                         <i data-lucide="{{ $isComplete ? 'check' : ($isActive ? 'play' : 'circle') }}"
@@ -356,7 +391,8 @@
                             </h4>
                             @if ($isActive)
                                 <span
-                                    class="inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-2 py-0.5 text-[8px] font-black uppercase text-orange-600 animate-pulse">
+                                    class="inline-flex items-center gap-1.5 rounded-full {{ $config['color'] }} px-2.5 py-1 text-[8px] font-black uppercase text-white shadow-sm">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-white"></span>
                                     Current Phase
                                 </span>
                             @endif
@@ -385,8 +421,8 @@
     <section class="mt-6 grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
         <div class="space-y-8">
             <div
-                class="relative overflow-hidden rounded-[2.5rem] border border-white bg-white/70 p-8 shadow-sm backdrop-blur-xl">
-                <div class="absolute left-0 top-0 h-full w-1 rounded-r-full bg-blue-400/70"></div>
+                class="relative overflow-hidden rounded-[2.5rem] border border-[var(--line)] bg-[var(--surface-raised)] p-8 shadow-sm backdrop-blur-xl">
+                <div class="absolute left-0 top-0 h-full w-1 rounded-r-full bg-blue-100"></div>
 
                 <div class="flex items-center justify-between gap-4 mb-6">
                     <div class="flex items-center gap-4">
@@ -401,23 +437,23 @@
                     </div>
 
                     <a href="{{ route('admin.users.show', $job->client) }}"
-                        class="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700">
+                        class="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-[10px] font-black uppercase  text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700">
                         <i data-lucide="eye" class="h-4 w-4"></i>
                         View User
                     </a>
                 </div>
 
-                <div class="flex flex-col gap-5 rounded-[2rem] bg-slate-50/70 p-5 sm:flex-row sm:items-start">
+                <div class="flex flex-col gap-5 rounded-[2rem] bg-[var(--surface-soft)] p-5 sm:flex-row sm:items-start">
                     <x-avatar :user="$job->client" size="h-16 w-16" text="text-lg" rounded="rounded-[1.5rem]"
                         class="shadow-sm border border-white" />
 
                     <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-3">
-                            <h4 class="text-2xl font-black tracking-tight text-[var(--ink)]">
+                            <h4 class="text-2xl font-black  text-[var(--ink)]">
                                 {{ $job->client->name }}
                             </h4>
                             <span
-                                class="inline-flex rounded-xl border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] {{ $job->client->account_status === 'active'
+                                class="inline-flex rounded-xl border px-2.5 py-1 text-[9px] font-black uppercase  {{ $job->client->account_status === 'active'
                                     ? 'border-emerald-100 bg-emerald-50 text-emerald-700'
                                     : ($job->client->account_status === 'suspended'
                                         ? 'border-amber-100 bg-amber-50 text-amber-700'
@@ -431,31 +467,31 @@
                     </div>
                 </div>
 
-                <div class="mt-5 grid gap-4 sm:grid-cols-3">
-                    <div class="rounded-[1.5rem] border border-slate-100 bg-white px-4 py-5">
-                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Phone</p>
-                        <p class="mt-3 text-sm font-black text-slate-900">
-                            {{ $job->client->phone ?: 'Not provided' }}
-                        </p>
+                <div class="mt-5 divide-y divide-[var(--line)] rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface)] px-4">
+                    <div class="flex items-center justify-between gap-4 py-4">
+                        <p class="text-[10px] font-black uppercase text-slate-400">Phone</p>
+                        <p class="text-right text-sm font-black text-[var(--ink)]">{{ $job->client->phone ?: 'Not provided' }}</p>
                     </div>
-                    <div class="rounded-[1.5rem] border border-slate-100 bg-white px-4 py-5">
-                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Verification</p>
-                        <p class="mt-3 text-sm font-black text-slate-900">
-                            {{ $job->client->phone_verified_at ? 'Phone verified' : 'Phone pending' }}
-                        </p>
+                    <div class="flex items-center justify-between gap-4 py-4">
+                        <p class="text-[10px] font-black uppercase text-slate-400">Verification</p>
+                        @php
+                            $phoneVerified = (bool) $job->client->phone_verified_at;
+                        @endphp
+                        <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-black uppercase {{ $phoneVerified ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' }}">
+                            <span class="h-1.5 w-1.5 rounded-full {{ $phoneVerified ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+                            {{ $phoneVerified ? 'Verified' : 'Pending' }}
+                        </span>
                     </div>
-                    <div class="rounded-[1.5rem] border border-slate-100 bg-white px-4 py-5">
-                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Joined</p>
-                        <p class="mt-3 text-sm font-black text-slate-900">
-                            {{ optional($job->client->created_at)->format('d M Y') ?: 'Unknown' }}
-                        </p>
+                    <div class="flex items-center justify-between gap-4 py-4">
+                        <p class="text-[10px] font-black uppercase text-slate-400">Joined</p>
+                        <p class="text-right text-sm font-black text-[var(--ink)]">{{ optional($job->client->created_at)->format('d M Y') ?: 'Unknown' }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- HUSTLE DESCRIPTION -->
             <div
-                class="relative overflow-hidden rounded-[2.5rem] border border-white bg-white/70 p-8 shadow-sm backdrop-blur-xl">
+                class="relative overflow-hidden rounded-[2.5rem] border border-[var(--line)] bg-[var(--surface-raised)] p-8 shadow-sm backdrop-blur-xl">
                 <!-- Brand Accent -->
                 <div class="absolute left-0 top-0 h-full w-1 rounded-r-full bg-[var(--brand)] opacity-40"></div>
 
@@ -470,9 +506,9 @@
                     </div>
                 </div>
 
-                <div class="rounded-3xl bg-slate-50/50 p-6 border border-slate-100/50">
+                <div class="rounded-3xl bg-[var(--surface-soft)] p-6 border border-[var(--line)]">
                     <p
-                        class="text-sm font-medium leading-relaxed text-slate-600 italic transition-all group-hover:text-[var(--ink)]">
+                        class="text-sm font-medium leading-relaxed text-[var(--muted)] italic transition-all group-hover:text-[var(--ink)]">
                         "{{ $job->description }}"
                     </p>
                 </div>
@@ -481,7 +517,7 @@
 
         <!-- HUSTLE PERFORMANCE / RATING -->
         <div
-            class="relative overflow-hidden rounded-[2.5rem] border border-white bg-white/70 p-8 shadow-sm backdrop-blur-xl">
+            class="relative overflow-hidden rounded-[2.5rem] border border-[var(--line)] bg-[var(--surface-raised)] p-8 shadow-sm backdrop-blur-xl">
             <div class="flex flex-col md:flex-row md:items-center gap-3 justify-between mb-8">
                 <div class="flex items-center gap-4">
                     <div
@@ -503,7 +539,7 @@
 
             @if ($job->rating)
                 <div
-                    class="relative rounded-[2rem] border border-violet-100 bg-violet-50/30 p-8 transition-all hover:bg-white hover:shadow-xl hover:shadow-violet-500/5">
+                    class="relative rounded-[2rem] border border-violet-200/70 dark:border-violet-900/70 bg-violet-50 dark:bg-violet-100 p-8 transition-all hover:bg-violet-50 dark:hover:bg-violet-100 hover:shadow-xl hover:shadow-violet-500/5">
                     <div class="flex items-center gap-6">
                         <!-- Large Score Display -->
                         <div class="text-center">
@@ -513,14 +549,14 @@
                         </div>
 
                         <!-- Review Content -->
-                        <div class="flex-1 border-l border-violet-100 pl-6">
+                        <div class="flex-1 border-l border-violet-200 dark:border-violet-900 pl-6">
                             <div class="flex gap-0.5 mb-3">
                                 @for ($i = 1; $i <= 5; $i++)
                                     <i data-lucide="star"
                                         class="w-4 h-4 {{ $i <= $job->rating->rating ? 'text-orange-400 fill-current' : 'text-slate-200' }}"></i>
                                 @endfor
                             </div>
-                            <p class="text-sm font-bold leading-relaxed text-slate-700 italic">
+                            <p class="text-sm font-bold leading-relaxed text-[var(--ink)] italic">
                                 "{{ $job->rating->review ?: 'The client completed this hustle without a written review.' }}"
                             </p>
                             <p class="mt-3 text-[10px] font-black uppercase text-slate-400">
@@ -529,11 +565,11 @@
                         </div>
                     </div>
                     <!-- Abstract Star Decoration -->
-                    <i data-lucide="quote" class="absolute right-6 top-6 h-12 w-12 text-violet-200/30 rotate-12"></i>
+                    <i data-lucide="quote" class="absolute right-6 top-6 h-12 w-12 text-violet-300/30 dark:text-violet-700/30 rotate-12"></i>
                 </div>
             @else
                 <div
-                    class="flex flex-col items-center justify-center py-10 rounded-[2rem] border-2 border-dashed border-slate-100 bg-slate-50/50">
+                    class="flex flex-col items-center justify-center py-10 rounded-[2rem] border-2 border-dashed border-[var(--line)] bg-[var(--surface-soft)]">
                     <i data-lucide="star-off" class="h-8 w-8 text-slate-200 mb-3"></i>
                     <p class="text-sm font-black text-slate-400 uppercase">Pending Review</p>
                     <p class="text-[10px] font-bold text-slate-300 italic mt-1">Feedback will appear once the client
@@ -544,7 +580,7 @@
     </section>
     <section class="mt-3">
         <div
-            class="relative overflow-hidden rounded-[2.5rem] border border-white bg-white/70 px-4 py-5 md:p-8 shadow-sm backdrop-blur-xl">
+            class="relative overflow-hidden rounded-[2.5rem] border border-[var(--line)] bg-[var(--surface-raised)] px-4 py-5 md:p-8 shadow-sm backdrop-blur-xl">
             <!-- Header: Dynamic Counter -->
             <div class="flex flex-col md:flex-row gap-3 md:items-center justify-between mb-8">
                 <div class="flex items-center gap-4">
@@ -571,7 +607,7 @@
                     @endphp
 
                     <article
-                        class="group relative overflow-hidden rounded-[2.2rem] border border-slate-100 bg-white/50 p-6 transition-all hover:bg-white hover:shadow-xl hover:shadow-black/5 {{ $isSelected ? 'border-emerald-200 ring-1 ring-emerald-100' : '' }}">
+                        class="group relative overflow-hidden rounded-[2.2rem] border border-[var(--line)] bg-[var(--surface)] p-6 transition-all hover:bg-[var(--surface-soft)] hover:shadow-xl hover:shadow-black/5 {{ $isSelected ? 'border-emerald-400 dark:border-emerald-700 ring-1 ring-emerald-200 dark:ring-emerald-900' : '' }}">
 
                         <!-- Selection Indicator -->
                         @if ($isSelected)
@@ -631,9 +667,9 @@
 
                             <!-- Contact Bento Pill -->
                             <div
-                                class="rounded-2xl bg-[var(--surface-soft)]/80 p-3 pr-5 border border-white shadow-sm flex items-center gap-3 self-start">
+                                        class="rounded-2xl bg-[var(--surface-soft)] p-3 pr-5 border border-[var(--line)] shadow-sm flex items-center gap-3 self-start">
                                 <div
-                                    class="h-8 w-8 rounded-xl bg-white flex items-center justify-center text-[var(--brand)] shadow-sm">
+                                    class="h-8 w-8 rounded-xl bg-[var(--surface)] flex items-center justify-center text-[var(--brand)] shadow-sm">
                                     <i data-lucide="phone" class="h-4 w-4"></i>
                                 </div>
                                 <div>
@@ -660,7 +696,7 @@
                     </article>
                 @empty
                     <div
-                        class="flex flex-col items-center justify-center py-12 rounded-[2.5rem] border-2 border-dashed border-slate-100 bg-slate-50/50">
+                        class="flex flex-col items-center justify-center py-12 rounded-[2.5rem] border-2 border-dashed border-[var(--line)] bg-[var(--surface-soft)]">
                         <i data-lucide="inbox" class="h-10 w-10 text-slate-200 mb-4"></i>
                         <p class="text-sm font-black text-slate-400 uppercase">Quiet Registry</p>
                         <p class="text-[10px] font-bold text-slate-300 italic mt-1">No workers have expressed interest in

@@ -97,14 +97,14 @@
 <section class="rounded-[1.5rem] border border-slate-100 bg-white px-5 py-5">
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
-            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ $title }}</p>
+            <p class="text-[10px] font-black uppercase  text-slate-400">{{ $title }}</p>
             @if ($distanceKm !== null)
                 <p class="mt-2 text-lg font-black text-slate-900">
                     {{ number_format($distanceKm, $distanceKm >= 10 ? 1 : 2) }} km apart
                 </p>
             @endif
         </div>
-        <div class="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+        <div class="flex items-center gap-3 text-[10px] font-black uppercase  text-slate-400">
             <span class="inline-flex items-center gap-2">
                 <span class="h-2.5 w-2.5 rounded-full bg-slate-900"></span>
                 {{ $sourceLabel }}

@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Events\JobStatusUpdated;
+use App\Events\ConversationStatusUpdated;
 use App\Events\WorkerHired;
+use App\Models\Conversation;
 use App\Models\ServiceJob;
 use App\Models\JobApplication;
 use App\Models\JobNegotiation;
@@ -54,7 +56,13 @@ class JobService
     protected function broadcastJobStatusUpdate(ServiceJob $job): void
     {
         DB::afterCommit(function () use ($job) {
-            event(new JobStatusUpdated($job->fresh(['client', 'worker', 'skill', 'rating'])));
+            $freshJob = $job->fresh(['client', 'worker', 'skill', 'rating']);
+            try {
+                event(new JobStatusUpdated($freshJob));
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+            $this->notifyMatchingWorkersOfUpdate($freshJob);
         });
     }
 
@@ -620,6 +628,18 @@ class JobService
                 'status' => ServiceJob::STATUS_COMPLETED
             ]);
 
+            $conversation = $job->conversation()->lockForUpdate()->first();
+            if ($conversation && !$conversation->is_closed) {
+                $conversation->close();
+                DB::afterCommit(function () use ($conversation) {
+                    try {
+                        event(new ConversationStatusUpdated($conversation->fresh()));
+                    } catch (\Throwable $exception) {
+                        report($exception);
+                    }
+                });
+            }
+
             $payment->update([
                 'status' => Payment::STATUS_SUCCESSFUL,
                 'verified_at' => now()
@@ -761,7 +781,7 @@ class JobService
 
     protected function notifyMatchingWorkers(ServiceJob $job): void
     {
-        $workerIds = User::query()
+        $workers = User::query()
             ->role('worker')
             ->where('is_verified', true)
             ->whereNotNull('id_document')
@@ -771,32 +791,120 @@ class JobService
                         $skillQuery->where('skills.id', $job->skill_id);
                     });
             })
-            ->pluck('id')
-            ->unique();
+            ->get();
 
-        foreach ($workerIds as $workerId) {
-            $workerModel = User::find($workerId);
+        foreach ($workers as $worker) {
+            if ((int) $worker->id === (int) $job->user_id) {
+                continue;
+            }
 
-            if ($workerModel) {
-                if ((int) $workerModel->id === (int) $job->user_id) {
-                    continue;
-                }
-
-                $workerModel->notify(new \App\Notifications\NewJobAvailableNotification(
-                    jobTitle: $job->title,
-                    location: $job->location ?? 'your area',
-                    url: route('web.app.jobs.show', $job)
-                ));
-
+            $url = route('web.app.jobs.show', $job);
+            $message = $job->title . ' is available for your skills.';
+            try {
                 $this->notificationService->create(
-                    $workerModel->id,
+                    $worker->id,
                     'New job available',
-                    $job->title . ' is available near you.',
+                    $message,
                     'job',
-                    route('web.app.jobs.show', $job),
+                    $url,
                     'View Job'
                 );
+            } catch (\Throwable $exception) {
+                report($exception);
             }
+
+            try {
+                $worker->notify(new \App\Notifications\NewJobAvailableNotification(
+                    jobTitle: $job->title,
+                    location: $job->location ?? 'your area',
+                    url: $url
+                ));
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
+    }
+
+    protected function notifyMatchingWorkersOfUpdate(ServiceJob $job): void
+    {
+        $statusLabel = str_replace('_', ' ', $job->status);
+        $title = match ($job->status) {
+            ServiceJob::STATUS_PAYMENT_PENDING => 'Work completed',
+            ServiceJob::STATUS_COMPLETED, ServiceJob::STATUS_RATED => 'Job completed',
+            ServiceJob::STATUS_CANCELLED => 'Job cancelled',
+            default => 'Job updated',
+        };
+        $message = match ($job->status) {
+            ServiceJob::STATUS_PAYMENT_PENDING => 'Work on "' . $job->title . '" was completed and is awaiting payment.',
+            ServiceJob::STATUS_COMPLETED, ServiceJob::STATUS_RATED => '"' . $job->title . '" has been completed.',
+            ServiceJob::STATUS_CANCELLED => '"' . $job->title . '" was cancelled.',
+            default => '"' . $job->title . '" was updated. Its status is now ' . $statusLabel . '.',
+        };
+        $url = route('web.app.jobs.show', $job);
+
+        $workers = User::query()
+            ->role('worker')
+            ->where('is_verified', true)
+            ->whereNotNull('id_document')
+            ->where('id', '!=', $job->user_id)
+            ->when($job->assigned_to, fn ($query) => $query->where('id', '!=', $job->assigned_to))
+            ->where(function ($query) use ($job) {
+                $query->where('primary_skill_id', $job->skill_id)
+                    ->orWhereHas('skills', fn ($skills) => $skills->where('skills.id', $job->skill_id));
+            })
+            ->get();
+
+        foreach ($workers as $worker) {
+            try {
+                $this->notificationService->create(
+                    $worker->id,
+                    $title,
+                    $message,
+                    'job',
+                    $url,
+                    'View Job'
+                );
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+
+            try {
+                $worker->notify(new \App\Notifications\JobUpdateNotification(
+                    title: $title,
+                    message: $message,
+                    url: $url
+                ));
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
+    }
+
+    protected function notifyJobParticipantOfUpdate(User $user, ServiceJob $job, string $title, string $message): void
+    {
+        $url = route('web.app.jobs.show', $job);
+
+        try {
+            $this->notificationService->create(
+                $user->id,
+                $title,
+                $message,
+                'job',
+                $url,
+                'View Job'
+            );
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
+
+        try {
+            $user->notify(new \App\Notifications\JobUpdateNotification(
+                title: $title,
+                message: $message,
+                url: $url
+            ));
+        } catch (\Throwable $exception) {
+            report($exception);
         }
     }
 
@@ -835,24 +943,26 @@ class JobService
             DB::afterCommit(function () use ($job, $assignedWorkerId) {
                 Cache::forget(CacheKeys::ADMIN_DASHBOARD_METRICS);
 
-                $this->notificationService->create(
-                    $job->user_id,
-                    'Job cancelled by admin',
-                    'Your job "' . $job->title . '" was cancelled by an administrator.',
-                    'job_cancelled',
-                    route('web.app.jobs.show', $job),
-                    'View Job'
-                );
+                $client = User::find($job->user_id);
+                if ($client) {
+                    $this->notifyJobParticipantOfUpdate(
+                        $client,
+                        $job,
+                        'Job cancelled by admin',
+                        'Your job "' . $job->title . '" was cancelled by an administrator.'
+                    );
+                }
 
                 if ($assignedWorkerId) {
-                    $this->notificationService->create(
-                        $assignedWorkerId,
-                        'Assigned job cancelled by admin',
-                        'The job "' . $job->title . '" was cancelled by an administrator.',
-                        'job_cancelled',
-                        route('web.app.jobs.show', $job),
-                        'View Job'
-                    );
+                    $worker = User::find($assignedWorkerId);
+                    if ($worker) {
+                        $this->notifyJobParticipantOfUpdate(
+                            $worker,
+                            $job,
+                            'Assigned job cancelled by admin',
+                            'The job "' . $job->title . '" was cancelled by an administrator.'
+                        );
+                    }
                 }
             });
 
@@ -931,6 +1041,22 @@ class JobService
             $job->status = $targetStatus;
             $job->save();
 
+            if ($targetStatus === ServiceJob::STATUS_COMPLETED) {
+                $conversation = $job->conversation()->lockForUpdate()->first();
+
+                if ($conversation && !$conversation->is_closed) {
+                    $conversation->close();
+
+                    DB::afterCommit(function () use ($conversation) {
+                        try {
+                            event(new ConversationStatusUpdated($conversation->fresh()));
+                        } catch (\Throwable $exception) {
+                            report($exception);
+                        }
+                    });
+                }
+            }
+
             if ($job->worker) {
                 $job->worker->syncAverageRating();
             }
@@ -949,24 +1075,16 @@ class JobService
                 $message = 'An administrator rolled back "' . $job->title . '" from ' .
                     str_replace('_', ' ', $previousStatus) . ' to ' . str_replace('_', ' ', $targetStatus) . '.';
 
-                $this->notificationService->create(
-                    $job->user_id,
-                    'Job status corrected by admin',
-                    $message,
-                    'job_status_rollback',
-                    route('web.app.jobs.show', $job),
-                    'View Job'
-                );
+                $client = User::find($job->user_id);
+                if ($client) {
+                    $this->notifyJobParticipantOfUpdate($client, $job, 'Job status corrected by admin', $message);
+                }
 
                 if ($job->assigned_to) {
-                    $this->notificationService->create(
-                        $job->assigned_to,
-                        'Job status corrected by admin',
-                        $message,
-                        'job_status_rollback',
-                        route('web.app.jobs.show', $job),
-                        'View Job'
-                    );
+                    $worker = User::find($job->assigned_to);
+                    if ($worker) {
+                        $this->notifyJobParticipantOfUpdate($worker, $job, 'Job status corrected by admin', $message);
+                    }
                 }
             });
 

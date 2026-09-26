@@ -22,8 +22,10 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'phone' => 'required|string',
-            'password' => 'required|string'
+            'channel' => 'nullable|in:email,phone',
+            'phone' => 'required_if:channel,phone|required_without:email|nullable|string|max:25',
+            'email' => 'required_if:channel,email|required_without:phone|nullable|email|max:255',
+            'password' => 'required|string',
         ];
     }
 }

@@ -25,7 +25,7 @@
 <div {{ $attributes->only('class')->merge(['class' => 'space-y-1.5']) }}>
     @if ($label)
         <label for="{{ $id }}"
-            class="ml-1 text-[10px] block font-black uppercase tracking-widest text-slate-400">
+            class="ml-1 text-[10px] block font-black uppercase  text-slate-400">
             {{ $label }}
         </label>
     @endif

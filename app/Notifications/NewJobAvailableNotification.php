@@ -34,7 +34,7 @@ class NewJobAvailableNotification extends Notification
     {
         return (new WebPushMessage)
             ->title('🛠️ New job available')
-            ->body("{$this->jobTitle} is available near you")
+            ->body("{$this->jobTitle} is available in {$this->location} and matches your skills.")
             ->data([
                 'url' => $this->url,
                 'type' => NotificationType::JOB,

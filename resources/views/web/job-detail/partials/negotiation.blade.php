@@ -17,7 +17,7 @@
                 <div class="space-y-3">
                     @forelse($negotiations as $negotiation)
                         <article
-                            class="group relative overflow-hidden rounded-2xl border border-white bg-white/60 p-4 transition-all hover:bg-white hover:shadow-lg hover:shadow-black/5">
+                            class="group relative overflow-hidden rounded-2xl border border-white bg-white p-4 transition-all hover:bg-white hover:shadow-lg hover:shadow-black/5">
                             <!-- Header: Compact Amount & Status -->
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-2.5 min-w-0">
@@ -26,11 +26,11 @@
                                         <span class="text-[10px] font-black font-mono">₦</span>
                                     </div>
                                     <div class="min-w-0">
-                                        <h4 class="text-sm font-black tracking-tight text-[var(--ink)] truncate">
+                                        <h4 class="text-sm font-black  text-[var(--ink)] truncate">
                                             {{ number_format($negotiation->amount) }}
                                         </h4>
                                         <p
-                                            class="text-[9px] font-bold uppercase tracking-tighter text-slate-400 truncate">
+                                            class="text-[9px] font-bold uppercase  text-slate-400 truncate">
                                             {{ $negotiation->worker->name }}
                                         </p>
                                     </div>
@@ -126,7 +126,7 @@
                                         class="accept-offer flex h-9 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 text-[9px] font-black uppercase text-white shadow-md shadow-emerald-500/10 transition-all hover:bg-emerald-700"
                                         onclick="openNegotiationDecisionModal({
                                                             action: 'accept',
-                                                            url: '{{ route('web.app.negotiate.accept', $negotiation->id) }}',
+                                                            url: '{{ route('web.app.negotiate.accept', $negotiation) }}',
                                                             modalToClose: 'negotiationWorkerModal{{ $negotiation->id }}',
                                                         })">
                                         <i data-lucide="check" class="w-3 h-3"></i>

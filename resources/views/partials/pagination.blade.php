@@ -29,7 +29,7 @@
 
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                <p class="text-xs font-bold text-slate-400 uppercase ">
                     Showing <span class="text-slate-900">{{ $paginator->firstItem() }}</span> to <span
                         class="text-slate-900">{{ $paginator->lastItem() }}</span> of <span
                         class="text-slate-900">{{ $paginator->total() }}</span>

@@ -3,6 +3,8 @@ set -eu
 
 cd /var/www/html
 
+: "${APP_KEY:?APP_KEY must be set in the production environment}"
+
 mkdir -p \
   storage/framework/cache \
   storage/framework/sessions \
@@ -16,14 +18,13 @@ if [ "${DB_CONNECTION:-mysql}" = "mysql" ]; then
   done
 fi
 
-BOOTSTRAP_CACHE_STORE="${BOOTSTRAP_CACHE_STORE:-file}"
-
-CACHE_STORE="${BOOTSTRAP_CACHE_STORE}" php artisan optimize:clear
-CACHE_STORE="${BOOTSTRAP_CACHE_STORE}" php artisan package:discover --ansi
-CACHE_STORE="${BOOTSTRAP_CACHE_STORE}" php artisan storage:link || true
+php artisan package:discover --ansi
+if [ ! -L public/storage ]; then
+  php artisan storage:link
+fi
 
 if [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
-  CACHE_STORE="${BOOTSTRAP_CACHE_STORE}" php artisan migrate --force --no-interaction
+  php artisan migrate --force --no-interaction
 fi
 
 php artisan config:cache

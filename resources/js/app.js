@@ -19,6 +19,7 @@ import {
     initJobCreationModal,
     initMessagesPage,
     initLocationFields,
+    initDashboardLocationPrompt,
     initJobDetailPage,
     initNavbarNotifications,
     initNotificationsPage,
@@ -30,6 +31,25 @@ window.lucide = { createIcons, icons };
 
 createIcons({ icons });
 AOS.init();
+
+const updateThemeToggleIcons = () => {
+    const dark = document.documentElement.classList.contains('dark');
+    document.querySelectorAll('[data-theme-icon-dark]').forEach((icon) => icon.classList.toggle('hidden', dark));
+    document.querySelectorAll('[data-theme-icon-light]').forEach((icon) => icon.classList.toggle('hidden', !dark));
+    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+        button.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+        button.setAttribute('title', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    });
+};
+
+document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+        const dark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('asaba-theme', dark ? 'dark' : 'light');
+        updateThemeToggleIcons();
+    });
+});
+updateThemeToggleIcons();
 
 window.handleAjaxForm = handleAjaxForm;
 window.togglePasswordView = togglePasswordView;
@@ -133,18 +153,35 @@ if ($("#register-form").length) {
 }
 
 if ($("#forgot-password-form").length) {
-    handleAjaxForm(
-        "#forgot-password-form",
-        "#forgot-password-submit",
-        function (response) {
-            if (response.success === true) {
-                location.reload();
-            }
-        },
+    handleAjaxForm("#forgot-password-form", "#forgot-password-submit");
+}
+
+function updateRegistrationVerificationMethod() {
+    const method = document.querySelector(
+        'input[name="verification_method"]:checked',
+    )?.value;
+    const emailInput = document.getElementById("email");
+
+    if (!emailInput || !method) return;
+
+    emailInput.required = method === "email";
+    $("#verification-method-help").text(
+        method === "email"
+            ? "We’ll send a verification link to your email address."
+            : "We’ll send a verification code to your phone.",
     );
 }
 
 $(function () {
+    $('input[name="verification_method"]').on(
+        "change",
+        updateRegistrationVerificationMethod,
+    );
+    updateRegistrationVerificationMethod();
+    $('input[name="channel"]').on("change", function () {
+        toggleChannel(this.value);
+    });
+
     (function () {
         if ($('input[name="channel"]').length > 0) {
             const checked = document.querySelector(
@@ -259,8 +296,8 @@ if ($("#job-create-form").length) {
             if (response.success === true) {
                 setTimeout(() => {
                     closeModal("createJobModal");
-                    if (response?.data?.id) {
-                        window.location.href = `/app/jobs/${response.data.id}`;
+                    if (response?.data?.slug) {
+                        window.location.href = `/app/jobs/${response.data.slug}`;
                         return;
                     }
 
@@ -289,6 +326,7 @@ $(document).ready(function () {
     initJobCreationModal();
     initMessagesPage();
     initLocationFields();
+    initDashboardLocationPrompt();
     initJobDetailPage();
     initNavbarNotifications();
     initNotificationsPage();
@@ -389,8 +427,8 @@ if (handler) {
     const url = handler.replace("web+hustle://", "");
 
     if (url.startsWith("job/")) {
-        const id = url.split("/")[1];
-        window.location.href = `/app/jobs/${id}`;
+        const publicKey = url.split("/")[1];
+        window.location.href = `/app/jobs/${publicKey}`;
     }
 
     if (url.startsWith("chat/")) {
@@ -398,13 +436,26 @@ if (handler) {
         window.location.href = `/app/conversations/${id}`;
     }
 }
-if (document.getElementById("enableNotifications")) {
-    document
-        .getElementById("enableNotifications")
-        .addEventListener("click", async () => {
+document
+    .querySelectorAll("#enableNotifications, #dashboard-enable-push")
+    .forEach((button) => {
+        button.addEventListener("click", async () => {
+            const status = document.getElementById("dashboard-permission-status");
+            const showStatus = (message, isError = false) => {
+                if (!status || button.id !== "dashboard-enable-push") return;
+                status.textContent = message;
+                status.classList.remove("hidden", "text-red-500", "text-emerald-600", "text-slate-500");
+                status.classList.add(isError ? "text-red-500" : "text-emerald-600");
+            };
+
             // 1. Basic Support Check
             if (!("Notification" in window)) {
-                alert("Your browser doesn't support notifications.");
+                showStatus("Your browser does not support push notifications.", true);
+                return;
+            }
+
+            if (Notification.permission === "denied") {
+                showStatus("Notifications are blocked in browser settings. Allow them there, then try again.", true);
                 return;
             }
 
@@ -421,14 +472,15 @@ if (document.getElementById("enableNotifications")) {
                 const subscription = await registerPush();
 
                 if (!subscription) {
-                    alert("Notifications remain disabled on this device.");
+                    showStatus("Notifications were not enabled. Allow them in the browser prompt to continue.", true);
                     return;
                 }
 
-                alert("Success! You'll now receive updates.");
+                button.textContent = "Push notifications enabled";
+                showStatus("Push notifications are enabled on this device.");
             } catch (err) {
                 console.error("Registration failed:", err);
-                alert(err?.message || "Something went wrong during setup.");
+                showStatus(err?.message || "Unable to enable push notifications.", true);
             }
         });
-}
+    });
