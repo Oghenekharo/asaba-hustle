@@ -468,6 +468,14 @@ This will create SSL config files automatically, usually:
 
 ## Step 22. Fix The Websocket SSL Vhost
 
+In the main app SSL vhost (`hustle.currencyopts.com-le-ssl.conf`), add this line
+inside its `<VirtualHost *:443>` block so signed verification links retain the
+public HTTPS scheme through Apache and Nginx:
+
+```apache
+RequestHeader set X-Forwarded-Proto "https"
+```
+
 Open the websocket SSL file:
 
 ```bash

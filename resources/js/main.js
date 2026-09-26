@@ -230,9 +230,9 @@ export const showAlert = function (message, type = "error", parent = null) {
     // 1. Theme and Icon Maps
     const themes = {
         success: "border-emerald-100 bg-emerald-50/50 text-emerald-600 dark:border-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
-        error: "border-red-100 bg-red-50/50 text-red-600",
-        warning: "border-amber-100 bg-amber-50/50 text-amber-600",
-        info: "border-blue-100 bg-blue-50/50 text-blue-600",
+        error: "border-red-200 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-950 dark:text-red-200",
+        warning: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200",
+        info: "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-200",
         default: "border-gray-100 bg-gray-50/50 text-gray-600",
     };
 

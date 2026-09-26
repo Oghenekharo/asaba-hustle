@@ -43,8 +43,8 @@
                         'Check your email for a verification link before signing in.',
                     ],
                     'email-invalid', 'email-failed' => [
-                        'bg-rose-50 text-rose-700 border-rose-100',
-                        'That email verification link is invalid or expired. Register again or contact support.',
+                        'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950 dark:text-rose-200 dark:border-rose-800',
+                        'That verification link is invalid or expired. Sign in again to receive a fresh link.',
                     ],
                     default => null,
                 };
