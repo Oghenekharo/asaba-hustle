@@ -179,3 +179,4 @@ networks:
 
   nuxus-prod:
     external: true
+    name: nuxus-commerce_nuxus-prod
