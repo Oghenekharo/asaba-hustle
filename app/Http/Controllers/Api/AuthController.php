@@ -82,6 +82,10 @@ class AuthController extends Controller
         $data = $request->validated();
         $channel = $data['channel'] ?? (isset($data['email']) ? 'email' : 'phone');
 
+        if ($channel === 'phone' && !config('auth_methods.phone_enabled', true)) {
+            return $this->errorResponse('Phone sign-in is disabled. Please sign in with email.', 422);
+        }
+
         $user = User::where($channel, $data[$channel] ?? null)->first();
 
         if (
@@ -249,6 +253,11 @@ class AuthController extends Controller
     public function forgotPassword(ForgotPasswordRequest $request)
     {
         $data = $request->validated();
+
+        if ($data['channel'] === 'phone' && !config('auth_methods.phone_enabled', true)) {
+            return $this->errorResponse('Phone password recovery is disabled. Please use email.', 422);
+        }
+
         $user = $this->resolveUserForChannel($data['channel'], $data);
 
         if ($user) {
@@ -270,6 +279,10 @@ class AuthController extends Controller
     public function resetPassword(ResetPasswordRequest $request)
     {
         $data = $request->validated();
+
+        if ($data['channel'] === 'phone' && !config('auth_methods.phone_enabled', true)) {
+            return $this->errorResponse('Phone password recovery is disabled. Please use email.', 422);
+        }
         $user = $this->resolveUserForChannel($data['channel'], $data);
 
         if (!$user) {
@@ -309,6 +322,10 @@ class AuthController extends Controller
 
     public function sendVerificationToken(SendVerificationTokenRequest $request)
     {
+        if ($request->validated('channel') === 'phone' && !config('auth_methods.phone_enabled', true)) {
+            return $this->errorResponse('Phone verification is disabled.', 422);
+        }
+
         try {
             $channel = $request->validated('channel');
 
@@ -354,6 +371,10 @@ class AuthController extends Controller
 
     public function verifyPhone(VerifyPhoneRequest $request)
     {
+        if (!config('auth_methods.phone_enabled', true)) {
+            return $this->errorResponse('Phone verification is disabled.', 422);
+        }
+
         $data = $request->validated();
         $user = User::where('phone', $data['phone'])->first();
 

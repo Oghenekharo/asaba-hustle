@@ -62,15 +62,18 @@
             @endif
             <form id="login-form" action="{{ route('web.login.submit') }}" method="POST" class="space-y-4">
                 @csrf
+                @if ($phoneAuthEnabled)
                 <fieldset>
                     <legend class="mb-2 text-[10px] font-medium uppercase  text-slate-500">Sign in with</legend>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid {{ $phoneAuthEnabled ? 'grid-cols-2' : 'grid-cols-1' }} gap-3">
+                        @if ($phoneAuthEnabled)
                         <label class="cursor-pointer">
                             <input class="peer sr-only" type="radio" name="channel" value="phone">
                             <span class="auth-method-option flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-600 transition peer-checked:border-[var(--brand)] peer-checked:bg-[var(--surface-soft)] peer-checked:text-[var(--brand)]">
                                 <i data-lucide="phone" class="h-4 w-4"></i> Phone
                             </span>
                         </label>
+                        @endif
                         <label class="cursor-pointer">
                             <input class="peer sr-only" type="radio" name="channel" value="email" checked>
                             <span class="auth-method-option flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-600 transition peer-checked:border-[var(--brand)] peer-checked:bg-[var(--surface-soft)] peer-checked:text-[var(--brand)]">
@@ -79,11 +82,14 @@
                         </label>
                     </div>
                 </fieldset>
+                @endif
 
+                @if ($phoneAuthEnabled)
                 <div id="phone-field">
                     <x-input name="phone" type="tel" label="Phone Number" placeholder="08012345678" icon="phone" />
                 </div>
-                <div id="email-field" class="hidden">
+                @endif
+                <div id="email-field" @class(['hidden' => $phoneAuthEnabled])>
                     <x-input name="email" type="email" label="Email address" placeholder="you@example.com" icon="mail" />
                 </div>
 

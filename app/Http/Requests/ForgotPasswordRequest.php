@@ -13,10 +13,12 @@ class ForgotPasswordRequest extends FormRequest
 
     public function rules(): array
     {
+        $phoneEnabled = config('auth_methods.phone_enabled', true);
+
         return [
-            'channel' => 'required|in:email,phone',
-            'email' => 'required_if:channel,email|nullable|email|max:255',
-            'phone' => 'required_if:channel,phone|nullable|string|max:25',
+            'channel' => $phoneEnabled ? 'required|in:email,phone' : 'required|in:email',
+            'email' => [$phoneEnabled ? 'required_if:channel,email' : 'required', 'nullable', 'email', 'max:255'],
+            'phone' => [$phoneEnabled ? 'required_if:channel,phone' : 'prohibited', 'nullable', 'string', 'max:25'],
         ];
     }
 }

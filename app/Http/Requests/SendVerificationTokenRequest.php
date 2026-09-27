@@ -10,7 +10,7 @@ class SendVerificationTokenRequest extends FormRequest
     {
         if (!$this->filled('channel')) {
             $this->merge([
-                'channel' => 'phone',
+                'channel' => config('auth_methods.phone_enabled', true) ? 'phone' : 'email',
             ]);
         }
     }
@@ -23,7 +23,9 @@ class SendVerificationTokenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'channel' => 'required|in:email,phone',
+            'channel' => config('auth_methods.phone_enabled', true)
+                ? 'required|in:email,phone'
+                : 'required|in:email',
         ];
     }
 }

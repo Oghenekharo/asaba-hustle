@@ -8,13 +8,15 @@ class VerifyContactRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return config('auth_methods.phone_enabled', true);
     }
 
     public function rules(): array
     {
         return [
-            'channel' => 'required|in:phone',
+            'channel' => config('auth_methods.phone_enabled', true)
+                ? 'required|in:phone'
+                : 'prohibited',
             'token' => 'required|string|max:20',
         ];
     }

@@ -21,10 +21,12 @@ class LoginRequest extends FormRequest
      */
     public function rules(): array
     {
+        $phoneEnabled = config('auth_methods.phone_enabled', true);
+
         return [
-            'channel' => 'nullable|in:email,phone',
-            'phone' => 'required_if:channel,phone|required_without:email|nullable|string|max:25',
-            'email' => 'required_if:channel,email|required_without:phone|nullable|email|max:255',
+            'channel' => $phoneEnabled ? 'nullable|in:email,phone' : 'nullable|in:email',
+            'phone' => [$phoneEnabled ? 'required_without:email' : 'prohibited', 'nullable', 'string', 'max:25'],
+            'email' => [$phoneEnabled ? 'required_without:phone' : 'required', 'nullable', 'email', 'max:255'],
             'password' => 'required|string',
         ];
     }

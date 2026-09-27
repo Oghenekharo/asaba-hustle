@@ -27,16 +27,19 @@
             <form id="reset-password-form" method="POST" action="{{ route('web.password.update') }}"
                 class="mt-8 space-y-5">
                 @csrf
-                @php($resetChannel = $email !== '' ? 'email' : 'phone')
+                @php($resetChannel = !$phoneAuthEnabled || $email !== '' ? 'email' : 'phone')
+                @if ($phoneAuthEnabled)
                 <fieldset>
                     <legend class="mb-2 text-[10px] font-medium uppercase  text-slate-500">Recovery method</legend>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid {{ $phoneAuthEnabled ? 'grid-cols-2' : 'grid-cols-1' }} gap-3">
+                        @if ($phoneAuthEnabled)
                         <label class="cursor-pointer">
                             <input class="peer sr-only" type="radio" name="channel" value="phone" @checked($resetChannel === 'phone')>
                             <span class="auth-method-option flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-600 transition peer-checked:border-[var(--brand)] peer-checked:bg-[var(--surface-soft)] peer-checked:text-[var(--brand)]">
                                 <i data-lucide="phone" class="h-4 w-4"></i> Phone (SMS)
                             </span>
                         </label>
+                        @endif
                         <label class="cursor-pointer">
                             <input class="peer sr-only" type="radio" name="channel" value="email" @checked($resetChannel === 'email')>
                             <span class="auth-method-option flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-600 transition peer-checked:border-[var(--brand)] peer-checked:bg-[var(--surface-soft)] peer-checked:text-[var(--brand)]">
@@ -45,7 +48,9 @@
                         </label>
                     </div>
                 </fieldset>
+                @endif
 
+                @if ($phoneAuthEnabled)
                 <div id="phone-field" @class(['space-y-1.5', 'hidden' => $resetChannel !== 'phone'])>
                     <x-input name="phone" type="tel" value="{{ $phone }}" label="Phone Number" icon="phone"
                         placeholder="0810..." />
@@ -54,6 +59,11 @@
                     <x-input name="email" type="email" value="{{ $email }}" label="Email address" icon="mail"
                         placeholder="you@example.com" />
                 </div>
+                @else
+                    <input type="hidden" name="channel" value="email">
+                    <x-input name="email" type="email" value="{{ $email }}" label="Email address" icon="mail"
+                        placeholder="you@example.com" />
+                @endif
                 <div class="space-y-1.5">
                     <x-input name="token" type="number" label="Verification Token" numeric icon="key"
                         placeholder="000000" minlength="1" maxlength="6" />

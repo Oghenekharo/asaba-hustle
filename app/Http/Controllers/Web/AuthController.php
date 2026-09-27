@@ -27,18 +27,25 @@ class AuthController extends Controller
 
     public function showLogin()
     {
-        return view('web.auth.login');
+        return view('web.auth.login', ['phoneAuthEnabled' => config('auth_methods.phone_enabled', true)]);
     }
 
     public function showRegister()
     {
         $skills = Skill::query()->orderBy('name')->get();
 
-        return view('web.auth.register', compact('skills'));
+        return view('web.auth.register', [
+            'skills' => $skills,
+            'phoneAuthEnabled' => config('auth_methods.phone_enabled', true),
+        ]);
     }
 
     public function showVerifyPhone(Request $request)
     {
+        if (!config('auth_methods.phone_enabled', true)) {
+            return redirect()->route('login');
+        }
+
         return view('web.auth.verify-phone', [
             'phone' => (string) $request->query('phone', ''),
         ]);
@@ -46,7 +53,7 @@ class AuthController extends Controller
 
     public function showForgotPassword()
     {
-        return view('web.auth.forgot-password');
+        return view('web.auth.forgot-password', ['phoneAuthEnabled' => config('auth_methods.phone_enabled', true)]);
     }
 
     public function showResetPassword(Request $request)
@@ -54,6 +61,7 @@ class AuthController extends Controller
         return view('web.auth.reset-password', [
             'email' => (string) $request->query('email', ''),
             'phone' => (string) $request->query('phone', ''),
+            'phoneAuthEnabled' => config('auth_methods.phone_enabled', true),
         ]);
     }
 
@@ -106,6 +114,10 @@ class AuthController extends Controller
         $data = $request->validated();
         $channel = $data['channel'] ?? (isset($data['email']) ? 'email' : 'phone');
 
+        if ($channel === 'phone' && !config('auth_methods.phone_enabled', true)) {
+            return $this->errorResponse('Phone sign-in is disabled. Please sign in with email.', 422);
+        }
+
         $user = User::query()->where($channel, $data[$channel] ?? null)->first();
 
         if (!$user || !Hash::check($data['password'], $user->password)) {
@@ -155,6 +167,11 @@ class AuthController extends Controller
     public function forgotPassword(ForgotPasswordRequest $request)
     {
         $data = $request->validated();
+
+        if ($data['channel'] === 'phone' && !config('auth_methods.phone_enabled', true)) {
+            return $this->errorResponse('Phone password recovery is disabled. Please use email.', 422);
+        }
+
         $user = $this->resolveUserForChannel($data['channel'], $data);
 
         if ($user) {
@@ -181,6 +198,10 @@ class AuthController extends Controller
     public function resetPassword(ResetPasswordRequest $request)
     {
         $data = $request->validated();
+
+        if ($data['channel'] === 'phone' && !config('auth_methods.phone_enabled', true)) {
+            return $this->errorResponse('Phone password recovery is disabled. Please use email.', 422);
+        }
         $user = $this->resolveUserForChannel($data['channel'], $data);
 
         if (!$user) {
@@ -206,6 +227,10 @@ class AuthController extends Controller
 
     public function verifyPhone(VerifyPhoneRequest $request)
     {
+        if (!config('auth_methods.phone_enabled', true)) {
+            return $this->errorResponse('Phone verification is disabled.', 422);
+        }
+
         $data = $request->validated();
         $user = User::query()->where('phone', $data['phone'])->first();
 

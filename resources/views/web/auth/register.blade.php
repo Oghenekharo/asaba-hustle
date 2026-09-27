@@ -50,17 +50,20 @@
                 <x-input name="password_confirmation" type="password" label="Confirm Password" placeholder="••••••••"
                     icon="lock" required />
 
+                @if ($phoneAuthEnabled)
                 <div class="md:col-span-2 space-y-1.5">
                     <fieldset>
                         <legend class="ml-1 mb-2 text-[10px] font-black uppercase  text-slate-400">
                             Choose your verification method</legend>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid {{ $phoneAuthEnabled ? 'grid-cols-2' : 'grid-cols-1' }} gap-3">
+                            @if ($phoneAuthEnabled)
                             <label class="cursor-pointer">
                                 <input class="peer sr-only" type="radio" name="verification_method" value="phone">
                                 <span class="auth-method-option flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-600 transition peer-checked:border-[var(--brand)] peer-checked:bg-[var(--surface-soft)] peer-checked:text-[var(--brand)]">
                                     <i data-lucide="phone" class="h-4 w-4"></i> Phone (SMS)
                                 </span>
                             </label>
+                            @endif
                             <label class="cursor-pointer">
                                 <input class="peer sr-only" type="radio" name="verification_method" value="email" checked>
                                 <span class="auth-method-option flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-600 transition peer-checked:border-[var(--brand)] peer-checked:bg-[var(--surface-soft)] peer-checked:text-[var(--brand)]">
@@ -73,6 +76,9 @@
                         </p>
                     </fieldset>
                 </div>
+                @else
+                    <input type="hidden" name="verification_method" value="email">
+                @endif
 
                 <x-error class="md:col-span-2" />
 

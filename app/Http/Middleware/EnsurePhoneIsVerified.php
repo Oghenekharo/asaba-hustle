@@ -10,6 +10,10 @@ class EnsurePhoneIsVerified
 {
     public function handle(Request $request, Closure $next): Response
     {
+        if (!config('auth_methods.phone_enabled', true)) {
+            return $next($request);
+        }
+
         $user = $request->user();
 
         if (!$user || $user->hasRole('admin') || $user->phone_verified_at || $user->email_verified_at) {
