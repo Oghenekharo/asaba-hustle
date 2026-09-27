@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\SiteSetting;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SendVerificationTokenRequest extends FormRequest
@@ -10,7 +11,7 @@ class SendVerificationTokenRequest extends FormRequest
     {
         if (!$this->filled('channel')) {
             $this->merge([
-                'channel' => config('auth_methods.phone_enabled', true) ? 'phone' : 'email',
+                'channel' => SiteSetting::phoneAuthEnabled() ? 'phone' : 'email',
             ]);
         }
     }
@@ -23,7 +24,7 @@ class SendVerificationTokenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'channel' => config('auth_methods.phone_enabled', true)
+            'channel' => SiteSetting::phoneAuthEnabled()
                 ? 'required|in:email,phone'
                 : 'required|in:email',
         ];

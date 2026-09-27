@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\SiteSetting;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
@@ -21,7 +22,7 @@ class LoginRequest extends FormRequest
      */
     public function rules(): array
     {
-        $phoneEnabled = config('auth_methods.phone_enabled', true);
+        $phoneEnabled = SiteSetting::phoneAuthEnabled();
 
         return [
             'channel' => $phoneEnabled ? 'nullable|in:email,phone' : 'nullable|in:email',

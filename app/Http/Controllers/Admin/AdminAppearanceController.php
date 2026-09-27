@@ -23,6 +23,7 @@ class AdminAppearanceController extends Controller
             'siteIcon' => Cache::rememberForever('site_theme.icon_path', function () {
                 return SiteSetting::query()->where('key', 'site_icon')->value('value');
             }),
+            'phoneAuthEnabled' => SiteSetting::phoneAuthEnabled(),
         ]);
     }
 
@@ -31,6 +32,7 @@ class AdminAppearanceController extends Controller
         $validated = $request->validate([
             'primary_color' => ['required', 'string', 'in:' . implode(',', array_keys(config('site_theme.colors')))],
             'site_icon' => ['nullable', 'image', 'mimes:png,jpg,jpeg,svg,webp,ico', 'max:2048'],
+            'phone_auth_enabled' => ['sometimes', 'boolean'],
         ]);
 
         SiteSetting::query()->updateOrCreate(
@@ -39,6 +41,13 @@ class AdminAppearanceController extends Controller
         );
 
         Cache::forever('site_theme.primary_color', $validated['primary_color']);
+
+        $phoneAuthEnabled = $request->boolean('phone_auth_enabled');
+        SiteSetting::query()->updateOrCreate(
+            ['key' => 'phone_auth_enabled'],
+            ['value' => $phoneAuthEnabled ? '1' : '0'],
+        );
+        Cache::forever('site_setting.phone_auth_enabled', $phoneAuthEnabled);
 
         if ($request->hasFile('site_icon')) {
             $oldPath = SiteSetting::query()->where('key', 'site_icon')->value('value');
@@ -51,6 +60,6 @@ class AdminAppearanceController extends Controller
             }
         }
 
-        return redirect()->route('admin.appearance.edit')->with('status', 'Primary color updated.');
+        return redirect()->route('admin.appearance.edit')->with('status', 'Site settings updated.');
     }
 }

@@ -27,6 +27,9 @@
             <form id="forgot-password-form" method="POST" action="{{ route('web.password.email') }}"
                 class="mt-6 space-y-5">
                 @csrf
+                @unless ($phoneAuthEnabled)
+                    <input type="hidden" name="channel" value="email">
+                @endunless
                 @if ($phoneAuthEnabled)
                 <fieldset>
                     <legend class="mb-2 text-[10px] font-medium uppercase  text-slate-500">Send reset code to</legend>

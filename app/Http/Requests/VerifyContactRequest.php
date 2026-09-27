@@ -2,19 +2,20 @@
 
 namespace App\Http\Requests;
 
+use App\Models\SiteSetting;
 use Illuminate\Foundation\Http\FormRequest;
 
 class VerifyContactRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return config('auth_methods.phone_enabled', true);
+        return SiteSetting::phoneAuthEnabled();
     }
 
     public function rules(): array
     {
         return [
-            'channel' => config('auth_methods.phone_enabled', true)
+            'channel' => SiteSetting::phoneAuthEnabled()
                 ? 'required|in:phone'
                 : 'prohibited',
             'token' => 'required|string|max:20',

@@ -46,6 +46,19 @@
                 @error('site_icon') <p class="mt-2 text-sm text-rose-600">{{ $message }}</p> @enderror
             </section>
 
+            <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
+                <h2 class="text-lg font-semibold text-slate-800">Authentication methods</h2>
+                <p class="mt-1 text-sm text-slate-500">Choose which sign-in and account recovery methods are available.</p>
+                <label class="mt-5 flex cursor-pointer items-start gap-3">
+                    <input type="checkbox" name="phone_auth_enabled" value="1" @checked(old('phone_auth_enabled', $phoneAuthEnabled))
+                        class="mt-1 h-4 w-4 rounded border-slate-300 text-[var(--brand)] focus:ring-[var(--brand)]">
+                    <span>
+                        <span class="block text-sm font-medium text-slate-800">Allow phone authentication</span>
+                        <span class="mt-1 block text-sm text-slate-500">Enables phone sign-in, SMS password recovery, and phone verification. Phone remains required during registration.</span>
+                    </span>
+                </label>
+            </section>
+
             @error('primary_color')
                 <p class="text-sm text-rose-600">{{ $message }}</p>
             @enderror

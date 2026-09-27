@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\SiteSetting;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ForgotPasswordRequest extends FormRequest
@@ -13,7 +14,7 @@ class ForgotPasswordRequest extends FormRequest
 
     public function rules(): array
     {
-        $phoneEnabled = config('auth_methods.phone_enabled', true);
+        $phoneEnabled = SiteSetting::phoneAuthEnabled();
 
         return [
             'channel' => $phoneEnabled ? 'required|in:email,phone' : 'required|in:email',

@@ -10,6 +10,7 @@ use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\VerifyPhoneRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Skill;
+use App\Models\SiteSetting;
 use App\Models\User;
 use App\Services\AuthSecurityService;
 use Illuminate\Http\Request;
@@ -27,7 +28,7 @@ class AuthController extends Controller
 
     public function showLogin()
     {
-        return view('web.auth.login', ['phoneAuthEnabled' => config('auth_methods.phone_enabled', true)]);
+        return view('web.auth.login', ['phoneAuthEnabled' => SiteSetting::phoneAuthEnabled()]);
     }
 
     public function showRegister()
@@ -36,13 +37,13 @@ class AuthController extends Controller
 
         return view('web.auth.register', [
             'skills' => $skills,
-            'phoneAuthEnabled' => config('auth_methods.phone_enabled', true),
+            'phoneAuthEnabled' => SiteSetting::phoneAuthEnabled(),
         ]);
     }
 
     public function showVerifyPhone(Request $request)
     {
-        if (!config('auth_methods.phone_enabled', true)) {
+        if (!SiteSetting::phoneAuthEnabled()) {
             return redirect()->route('login');
         }
 
@@ -53,7 +54,7 @@ class AuthController extends Controller
 
     public function showForgotPassword()
     {
-        return view('web.auth.forgot-password', ['phoneAuthEnabled' => config('auth_methods.phone_enabled', true)]);
+        return view('web.auth.forgot-password', ['phoneAuthEnabled' => SiteSetting::phoneAuthEnabled()]);
     }
 
     public function showResetPassword(Request $request)
@@ -61,7 +62,7 @@ class AuthController extends Controller
         return view('web.auth.reset-password', [
             'email' => (string) $request->query('email', ''),
             'phone' => (string) $request->query('phone', ''),
-            'phoneAuthEnabled' => config('auth_methods.phone_enabled', true),
+            'phoneAuthEnabled' => SiteSetting::phoneAuthEnabled(),
         ]);
     }
 
@@ -114,7 +115,7 @@ class AuthController extends Controller
         $data = $request->validated();
         $channel = $data['channel'] ?? (isset($data['email']) ? 'email' : 'phone');
 
-        if ($channel === 'phone' && !config('auth_methods.phone_enabled', true)) {
+        if ($channel === 'phone' && !SiteSetting::phoneAuthEnabled()) {
             return $this->errorResponse('Phone sign-in is disabled. Please sign in with email.', 422);
         }
 
@@ -168,7 +169,7 @@ class AuthController extends Controller
     {
         $data = $request->validated();
 
-        if ($data['channel'] === 'phone' && !config('auth_methods.phone_enabled', true)) {
+        if ($data['channel'] === 'phone' && !SiteSetting::phoneAuthEnabled()) {
             return $this->errorResponse('Phone password recovery is disabled. Please use email.', 422);
         }
 
@@ -199,7 +200,7 @@ class AuthController extends Controller
     {
         $data = $request->validated();
 
-        if ($data['channel'] === 'phone' && !config('auth_methods.phone_enabled', true)) {
+        if ($data['channel'] === 'phone' && !SiteSetting::phoneAuthEnabled()) {
             return $this->errorResponse('Phone password recovery is disabled. Please use email.', 422);
         }
         $user = $this->resolveUserForChannel($data['channel'], $data);
@@ -227,7 +228,7 @@ class AuthController extends Controller
 
     public function verifyPhone(VerifyPhoneRequest $request)
     {
-        if (!config('auth_methods.phone_enabled', true)) {
+        if (!SiteSetting::phoneAuthEnabled()) {
             return $this->errorResponse('Phone verification is disabled.', 422);
         }
 

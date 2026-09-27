@@ -15,6 +15,7 @@ use App\Http\Requests\VerifyContactRequest;
 use App\Http\Requests\VerifyPhoneRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Models\SiteSetting;
 use App\Services\AuthSecurityService;
 use App\Traits\LogActivity;
 use Illuminate\Http\Request;
@@ -82,7 +83,7 @@ class AuthController extends Controller
         $data = $request->validated();
         $channel = $data['channel'] ?? (isset($data['email']) ? 'email' : 'phone');
 
-        if ($channel === 'phone' && !config('auth_methods.phone_enabled', true)) {
+        if ($channel === 'phone' && !SiteSetting::phoneAuthEnabled()) {
             return $this->errorResponse('Phone sign-in is disabled. Please sign in with email.', 422);
         }
 
@@ -254,7 +255,7 @@ class AuthController extends Controller
     {
         $data = $request->validated();
 
-        if ($data['channel'] === 'phone' && !config('auth_methods.phone_enabled', true)) {
+        if ($data['channel'] === 'phone' && !SiteSetting::phoneAuthEnabled()) {
             return $this->errorResponse('Phone password recovery is disabled. Please use email.', 422);
         }
 
@@ -280,7 +281,7 @@ class AuthController extends Controller
     {
         $data = $request->validated();
 
-        if ($data['channel'] === 'phone' && !config('auth_methods.phone_enabled', true)) {
+        if ($data['channel'] === 'phone' && !SiteSetting::phoneAuthEnabled()) {
             return $this->errorResponse('Phone password recovery is disabled. Please use email.', 422);
         }
         $user = $this->resolveUserForChannel($data['channel'], $data);
@@ -322,7 +323,7 @@ class AuthController extends Controller
 
     public function sendVerificationToken(SendVerificationTokenRequest $request)
     {
-        if ($request->validated('channel') === 'phone' && !config('auth_methods.phone_enabled', true)) {
+        if ($request->validated('channel') === 'phone' && !SiteSetting::phoneAuthEnabled()) {
             return $this->errorResponse('Phone verification is disabled.', 422);
         }
 
@@ -371,7 +372,7 @@ class AuthController extends Controller
 
     public function verifyPhone(VerifyPhoneRequest $request)
     {
-        if (!config('auth_methods.phone_enabled', true)) {
+        if (!SiteSetting::phoneAuthEnabled()) {
             return $this->errorResponse('Phone verification is disabled.', 422);
         }
 
