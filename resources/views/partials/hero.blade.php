@@ -87,7 +87,7 @@
 
                 <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3">
                     <a href="{{ route('web.register') }}"
-                        class="px-6 py-3.5 rounded-2xl dark:bg-slate-900 bg-(--brand) text-white font-bold text-xs uppercase shadow-lg shadow-slate-900/10 active:scale-95 transition-all">
+                        class="px-6 py-3.5 rounded-2xl bg-[var(--brand)] text-white font-bold text-xs uppercase shadow-lg shadow-slate-900/10 active:scale-95 transition-all">
                         Get Started
                     </a>
                     <a href="{{ route('login') }}"
