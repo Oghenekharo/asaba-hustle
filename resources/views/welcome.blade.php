@@ -8,18 +8,21 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="icon" href="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/icon-192.png') }}">
+    <link rel="icon"
+        href="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/icon-192.png') }}">
     <meta name="theme-color" content="{{ $siteTheme['primary'] }}">
     <script>
         (() => {
             const saved = localStorage.getItem('asaba-theme');
-            document.documentElement.classList.toggle('dark', saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.classList.toggle('dark', saved ? saved === 'dark' : matchMedia(
+                '(prefers-color-scheme: dark)').matches);
         })();
     </script>
     <title>Asaba Hustle | Local Marketplace</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 @php
@@ -33,7 +36,8 @@
     ];
 @endphp
 
-<body class="web-ui site-typography min-h-screen antialiased text-[var(--ink)]" style="--brand: {{ $siteTheme['primary'] }}; --brand-strong: {{ $siteTheme['strong'] }}; --brand-gradient: {{ $siteTheme['gradient'] }}; --surface-soft: {{ $siteTheme['soft'] }}; background-color: var(--surface); color: var(--ink)">
+<body class="web-ui site-typography min-h-screen antialiased text-[var(--ink)]"
+    style="--brand: {{ $siteTheme['primary'] }}; --brand-strong: {{ $siteTheme['strong'] }}; --brand-gradient: {{ $siteTheme['gradient'] }}; --surface-soft: {{ $siteTheme['soft'] }}; background-color: var(--surface); color: var(--ink)">
     <x-splash-screen />
 
     @include('partials.nav')
@@ -84,8 +88,8 @@
                             class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-slate-900 text-white text-[10px] font-black ">
                             STEP {{ $step['id'] }}
                         </div>
-                        <div
-                            class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white group-hover:rotate-6 transition-transform" style="background-color:var(--brand)">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white group-hover:rotate-6 transition-transform"
+                            style="background-color:var(--brand)">
                             <i data-lucide="{{ $step['icon'] }}" class="w-6 h-6"></i>
                         </div>
                         <h3 class="font-bold text-lg text-slate-900 mb-2">{{ $step['title'] }}</h3>
@@ -103,8 +107,8 @@
                         class="text-[var(--brand)]">backed by results.</span></h2>
                 <div class="space-y-4">
                     <div class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                        <div
-                            class="h-10 w-10 rounded-xl text-white flex items-center justify-center" style="background-color:var(--brand)">
+                        <div class="h-10 w-10 rounded-xl text-white flex items-center justify-center"
+                            style="background-color:var(--brand)">
                             <i data-lucide="shield-check" class="w-5 h-5"></i>
                         </div>
                         <p class="text-sm font-bold text-slate-700">100% Identity Verified Professionals</p>
@@ -138,10 +142,11 @@
             <div class="p-12 rounded-[3rem] bg-slate-900 text-white relative overflow-hidden">
                 <div class="relative z-10">
                     <h2 class="text-3xl font-black mb-6">Ready to find your pro?</h2>
-                    <button
-                        class="px-10 py-4 rounded-2xl text-white font-bold text-xs uppercase  hover:opacity-90 transition-all active:scale-95 shadow-xl" style="background: var(--brand-gradient)">
-                        Join the Marketplace
-                    </button>
+                    <a href="{{ route('web.register') }}"
+                        class="px-10 py-4 rounded-2xl text-white font-bold text-xs uppercase  hover:opacity-90 transition-all active:scale-95 shadow-xl"
+                        style="background: var(--brand-gradient)">
+                        Join the Hustle
+                    </a>
                 </div>
             </div>
         </div>
@@ -151,7 +156,8 @@
     <footer class="pb-32 md:pb-12 pt-12 bg-slate-50 dark:bg-slate-900 border-t border-slate-200">
         <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
             <div class="flex items-center gap-2">
-                <img src="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/asaba-hustle.svg') }}" class="w-7 h-7 object-contain" alt="{{ config('app.name') }}" />
+                <img src="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/asaba-hustle.svg') }}"
+                    class="w-7 h-7 object-contain" alt="{{ config('app.name') }}" />
                 <span class="text-sm font-black  text-slate-900">AsabaHustle</span>
             </div>
 
@@ -168,11 +174,11 @@
     </footer>
 
     <div id="installBanner" class="hidden fixed bottom-6 left-4 right-4 md:left-auto md:right-8 md:w-96 z-50">
-        <div
-            class="p-4 rounded-2xl shadow-2xl border border-white/20 backdrop-blur-sm" style="background-color:var(--brand)">
+        <div class="p-4 rounded-2xl shadow-2xl border border-white/20 backdrop-blur-sm"
+            style="background-color:var(--brand)">
             <div class="flex items-center gap-3"> <!-- Icon -->
-                <div
-                    class="flex-shrink-0 w-11 h-11 sm:w-12 sm:h-12 bg-white rounded-xl flex items-center justify-center shadow-inner" style="color:var(--brand)">
+                <div class="flex-shrink-0 w-11 h-11 sm:w-12 sm:h-12 bg-white rounded-xl flex items-center justify-center shadow-inner"
+                    style="color:var(--brand)">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-7 sm:w-7" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -188,7 +194,8 @@
             </div> <!-- Actions -->
             <div class="mt-3 flex gap-2"> <button id="installBtn"
                     class="flex-1 bg-white text-[var(--brand)] px-4 py-2.5 rounded-xl font-semibold text-sm active:scale-95 transition shadow-md">
-                    Install </button> <button onclick="document.getElementById('installBanner').classList.add('hidden')"
+                    Install </button> <button
+                    onclick="document.getElementById('installBanner').classList.add('hidden')"
                     class="flex-1 text-white border border-white px-4 py-2.5 rounded-xl text-sm font-medium active:scale-95">
                     Later </button> </div>
         </div>
@@ -197,7 +204,8 @@
         <div class="space-y-5">
             <!-- Icon + Title -->
             <div class="flex items-center gap-3">
-                <img src="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/asaba-hustle.png') }}" class="w-10 h-10 rounded-xl object-contain" alt="{{ config('app.name') }}" />
+                <img src="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/asaba-hustle.png') }}"
+                    class="w-10 h-10 rounded-xl object-contain" alt="{{ config('app.name') }}" />
                 <div>
                     <h3 class="font-semibold text-gray-900">Install Asaba Hustle</h3>
                     <p class="text-xs text-gray-500">Get faster access & offline support</p>
@@ -237,7 +245,8 @@
             <!-- CTA -->
             <div class="pt-2">
                 <button onclick="closeModal('installGuideModal')"
-                    class="w-full text-white py-2.5 rounded-xl font-semibold active:scale-95 transition" style="background: var(--brand-gradient)">
+                    class="w-full text-white py-2.5 rounded-xl font-semibold active:scale-95 transition"
+                    style="background: var(--brand-gradient)">
                     Got it
                 </button>
             </div>
