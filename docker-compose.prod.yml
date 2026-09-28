@@ -3,6 +3,11 @@ services:
     build:
       context: .
       dockerfile: docker/prod/php/Dockerfile
+      args:
+        VITE_REVERB_APP_KEY: ${VITE_REVERB_APP_KEY}
+        VITE_REVERB_HOST: ${VITE_REVERB_HOST}
+        VITE_REVERB_PORT: ${VITE_REVERB_PORT:-443}
+        VITE_REVERB_SCHEME: ${VITE_REVERB_SCHEME:-https}
     image: ${APP_IMAGE:-asaba-hustle}:${APP_IMAGE_TAG:-latest}
     container_name: asaba-hustle-app
     restart: unless-stopped
@@ -13,11 +18,6 @@ services:
       APP_DEBUG: "false"
       APP_ROLE: app
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
-    args:
-      VITE_REVERB_APP_KEY: ${VITE_REVERB_APP_KEY}
-      VITE_REVERB_HOST: ${VITE_REVERB_HOST}
-      VITE_REVERB_PORT: ${VITE_REVERB_PORT:-443}
-      VITE_REVERB_SCHEME: ${VITE_REVERB_SCHEME:-https}
     depends_on:
       mysql:
         condition: service_healthy
