@@ -6,22 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="{{ $siteTheme['primary'] }}">
-    <link rel="icon" href="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/icon-192.png') }}">
+    <link rel="icon"
+        href="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/icon-192.png') }}">
     <script>
         (() => {
             const saved = localStorage.getItem('asaba-theme');
-            document.documentElement.classList.toggle('dark', saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.classList.toggle('dark', saved ? saved === 'dark' : matchMedia(
+                '(prefers-color-scheme: dark)').matches);
         })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <title>{{ $title ?? trim($__env->yieldContent('title')) ?: 'Admin Dashboard' }} |
         {{ config('app.name', 'Asaba Hustle') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="site-typography min-h-screen text-[var(--ink)] antialiased" style="--brand: {{ $siteTheme['primary'] }}; --brand-strong: {{ $siteTheme['strong'] }}; --brand-gradient: {{ $siteTheme['gradient'] }}; --surface-soft: {{ $siteTheme['soft'] }}; background-color: var(--surface); color: var(--ink)">
+<body class="site-typography min-h-screen text-[var(--ink)] antialiased"
+    style="--brand: {{ $siteTheme['primary'] }}; --brand-strong: {{ $siteTheme['strong'] }}; --brand-gradient: {{ $siteTheme['gradient'] }}; --surface-soft: {{ $siteTheme['soft'] }}; background-color: var(--surface); color: var(--ink)">
     @php
         $adminUser = auth()->user();
         $navItems = [
@@ -79,8 +83,7 @@
                             class="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--brand)] text-sm font-black italic text-white shadow-[0_8px_16px_color-mix(in_srgb,var(--brand)_30%,transparent)] group-hover:scale-110 transition-transform duration-300">
                             AH</div>
                         <div>
-                            <span
-                                class="block text-[10px] font-black uppercase text-slate-300">Control</span>
+                            <span class="block text-[10px] font-black uppercase text-slate-300">Control</span>
                             <span class="block text-sm font-black  text-white italic">Asaba Hustle</span>
                         </div>
                     </a>
@@ -93,8 +96,7 @@
 
             <!-- Admin Profile Pill -->
             <div class="px-5 mb-6">
-                <div
-                    class="flex items-center gap-3 rounded-[2rem] bg-[#1b2a40] p-2 pr-4 border border-[#3d5678]">
+                <div class="flex items-center gap-3 rounded-[2rem] bg-[#1b2a40] p-2 pr-4 border border-[#3d5678]">
                     <div
                         class="h-10 w-10 rounded-[1.25rem] bg-[#293f5f] flex items-center justify-center font-black text-xs border border-[#6784aa] text-white">
                         {{ substr($adminUser?->name ?? 'A', 0, 1) }}
@@ -102,8 +104,7 @@
                     <div class="min-w-0">
                         <p class="truncate text-[11px] font-black text-white uppercase ">
                             {{ $adminUser?->name }}</p>
-                        <div
-                            class="flex items-center gap-1.5 text-[9px] font-bold uppercase text-emerald-300">
+                        <div class="flex items-center gap-1.5 text-[9px] font-bold uppercase text-emerald-300">
                             <span class="h-1 w-1 rounded-full bg-emerald-400 animate-pulse"></span>
                             Verified Admin
                         </div>
@@ -119,8 +120,7 @@
                         class="group flex items-center gap-3 rounded-2xl border-b px-4 py-3.5 text-[10px] font-black uppercase transition-all duration-300 {{ $active ? 'border-b-transparent bg-[var(--brand)] text-white shadow-lg' : 'border-b-[#35445a] bg-[#29384d] text-white hover:border-b-[#35445a] hover:bg-[#34465f] hover:text-white' }}">
                         <div
                             class="flex h-8 w-8 items-center justify-center rounded-xl transition-colors {{ $active ? 'bg-white text-[var(--brand)]' : 'bg-[#1b2a40] text-white group-hover:bg-[#293f5f]' }}">
-                            <i data-lucide="{{ $item['icon'] }}"
-                                class="h-4 w-4"></i>
+                            <i data-lucide="{{ $item['icon'] }}" class="h-4 w-4"></i>
                         </div>
                         <span class="flex-1">{{ $item['label'] }}</span>
                         @if ($active)
@@ -133,7 +133,7 @@
             <!-- Sidebar Footer Actions -->
             <div class="mt-auto p-4">
                 <div class="rounded-2xl border border-[#293e5e] bg-[#14223a] p-3">
-                    <div class="grid grid-cols-1 gap-2">
+                    <div class="grid grid-cols-2 gap-2">
                         <a href="{{ route('web.app') }}"
                             class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#263b5c] px-3 py-2 text-[9px] font-black uppercase text-white transition-all hover:bg-[#334f77]">
                             <i data-lucide="external-link" class="h-3.5 w-3.5 text-[var(--brand)]"></i>
@@ -177,17 +177,19 @@
                     </div>
 
                     <div class="flex items-center gap-3">
-                        <button type="button" data-theme-toggle class="theme-toggle inline-flex h-10 w-10 items-center justify-center rounded-xl transition" aria-label="Toggle dark mode" title="Toggle dark mode">
+                        <button type="button" data-theme-toggle
+                            class="theme-toggle inline-flex h-10 w-10 items-center justify-center rounded-xl transition"
+                            aria-label="Toggle dark mode" title="Toggle dark mode">
                             <i data-lucide="moon" data-theme-icon-dark class="h-4 w-4"></i>
                             <i data-lucide="sun" data-theme-icon-light class="hidden h-4 w-4"></i>
                         </button>
                         <div class="hidden items-center gap-4 md:flex">
-                        <div
-                            class="flex items-center gap-3 rounded-2xl bg-[var(--surface-soft)] px-4 py-2.5 border border-[var(--brand)]/10 shadow-sm">
-                            <i data-lucide="calendar" class="h-4 w-4 text-[var(--brand)]"></i>
-                            <span
-                                class="text-[10px] font-black uppercase  text-[var(--ink)] opacity-70">{{ now()->format('D, d M Y') }}</span>
-                        </div>
+                            <div
+                                class="flex items-center gap-3 rounded-2xl bg-[var(--surface-soft)] px-4 py-2.5 border border-[var(--brand)]/10 shadow-sm">
+                                <i data-lucide="calendar" class="h-4 w-4 text-[var(--brand)]"></i>
+                                <span
+                                    class="text-[10px] font-black uppercase  text-[var(--ink)] opacity-70">{{ now()->format('D, d M Y') }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
