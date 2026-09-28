@@ -101,7 +101,7 @@
             <div class="relative ">
                 <div
                     class="relative z-10 rounded-[3rem] overflow-hidden shadow-2xl rotate-2 transition-transform hover:rotate-0 duration-700">
-                    <img src="https://images.unsplash.com/photo-1770131091438-c5c4b89ea264?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    <img src="{{ asset('images/asaba.jpg') }}"
                         class="w-full h-full object-cover grayscale-[0.2] hover:grayscale-0 transition-all">
                 </div>
                 <!-- Floating Card -->

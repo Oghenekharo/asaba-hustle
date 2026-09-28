@@ -84,7 +84,7 @@
         notificationReadUrl: "{{ route('web.app.notifications.read') }}",
         notificationReadAllUrl: "{{ route('web.app.notifications.read-all') }}",
         currentUserId: {{ auth()->id() ?? 'null' }},
-        jobShowBase: "/app/jobs",
+        jobShowBase: "/dashboard/jobs",
         jobPublicKey: @json($jobPublicKey ?? null)
     };
     window.asabaLogoutUrl = "{{ route('web.logout') }}";

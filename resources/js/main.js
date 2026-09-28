@@ -1825,11 +1825,11 @@ export const initJobDetailPage = function () {
 
                 setTimeout(() => {
                     if (conversationUuid) {
-                        window.location.href = `/app/conversations?conversation=${conversationUuid}`;
+                        window.location.href = `/dashboard/conversations?conversation=${conversationUuid}`;
                         return;
                     }
 
-                    window.location.href = "/app/conversations";
+                    window.location.href = "/dashboard/conversations";
                 }, 900);
             },
         );

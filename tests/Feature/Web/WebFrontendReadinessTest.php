@@ -63,7 +63,7 @@ class WebFrontendReadinessTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get('/app/jobs')
+            ->get('/dashboard/jobs')
             ->assertOk()
             ->assertSee('Urgent apartment cleaning')
             ->assertSee('Cleaning');
@@ -77,7 +77,7 @@ class WebFrontendReadinessTest extends TestCase
         $user->assignRole('client');
 
         $this->actingAs($user)
-            ->putJson('/app/profile', [
+            ->putJson('/dashboard/profile', [
                 'name' => 'Updated Web User',
                 'bio' => 'Now editable from the Blade frontend.',
                 'primary_skill_id' => $skill->id,
@@ -111,7 +111,7 @@ class WebFrontendReadinessTest extends TestCase
         ]);
 
         $this->actingAs($worker)
-            ->postJson("/app/jobs/{$job->id}/apply", [
+            ->postJson("/dashboard/jobs/{$job->id}/apply", [
                 'message' => 'I can handle this quickly.',
             ])
             ->assertCreated()
@@ -134,12 +134,12 @@ class WebFrontendReadinessTest extends TestCase
         UserNotification::factory()->create([
             'user_id' => $user->id,
             'title' => 'New message',
-            'action_url' => '/app/conversations?conversation=test-uuid',
+            'action_url' => '/dashboard/conversations?conversation=test-uuid',
             'action_label' => 'Open Chat',
         ]);
 
         $this->actingAs($user)
-            ->getJson('/app/notifications')
+            ->getJson('/dashboard/notifications')
             ->assertOk()
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.0.title', 'New message')
@@ -162,7 +162,7 @@ class WebFrontendReadinessTest extends TestCase
         )->create();
 
         $this->actingAs($user)
-            ->get('/app/notifications')
+            ->get('/dashboard/notifications')
             ->assertOk()
             ->assertSee('All Notifications')
             ->assertSee('Cursor Pagination')
@@ -223,7 +223,7 @@ class WebFrontendReadinessTest extends TestCase
             'updated_at' => now()->subMinute(),
         ]);
 
-        $response = $this->actingAs($client)->get('/app/conversations');
+        $response = $this->actingAs($client)->get('/dashboard/conversations');
 
         $response->assertOk();
         $response->assertSeeInOrder([
@@ -239,7 +239,7 @@ class WebFrontendReadinessTest extends TestCase
         $user = User::factory()->create();
         $user->assignRole('client');
 
-        $request = Request::create('/app', 'GET');
+        $request = Request::create('/dashboard', 'GET');
         $session = app('session.store');
         $session->start();
         $session->put('last_activity_at', now()->subMinutes(31)->timestamp);

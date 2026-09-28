@@ -297,7 +297,7 @@ if ($("#job-create-form").length) {
                 setTimeout(() => {
                     closeModal("createJobModal");
                     if (response?.data?.slug) {
-                        window.location.href = `/app/jobs/${response.data.slug}`;
+                        window.location.href = `/dashboard/jobs/${response.data.slug}`;
                         return;
                     }
 
@@ -428,12 +428,12 @@ if (handler) {
 
     if (url.startsWith("job/")) {
         const publicKey = url.split("/")[1];
-        window.location.href = `/app/jobs/${publicKey}`;
+        window.location.href = `/dashboard/jobs/${publicKey}`;
     }
 
     if (url.startsWith("chat/")) {
         const id = url.split("/")[1];
-        window.location.href = `/app/conversations/${id}`;
+        window.location.href = `/dashboard/conversations/${id}`;
     }
 }
 document

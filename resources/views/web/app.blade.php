@@ -49,7 +49,7 @@
 
                 @empty
 
-                    <x-empty-state title="No Jobs Available" actionUrl="/app" actionText="Refresh Jobs" icon="search-x"
+                    <x-empty-state title="No Jobs Available" actionUrl="/dashboard" actionText="Refresh Jobs" icon="search-x"
                         subtitle="{{ $searchTerm !== '' ? 'No open jobs matched your search within your skill set.' : 'There are currently no jobs matching your skill set.' }}" />
                 @endforelse
             @elseif(auth()->user()->hasRole('client'))

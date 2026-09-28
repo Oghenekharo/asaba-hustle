@@ -28,7 +28,7 @@
         class="public-site-nav-shell relative flex items-center justify-between p-2 pl-6 bg-white dark:bg-slate-900/90 backdrop-blur-2xl border border-slate-200 dark:border-[var(--line)] shadow-[0_8px_32px_0_rgba(15,23,42,0.12)] rounded-3xl">
 
         <!-- Brand -->
-        <a href="{{ auth()->check() ? '/app' : '/' }}"
+        <a href="{{ auth()->check() ? '/dashboard' : '/' }}"
             class="flex items-center gap-3 {{ $showMobileBackButton ? 'ml-7 md:ml-0' : '' }}">
             <img src="{{ $siteTheme['icon'] ? asset('storage/' . $siteTheme['icon']) : asset('images/icons/asaba-hustle.svg') }}" class="w-9 h-9 object-contain" alt="{{ config('app.name') }}" />
             <div class="text-lg font-black text-[var(--ink)] leading-none">

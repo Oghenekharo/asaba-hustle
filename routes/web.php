@@ -42,10 +42,10 @@ Route::get('/verify-phone', [WebAuthController::class, 'showVerifyPhone'])->name
 Route::post('/verify-phone', [WebAuthController::class, 'verifyPhone'])->name('web.verify.phone.submit');
 
 Route::middleware(['web', 'auth', 'session.active', 'account.active', 'phone.verified'])->group(function () {
-    Route::get('/app', [DashboardController::class, 'index'])->name('web.app');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('web.app');
     Route::post('/logout', [WebAuthController::class, 'logout'])->name('web.logout');
 
-    Route::prefix('app')->name('web.app.')->group(function () {
+    Route::prefix('dashboard')->name('web.app.')->group(function () {
         Route::get('/me', [ProfileController::class, 'me'])->name('me');
         Route::put('/profile', [ProfileController::class, 'updateProfile'])->name('profile.update');
         Route::post('/change-password', [ProfileController::class, 'changePassword'])->name('password.change');
